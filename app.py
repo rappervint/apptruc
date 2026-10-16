@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for
+import os
 import sqlite3
 from datetime import datetime, timedelta, date
+from flask import Flask, render_template, request, redirect, url_for
 
-app = Flask(__name__)
-DB_NAME = 'duty_schedule.db'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_NAME = os.path.join(BASE_DIR, 'duty_schedule.db')
+
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
 
 # 8 người cố định trực nhật vệ sinh 7h30 sáng
 DUTY_MEMBERS = ['Vinh', 'Dĩ', 'Ân', 'Bảo', 'Nguyên', 'Lợi', 'Thái', 'Duy']

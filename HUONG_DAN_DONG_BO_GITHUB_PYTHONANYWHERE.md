@@ -101,3 +101,4 @@ Từ nay về sau, mỗi lần sửa code xong trên máy tính và `git push`, 
 ./capnhat.sh
 ```
 Hệ thống sẽ tự kéo code mới về và tự khởi động lại web app trong vòng 2 giây!
+
