@@ -4,210 +4,617 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lịch Trực Vệ Sinh 7H30 & Quản Lý Nghỉ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #1e3a8a;
-      --primary-light: #eff6ff;
-      --secondary: #0284c7;
-      --accent: #dc2626;
-      --warning: #f59e0b;
-      --warning-bg: #fffbeb;
-      --warning-border: #fcd34d;
-      --danger-bg: #fef2f2;
-      --danger-border: #fecaca;
-      --success: #10b981;
-      --success-bg: #ecfdf5;
-      --bg: #f8fafc;
+      --primary: #1e40af;
+      --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      --accent-gradient: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+      --today-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      --tomorrow-gradient: linear-gradient(135deg, #0f766e 0%, #10b981 100%);
+      --bg: #f1f5f9;
       --card-bg: #ffffff;
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
+      --border-focus: #3b82f6;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 25px -3px rgba(30, 58, 138, 0.1), 0 4px 6px -2px rgba(30, 58, 138, 0.05);
+      --radius: 16px;
+      --radius-sm: 10px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 16px; max-width: 820px; margin: 0 auto; line-height: 1.5; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
-    /* Top Header with Live Clock */
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      max-width: 860px;
+      margin: 0 auto;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Bar Header */
     .top-header-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      border-radius: 30px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: var(--shadow-sm);
     }
     .brand-title {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 800;
       color: var(--primary);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .clock-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--card-bg);
-      border: 1.5px solid var(--border);
-      padding: 6px 12px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 5px 12px;
       border-radius: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
       font-size: 0.82rem;
-      color: #334155;
+      color: #1e3a8a;
     }
     .clock-badge .clock-time {
       font-size: 0.95rem;
       font-weight: 800;
-      color: #1e3a8a;
+      color: #1e40af;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.5px;
     }
     .clock-badge .clock-zone {
-      font-size: 0.7rem;
-      background: #eff6ff;
-      color: #2563eb;
+      font-size: 0.68rem;
+      background: #2563eb;
+      color: #fff;
       font-weight: 700;
       padding: 2px 6px;
-      border-radius: 10px;
+      border-radius: 8px;
     }
-    
-    /* Header */
-    header { text-align: center; margin-bottom: 20px; }
-    h1 { font-size: 1.55rem; color: var(--primary); margin-bottom: 4px; font-weight: 800; letter-spacing: -0.5px; }
-    .subtitle { font-size: 0.9rem; color: var(--text-muted); }
-    
+
+    /* Page Header */
+    header {
+      text-align: center;
+      margin-bottom: 22px;
+      animation: fadeInDown 0.35s ease-out;
+    }
+    h1 {
+      font-size: 1.65rem;
+      color: #0f172a;
+      margin-bottom: 4px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
     /* Tab Navigation */
     .tab-container {
       display: flex;
       background: #e2e8f0;
-      padding: 4px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      gap: 4px;
+      padding: 5px;
+      border-radius: 14px;
+      margin-bottom: 22px;
+      gap: 5px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
     }
     .tab-btn {
       flex: 1;
-      padding: 12px 10px;
+      padding: 12px 14px;
       border: none;
       background: transparent;
-      color: var(--text-muted);
+      color: #475569;
       font-size: 0.92rem;
       font-weight: 700;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      transition: all 0.2s ease;
+      gap: 8px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
       text-decoration: none;
+    }
+    .tab-btn:hover {
+      color: #0f172a;
     }
     .tab-btn.active {
       background: var(--card-bg);
       color: var(--primary);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      transform: translateY(-1px);
     }
     .tab-badge {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       padding: 2px 7px;
-      border-radius: 10px;
+      border-radius: 12px;
       background: #94a3b8;
       color: #fff;
+      font-weight: 700;
     }
     .tab-badge.badge-alert {
       background: #ef4444;
-      animation: pulse 2s infinite;
+      animation: pulseAlert 2s infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.08); }
     }
-    
+
     .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
+    .tab-content.active {
+      display: block;
+      animation: tabFadeIn 0.25s ease-out;
+    }
+
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Highlight Cards */
-    .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-    @media (max-width: 520px) { .cards-grid { grid-template-columns: 1fr; } }
-    
-    .card { background: var(--card-bg); border-radius: 14px; padding: 18px 16px; border: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.03); text-align: center; }
-    .card-today { border-top: 5px solid #2563eb; }
-    .card-tomorrow { border-top: 5px solid #10b981; }
-    .card-title { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
-    .card-name { font-size: 1.85rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
-    .card-meta { font-size: 0.85rem; color: var(--text-muted); }
-    .card-subtext { font-size: 0.8rem; margin-top: 6px; padding: 4px 8px; border-radius: 6px; display: inline-block; }
-    .badge-holiday { display: inline-block; background: #fef2f2; color: #b91c1c; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; }
+    /* Hero Cards (Hôm nay / Ngày mai) */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 540px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
 
-    /* Action Box / Forms */
-    .section-title { font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px; color: var(--primary); display: flex; align-items: center; justify-content: space-between; }
-    .action-box { background: var(--card-bg); border-radius: 14px; padding: 18px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-    label { font-size: 0.88rem; font-weight: 700; color: #334155; }
-    select, input[type="date"], input[type="text"] { width: 100%; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; background: #fff; }
-    select:focus, input[type="date"]:focus, input[type="text"]:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
-    
-    .quick-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-    .chip { font-size: 0.78rem; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 14px; cursor: pointer; color: #475569; transition: all 0.15s; }
-    .chip:hover { background: #e2e8f0; color: #0f172a; }
+    .hero-card {
+      position: relative;
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      color: #fff;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .hero-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px -4px rgba(30, 58, 138, 0.16);
+    }
+    .hero-today {
+      background: var(--today-gradient);
+    }
+    .hero-tomorrow {
+      background: var(--tomorrow-gradient);
+    }
+    .hero-label {
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .hero-name {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .hero-meta {
+      font-size: 0.88rem;
+      opacity: 0.92;
+      font-weight: 600;
+    }
+    .hero-alert {
+      margin-top: 10px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .badge-holiday-box {
+      background: rgba(254, 226, 226, 0.95);
+      color: #991b1b;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      margin-top: 6px;
+    }
 
-    /* Alert Boxes */
-    .alert-box { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 0.88rem; line-height: 1.45; }
-    .alert-warning { background: var(--warning-bg); border: 1.5px solid var(--warning-border); color: #92400e; }
-    .alert-danger { background: var(--danger-bg); border: 1.5px solid var(--danger-border); color: #991b1b; }
-    .alert-info { background: #eff6ff; border: 1.5px solid #bfdbfe; color: #1e40af; }
-    .alert-success { background: var(--success-bg); border: 1.5px solid #a7f3d0; color: #065f46; }
+    /* Action bar shortcuts */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 1.08rem;
+      font-weight: 800;
+      margin: 24px 0 12px;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Cards & Action Box */
+    .action-box {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 22px;
+      border: 1px solid var(--border);
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-md);
+      transition: box-shadow 0.2s ease;
+    }
+    .action-box:hover {
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    label {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #334155;
+    }
+    select, input[type="date"], input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+      background: #fff;
+      color: var(--text);
+    }
+    select:focus, input[type="date"]:focus, input[type="text"]:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Quick Suggestion Chips */
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .chip {
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 16px;
+      cursor: pointer;
+      color: #475569;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .chip:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+      transform: translateY(-1px);
+    }
+    .chip:active {
+      transform: scale(0.96);
+    }
 
     /* Buttons */
-    .btn { padding: 12px 16px; border: none; border-radius: 9px; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn:active { transform: scale(0.99); opacity: 0.9; }
-    .btn-danger { background: #dc2626; color: #fff; }
-    .btn-primary { background: #2563eb; color: #fff; }
-    .btn-dark { background: #334155; color: #fff; }
-    .cancel-btn { background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 700; transition: background 0.2s; }
-    .cancel-btn:hover { background: #fca5a5; }
+    .btn {
+      padding: 12px 18px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: scale(0.99);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+    }
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+    .btn-dark {
+      background: #334155;
+      color: #fff;
+    }
+    .btn-light {
+      background: #fff;
+      color: #334155;
+      border: 1.5px solid var(--border);
+    }
+    .btn-light:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    .cancel-btn {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      padding: 4px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 700;
+      transition: all 0.18s ease;
+    }
+    .cancel-btn:hover {
+      background: #fca5a5;
+    }
+
+    /* Alert Boxes */
+    .alert-box {
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      animation: alertFadeIn 0.22s ease-out;
+    }
+    @keyframes alertFadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .alert-warning {
+      background: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      color: #92400e;
+    }
+    .alert-danger {
+      background: #fef2f2;
+      border: 1.5px solid #fecaca;
+      color: #991b1b;
+    }
+    .alert-info {
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
+      color: #1e40af;
+    }
+    .alert-success {
+      background: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+      color: #065f46;
+    }
 
     /* Tables */
-    .table-container { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); overflow-x: auto; margin-bottom: 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem; }
-    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    th { background: #f8fafc; color: #475569; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .table-container {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    tr {
+      transition: background-color 0.15s ease;
+    }
     tr:last-child td { border-bottom: none; }
-    tr.tr-conflict { background-color: #fffbeb; }
+    tr:hover { background-color: #f8fafc; }
+    tr.tr-conflict { background-color: #fffbeb !important; }
 
     /* Tags & Badges */
-    .tag-duty { background: #eff6ff; color: #1d4ed8; padding: 5px 10px; border-radius: 8px; font-weight: 800; display: inline-block; }
-    .tag-leave { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; padding: 4px 8px; border-radius: 6px; font-size: 0.82rem; font-weight: 600; display: inline-block; margin: 2px 0; }
-    .tag-shift-auto { background: #fdf4ff; color: #a21caf; border: 1px solid #f0abfc; padding: 3px 7px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; display: inline-block; margin-top: 3px; }
-    .tag-nonduty { background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; display: inline-block; }
-    .badge-conflict { background: #fee2e2; color: #991b1b; border: 1.5px solid #f87171; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; display: inline-block; }
-    .badge-first { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; padding: 5px 10px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; display: inline-block; text-align: left; }
-    .badge-later { background: #fef2f2; border: 1.5px solid #f87171; color: #991b1b; padding: 5px 10px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; display: inline-block; text-align: left; line-height: 1.35; }
-    .badge-ok { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
+    .tag-duty {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 800;
+      display: inline-block;
+      font-size: 0.92rem;
+    }
+    .tag-leave {
+      background: #fff1f2;
+      color: #be123c;
+      border: 1px solid #fecdd3;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-block;
+      margin: 2px 0;
+    }
+    .tag-shift-auto {
+      background: #fdf4ff;
+      color: #a21caf;
+      border: 1px solid #f0abfc;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      display: inline-block;
+      margin-top: 3px;
+    }
+    .tag-nonduty {
+      background: #fef3c7;
+      color: #b45309;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-first {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      color: #15803d;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-later {
+      background: #fef2f2;
+      border: 1.5px solid #f87171;
+      color: #991b1b;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-block;
+      line-height: 1.35;
+    }
+    .badge-ok {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      padding: 4px 9px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: inline-block;
+    }
 
-    /* Empty state */
-    .empty-state { text-align: center; padding: 32px 16px; color: var(--text-muted); }
-    .empty-state-icon { font-size: 2.2rem; margin-bottom: 8px; }
-
-    /* Tips note */
-    .tip-box { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 14px; border-radius: 0 8px 8px 0; margin-bottom: 16px; font-size: 0.88rem; color: #166534; }
-    .today-status-card { background: var(--card-bg); border-radius: 14px; padding: 16px 18px; border: 1.5px solid var(--border); margin-bottom: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    /* Collapsible Holiday Box */
+    details.holiday-settings {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    details.holiday-settings summary {
+      padding: 16px 20px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      list-style: none;
+      transition: background 0.2s ease;
+    }
+    details.holiday-settings summary::-webkit-details-marker { display: none; }
+    details.holiday-settings summary:hover { background: #f8fafc; }
+    details.holiday-settings summary::after {
+      content: "➕";
+      font-size: 0.85rem;
+      transition: transform 0.2s ease;
+    }
+    details.holiday-settings[open] summary::after {
+      content: "➖";
+    }
+    details.holiday-settings .holiday-content {
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+      animation: tabFadeIn 0.2s ease;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Top bar với Đồng hồ thời gian thực Giờ Việt Nam -->
+  <!-- Top bar với Đồng hồ thời gian thực Giờ Việt Nam & Nút Admin -->
   <div class="top-header-bar">
-    <div class="brand-title">🏢 Cửa Hàng</div>
-    <div class="clock-badge">
-      <span style="font-size: 1rem;">⏰</span>
-      <span id="vn-live-clock" class="clock-time">--:--:--</span>
-      <span id="vn-live-date" style="color: #64748b; font-size: 0.8rem; font-weight: 600;">--/--/----</span>
-      <span class="clock-zone">Giờ VN (UTC+7)</span>
+    <div class="brand-title">
+      <span>🏢</span>
+      <span>Cửa Hàng</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="clock-badge">
+        <span style="font-size: 0.95rem;">⏰</span>
+        <span id="vn-live-clock" class="clock-time">--:--:--</span>
+        <span id="vn-live-date" style="color: #64748b; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
+        <span class="clock-zone">Giờ VN</span>
+      </div>
+
+      {% if is_admin %}
+        <span style="background: #fef2f2; border: 1.5px solid #f87171; color: #b91c1c; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+          👑 Admin
+        </span>
+        <a href="/admin-logout" style="background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+          Thoát
+        </a>
+      {% else %}
+        <button type="button" onclick="openAdminModal()" style="background: #f8fafc; border: 1.5px solid #cbd5e1; color: #475569; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+          🔐 Quản Trị
+        </button>
+      {% endif %}
     </div>
   </div>
 
@@ -250,47 +657,51 @@
     
     <!-- Hai thẻ to trọng tâm cho hôm nay và ngày mai -->
     <div class="cards-grid">
-      <div class="card card-today">
-        <div class="card-title">Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
-        {% if today_duty and today_duty.is_holiday %}
-          <div class="badge-holiday">{{ today_duty.holiday_reason }}</div>
-        {% elif today_duty and today_duty.assigned %}
-          <div class="card-name">{{ today_duty.assigned }}</div>
-          <div class="card-meta">{{ today_duty.weekday_vn }} - 7h30 sáng</div>
-          {% if today_duty.skipped_for_duty %}
-            <div class="card-subtext" style="background:#fee2e2; color:#b91c1c;">
-              ⚡ Đã đôn ca (do {% for s in today_duty.skipped_for_duty %}{{ s.member_name }}{% if not loop.last %}, {% endif %}{% endfor %} xin nghỉ)
-            </div>
+      <div class="hero-card hero-today">
+        <div>
+          <div class="hero-label">🌟 Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
+          {% if today_duty and today_duty.is_holiday %}
+            <div class="badge-holiday-box">{{ today_duty.holiday_reason }}</div>
+          {% elif today_duty and today_duty.assigned %}
+            <div class="hero-name">{{ today_duty.assigned }}</div>
+            <div class="hero-meta">{{ today_duty.weekday_vn }} • 7h30 sáng</div>
+          {% else %}
+            <div class="hero-name">---</div>
           {% endif %}
-        {% else %}
-          <div class="card-name">---</div>
+        </div>
+        {% if today_duty and today_duty.skipped_for_duty %}
+          <div class="hero-alert">
+            ⚡ Đã đôn ca (do {% for s in today_duty.skipped_for_duty %}{{ s.member_name }}{% if not loop.last %}, {% endif %}{% endfor %} xin nghỉ)
+          </div>
         {% endif %}
       </div>
 
-      <div class="card card-tomorrow">
-        <div class="card-title">Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
-        {% if tomorrow_duty and tomorrow_duty.is_holiday %}
-          <div class="badge-holiday">{{ tomorrow_duty.holiday_reason }}</div>
-        {% elif tomorrow_duty and tomorrow_duty.assigned %}
-          <div class="card-name">{{ tomorrow_duty.assigned }}</div>
-          <div class="card-meta">{{ tomorrow_duty.weekday_vn }} - 7h30 sáng</div>
-          {% if tomorrow_duty.skipped_for_duty %}
-            <div class="card-subtext" style="background:#fee2e2; color:#b91c1c;">
-              ⚡ Đã đôn ca (do {% for s in tomorrow_duty.skipped_for_duty %}{{ s.member_name }}{% if not loop.last %}, {% endif %}{% endfor %} xin nghỉ)
-            </div>
+      <div class="hero-card hero-tomorrow">
+        <div>
+          <div class="hero-label">🌱 Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
+          {% if tomorrow_duty and tomorrow_duty.is_holiday %}
+            <div class="badge-holiday-box">{{ tomorrow_duty.holiday_reason }}</div>
+          {% elif tomorrow_duty and tomorrow_duty.assigned %}
+            <div class="hero-name">{{ tomorrow_duty.assigned }}</div>
+            <div class="hero-meta">{{ tomorrow_duty.weekday_vn }} • 7h30 sáng</div>
+          {% else %}
+            <div class="hero-name">---</div>
           {% endif %}
-        {% else %}
-          <div class="card-name">---</div>
+        </div>
+        {% if tomorrow_duty and tomorrow_duty.skipped_for_duty %}
+          <div class="hero-alert">
+            ⚡ Đã đôn ca (do {% for s in tomorrow_duty.skipped_for_duty %}{{ s.member_name }}{% if not loop.last %}, {% endif %}{% endfor %} xin nghỉ)
+          </div>
         {% endif %}
       </div>
     </div>
 
-    <!-- Nút chuyển nhanh sang Xin Nghỉ -->
-    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
-      <a href="/history" class="btn btn-dark" style="width: auto; padding: 8px 14px; font-size: 0.85rem; text-decoration: none;">
-        📜 Xem Lịch Sử Nghỉ
+    <!-- Phím tắt nhanh -->
+    <div class="action-bar">
+      <a href="/history" class="btn btn-light" style="width: auto; padding: 10px 16px; font-size: 0.88rem;">
+        📜 Xem Lịch Sử Nghỉ Toàn Cửa Hàng
       </a>
-      <button type="button" onclick="switchTab('leaves')" class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 0.88rem;">
+      <button type="button" onclick="switchTab('leaves')" class="btn btn-primary" style="width: auto; padding: 10px 18px; font-size: 0.9rem;">
         ➕ Bạn muốn xin nghỉ? Bấm vào đây
       </button>
     </div>
@@ -298,7 +709,7 @@
     <!-- Bảng danh sách lịch dự kiến 21 ngày tới -->
     <div class="section-title">
       <span>Lịch Dự Kiến Các Ngày Tới</span>
-      <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">8 người xoay tua vòng tròn</span>
+      <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">8 anh em xoay tua vòng tròn</span>
     </div>
 
     <div class="table-container">
@@ -306,20 +717,20 @@
         <thead>
           <tr>
             <th>Ngày</th>
-            <th>Người trực chính (7h30)</th>
+            <th>Trực chính (7h30)</th>
             <th>Ghi chú & Người xin nghỉ</th>
           </tr>
         </thead>
         <tbody>
           {% for row in schedule %}
           <tr {% if row.leaves and row.leaves|length > 1 %}class="tr-conflict"{% endif %}>
-            <td>
+            <td style="white-space: nowrap;">
               <strong>{{ row.display_date }}</strong><br>
               <span style="font-size: 0.8rem; color: var(--text-muted);">{{ row.weekday_vn }}</span>
             </td>
             <td>
               {% if row.is_holiday %}
-                <span class="badge-holiday">{{ row.holiday_reason }}</span>
+                <span style="background: #fef2f2; color: #b91c1c; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.88rem;">{{ row.holiday_reason }}</span>
               {% else %}
                 <span class="tag-duty">{{ row.assigned }}</span>
                 {% if row.skipped_for_duty %}
@@ -349,21 +760,60 @@
       </table>
     </div>
 
-    <!-- Cài đặt ngày nghỉ của tiệm -->
-    <div class="section-title">Cài Đặt Ngày Nghỉ Tiệm (Đóng Cửa Cả Tiệm)</div>
-    <div class="action-box">
-      <form action="/add-holiday" method="POST">
-        <div class="form-group">
-          <label>Ngày tiệm đóng cửa (Không tính lịch trực):</label>
-          <input type="date" name="holiday_date" required>
+    <!-- Cài đặt ngày nghỉ của tiệm (dạng thu gọn collapsible) -->
+    <details class="holiday-settings">
+      <summary>⚙️ Cài đặt ngày tiệm đóng cửa / Nghỉ lễ (Hỗ trợ chọn nhiều ngày liên tiếp)</summary>
+      <div class="holiday-content">
+        <form action="/add-holiday" method="POST" style="margin-top: 16px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label>Từ ngày:</label>
+              <input type="date" name="start_date" id="holiday_start_date" required onchange="syncHolidayEndDate()">
+            </div>
+            <div class="form-group">
+              <label>Đến ngày (chọn nếu nghỉ nhiều ngày):</label>
+              <input type="date" name="end_date" id="holiday_end_date">
+            </div>
+          </div>
+          <div class="quick-chips" style="margin-top: -6px; margin-bottom: 12px;">
+            <span class="chip" onclick="setQuickHolidayRange(1)">Nghỉ 1 ngày</span>
+            <span class="chip" onclick="setQuickHolidayRange(2)">Nghỉ 2 ngày</span>
+            <span class="chip" onclick="setQuickHolidayRange(3)">Nghỉ 3 ngày</span>
+            <span class="chip" onclick="setQuickHolidayRange(4)">Nghỉ 4 ngày</span>
+            <span class="chip" onclick="setQuickHolidayRange(7)">Nghỉ Tết / 1 tuần (7 ngày)</span>
+          </div>
+          <div class="form-group">
+            <label>Lý do nghỉ (Tùy chọn):</label>
+            <input type="text" name="reason" placeholder="VD: Nghỉ Tết Âm Lịch, Du lịch công ty, Lễ 30/4 - 1/5...">
+          </div>
+          <button type="submit" class="btn btn-dark" style="width: auto; padding: 10px 22px;">
+            ➕ Lưu Các Ngày Tiệm Nghỉ
+          </button>
+        </form>
+
+        {% if holidays_list %}
+        <div style="margin-top: 22px; border-top: 1px dashed var(--border); padding-top: 16px;">
+          <div style="font-size: 0.88rem; font-weight: 800; color: #1e293b; margin-bottom: 10px;">
+            📌 Danh sách các ngày tiệm đã cài đặt đóng cửa:
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            {% for h in holidays_list %}
+            <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px;">
+              <div>
+                <strong style="color: #b91c1c;">📅 {{ h.holiday_date }}</strong>
+                <span style="color: #475569; font-size: 0.86rem; margin-left: 8px;">— {{ h.reason }}</span>
+              </div>
+              <form action="/remove-holiday" method="POST" style="margin: 0;" onsubmit="return confirm('Mở lại hoạt động cho ngày {{ h.holiday_date }}?')">
+                <input type="hidden" name="holiday_date" value="{{ h.holiday_date }}">
+                <button type="submit" class="cancel-btn" style="padding: 2px 8px; font-size: 0.74rem;">Xóa</button>
+              </form>
+            </div>
+            {% endfor %}
+          </div>
         </div>
-        <div class="form-group">
-          <label>Lý do nghỉ (Tùy chọn):</label>
-          <input type="text" name="reason" placeholder="VD: Nghỉ Tết, Tiệm đi du lịch, Nghỉ Lễ...">
-        </div>
-        <button type="submit" class="btn btn-dark">Lưu Ngày Tiệm Nghỉ</button>
-      </form>
-    </div>
+        {% endif %}
+      </div>
+    </details>
 
   </div>
 
@@ -374,8 +824,8 @@
 
     <!-- FORM XIN NGHỈ -->
     <div class="action-box">
-      <h2 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; color: #b91c1c; display: flex; align-items: center; gap: 6px;">
-        📝 ĐĂNG KÝ XIN NGHỈ
+      <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 16px; color: #b91c1c; display: flex; align-items: center; gap: 8px;">
+        <span>📝</span> ĐĂNG KÝ XIN NGHỈ
       </h2>
 
       <form action="/report-leave" method="POST" id="leave-form">
@@ -398,24 +848,32 @@
         <div class="form-group">
           <label>Chọn ngày xin nghỉ:</label>
           <input type="date" name="leave_date" id="leave_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" required onchange="checkLiveConflict()">
+          <div class="quick-chips">
+            <span class="chip" onclick="setQuickLeaveDate(0)">Hôm nay</span>
+            <span class="chip" onclick="setQuickLeaveDate(1)">Ngày mai</span>
+            <span class="chip" onclick="setQuickLeaveDate(2)">Ngày mốt</span>
+            <span class="chip" onclick="setQuickLeaveDate(3)">3 ngày nữa</span>
+            <span class="chip" onclick="setQuickLeaveDate(7)">+7 ngày tới</span>
+          </div>
         </div>
 
         <div class="form-group">
           <label>Lý do xin nghỉ (để anh em sắp xếp công việc):</label>
-          <input type="text" name="reason" id="leave_reason_input" placeholder="VD: Về quê, Đám tiệc, Khám bệnh, Việc gia đình..." required>
+          <input type="text" name="reason" id="leave_reason_input" placeholder="VD: Về quê, Đám tiệc, Khám bệnh, Việc gia đình..." value="Việc cá nhân" required>
           <div class="quick-chips">
-            <span class="chip" onclick="setReason('Về quê')">Về quê</span>
-            <span class="chip" onclick="setReason('Việc gia đình')">Việc gia đình</span>
-            <span class="chip" onclick="setReason('Đám tiệc / Cưới hỏi')">Đám tiệc</span>
-            <span class="chip" onclick="setReason('Khám bệnh')">Khám bệnh</span>
-            <span class="chip" onclick="setReason('Đi du lịch')">Đi du lịch</span>
+            <span class="chip" onclick="setReason('Về quê')">🏡 Về quê</span>
+            <span class="chip" onclick="setReason('Việc gia đình')">👨‍👩‍👧 Việc gia đình</span>
+            <span class="chip" onclick="setReason('Đám tiệc / Cưới hỏi')">🎉 Đám tiệc</span>
+            <span class="chip" onclick="setReason('Khám bệnh')">🏥 Khám bệnh</span>
+            <span class="chip" onclick="setReason('Đi du lịch')">✈️ Đi du lịch</span>
+            <span class="chip" onclick="setReason('Việc cá nhân')">💼 Việc cá nhân</span>
           </div>
         </div>
 
         <!-- VÙNG CẢNH BÁO TRỰC TIẾP (LIVE CONFLICT ALERT) -->
         <div id="live-alert-container" style="display: none;"></div>
 
-        <button type="submit" class="btn btn-danger">
+        <button type="submit" class="btn btn-danger" style="margin-top: 6px;">
           🚀 Xác Nhận Xin Nghỉ & Cập Nhật Lịch
         </button>
       </form>
@@ -425,11 +883,11 @@
     <div class="section-title">
       <div>
         <span>📋 Bảng Theo Dõi Nghỉ (Hiện Tại & Sắp Tới)</span>
-        <div style="font-size: 0.78rem; font-weight: normal; color: #16a34a; margin-top: 2px;">
-          ✨ Tự động lưu vào Lịch sử và xóa khỏi bảng khi đã qua ngày để tránh rối mắt
+        <div style="font-size: 0.8rem; font-weight: 500; color: #16a34a; margin-top: 2px;">
+          ✨ Tự động chuyển vào Lịch sử và xóa khỏi bảng khi đã qua ngày để tránh rối mắt
         </div>
       </div>
-      <span style="font-size: 0.82rem; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 4px 10px; border-radius: 20px;">
+      <span style="font-size: 0.82rem; font-weight: 800; color: var(--primary); background: #eff6ff; padding: 4px 12px; border-radius: 20px; border: 1px solid #bfdbfe;">
         {{ leaves_summary|length }} ca sắp tới
       </span>
     </div>
@@ -450,7 +908,7 @@
         <tbody>
           {% for item in leaves_summary %}
           <tr {% if item.has_conflict %}class="tr-conflict"{% endif %}>
-            <td>
+            <td style="white-space: nowrap;">
               <strong>{{ item.display_date }}</strong><br>
               <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.weekday_vn }}</span>
             </td>
@@ -484,7 +942,7 @@
                   </div>
                 {% endif %}
               {% else %}
-                <span class="badge-ok">✅ Không trùng ai (1 người)</span>
+                <span class="badge-ok">✅ Không trùng ai</span>
               {% endif %}
             </td>
             <td>
@@ -495,35 +953,52 @@
                   🔄 Đã đôn cho <strong>{{ item.replaced_by }}</strong> trực thay
                 </span>
               {% else %}
-                <span style="color: #94a3b8; font-size: 0.85rem;">— Không vướng trực</span>
+                <span style="color: #16a34a; font-size: 0.82rem; font-weight: 600;">Không trùng ca trực</span>
               {% endif %}
             </td>
-            <td style="text-align: center;">
-              <form action="/cancel-leave" method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đơn xin nghỉ ngày {{ item.display_date }} của {{ item.member_name }} không?')">
-                <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
-                <input type="hidden" name="member_name" value="{{ item.member_name }}">
-                <input type="hidden" name="tab" value="leaves">
-                <button type="submit" class="cancel-btn">Hủy đơn</button>
-              </form>
+            <td style="text-align: center; white-space: nowrap;">
+              {% if is_admin %}
+                <button type="button" class="btn btn-light" style="padding: 3px 8px; font-size: 0.75rem; width: auto; display: inline-flex;" onclick="openEditModal('active', '', '{{ item.leave_date }}', '{{ item.member_name }}', '{{ item.reason }}')">
+                  ✏️ Sửa
+                </button>
+                <form action="/cancel-leave" method="POST" style="display: inline-block; margin-left: 2px;" onsubmit="return confirm('ADMIN: Bạn có chắc chắn muốn xóa ca nghỉ ngày {{ item.display_date }} của {{ item.member_name }}?')">
+                  <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
+                  <input type="hidden" name="member_name" value="{{ item.member_name }}">
+                  <input type="hidden" name="tab" value="leaves">
+                  <button type="submit" class="cancel-btn">Xóa</button>
+                </form>
+              {% elif item.can_cancel %}
+                <form action="/cancel-leave" method="POST" style="display: inline-block;" onsubmit="return confirm('Bạn có chắc muốn hủy đơn nghỉ ngày {{ item.display_date }}?')">
+                  <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
+                  <input type="hidden" name="member_name" value="{{ item.member_name }}">
+                  <input type="hidden" name="tab" value="leaves">
+                  <button type="submit" class="cancel-btn" title="Có thể hủy trong 15 phút sau khi nộp">
+                    Hủy (còn ~{{ item.minutes_left }}p)
+                  </button>
+                </form>
+              {% else %}
+                <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px;" title="Đã quá 15 phút sau khi nộp. Chỉ Admin mới có quyền hủy/sửa đơn này.">
+                  🔒 Cố định
+                </span>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
       {% else %}
-      <div class="empty-state">
-        <div class="empty-state-icon">🎉</div>
-        <p><strong>Hiện tại không có ca xin nghỉ nào sắp tới!</strong></p>
-        <p style="font-size: 0.85rem; margin-top: 4px;">Các ca nghỉ cũ đã qua ngày được lưu trữ tự động trong <a href="/history" style="color:var(--primary); font-weight:700;">Trang Lịch Sử Nghỉ</a>.</p>
+      <div class="empty-state" style="text-align: center; padding: 36px 16px; color: var(--text-muted);">
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">🌴</div>
+        <p><strong>Hiện tại không có ai xin nghỉ sắp tới!</strong></p>
+        <p style="font-size: 0.85rem; margin-top: 4px;">Cả 10 anh em đều đang có lịch đi làm đầy đủ.</p>
       </div>
       {% endif %}
     </div>
 
   </div>
 
-  <!-- JAVASCRIPT XỬ LÝ TAB VÀ CẢNH BÁO TRỰC TIẾP -->
   <script>
-    // Dữ liệu từ server truyền vào để kiểm tra trực tiếp
+    // Dữ liệu từ Backend Python
     const leavesByDate = {{ leaves_by_date | tojson }};
     const dutyByDate = {{ duty_by_date | tojson }};
     const nonDutyStaff = {{ non_duty_staff | tojson }};
@@ -532,16 +1007,12 @@
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-      const targetBtn = document.getElementById('tab-btn-' + tabName);
-      const targetContent = document.getElementById('tab-content-' + tabName);
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      const activeContent = document.getElementById(`tab-content-${tabName}`);
 
-      if (targetBtn && targetContent) {
-        targetBtn.classList.add('active');
-        targetContent.classList.add('active');
-        window.location.hash = 'tab-' + tabName;
-      }
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activeContent) activeContent.classList.add('active');
 
-      // Đổi tiêu đề lớn theo tab
       const pageTitle = document.getElementById('page-title');
       const pageSubtitle = document.getElementById('page-subtitle');
       if (tabName === 'schedule') {
@@ -568,6 +1039,52 @@
       }
     }
 
+    function setQuickLeaveDate(offset) {
+      const now = new Date();
+      now.setDate(now.getDate() + offset);
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const dateInput = document.getElementById('leave_date_input');
+      if (dateInput) {
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+        checkLiveConflict();
+      }
+    }
+
+    function syncHolidayEndDate() {
+      const startDateInput = document.getElementById('holiday_start_date');
+      const endDateInput = document.getElementById('holiday_end_date');
+      if (startDateInput && endDateInput && !endDateInput.value) {
+        endDateInput.value = startDateInput.value;
+      }
+    }
+
+    function setQuickHolidayRange(daysCount) {
+      const startDateInput = document.getElementById('holiday_start_date');
+      const endDateInput = document.getElementById('holiday_end_date');
+      if (!startDateInput || !endDateInput) return;
+
+      let baseDate = new Date();
+      if (startDateInput.value) {
+        const parts = startDateInput.value.split('-');
+        baseDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      } else {
+        const yyyy = baseDate.getFullYear();
+        const mm = String(baseDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(baseDate.getDate()).padStart(2, '0');
+        startDateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+
+      const targetDate = new Date(baseDate);
+      targetDate.setDate(targetDate.getDate() + (daysCount - 1));
+
+      const y = targetDate.getFullYear();
+      const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const d = String(targetDate.getDate()).padStart(2, '0');
+      endDateInput.value = `${y}-${m}-${d}`;
+    }
+
     function checkLiveConflict() {
       const dateInput = document.getElementById('leave_date_input');
       const memberSelect = document.getElementById('member_select');
@@ -584,7 +1101,6 @@
       }
 
       const existingOnDate = leavesByDate[selectedDate] || [];
-      // Lọc ra những người khác (không tính chính người này nếu họ sửa đơn)
       const otherMembers = existingOnDate.filter(item => item.member_name !== selectedMember);
 
       let html = '';
@@ -606,7 +1122,7 @@
         `;
       } else {
         html += `
-          <div class="alert-box alert-success" style="padding: 8px 12px; margin-bottom: 10px;">
+          <div class="alert-box alert-success" style="padding: 10px 14px; margin-bottom: 14px;">
             ✅ Ngày này hiện chưa có ai xin nghỉ (Tránh được trùng lịch).
           </div>
         `;
@@ -661,16 +1177,14 @@
         if (clockEl) clockEl.textContent = timeFormatter.format(now);
         if (dateEl) dateEl.textContent = dateFormatter.format(now);
       } catch (e) {
-        // Fallback đơn giản nếu trình duyệt cũ
         const now = new Date();
         const clockEl = document.getElementById('vn-live-clock');
         if (clockEl) clockEl.textContent = now.toLocaleTimeString('vi-VN');
       }
     }
 
-    // Khởi tạo tab khi tải trang theo URL hash hoặc server param
+    // Khởi tạo tab khi tải trang
     window.addEventListener('DOMContentLoaded', () => {
-      // Khởi động đồng hồ ngay lập tức và cập nhật mỗi giây
       updateVNClock();
       setInterval(updateVNClock, 1000);
 
@@ -683,9 +1197,111 @@
         switchTab('schedule');
       }
 
-      // Kích hoạt kiểm tra ngay khi mở
       checkLiveConflict();
     });
+  </script>
+
+  <!-- MODAL ĐĂNG NHẬP ADMIN -->
+  <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; padding:24px; max-width:360px; width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); animation:tabFadeIn 0.2s ease;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-size:1.1rem; color:#1e293b; font-weight:800; display:flex; align-items:center; gap:6px;">
+          🔐 Quyền Quản Trị Admin
+        </h3>
+        <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#64748b;">✕</button>
+      </div>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">Nhập mật khẩu quản trị để chỉnh sửa hoặc xóa lịch nghỉ của cửa hàng.</p>
+      <form action="/admin-login" method="POST">
+        <input type="hidden" name="next_url" value="{{ request.url }}">
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center;">
+        </div>
+        <div style="display:flex; gap:8px; margin-top:16px;">
+          <button type="button" class="btn btn-light" style="flex:1;" onclick="closeAdminModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;">Đăng Nhập</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CHỈNH SỬA LỊCH NGHỈ CHO ADMIN -->
+  <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; padding:24px; max-width:440px; width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); animation:tabFadeIn 0.2s ease;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-size:1.1rem; color:#1e293b; font-weight:800; display:flex; align-items:center; gap:6px;">
+          ✏️ Sửa Thông Tin Lịch Nghỉ
+        </h3>
+        <button type="button" onclick="closeEditModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#64748b;">✕</button>
+      </div>
+      <form action="/edit-leave" method="POST">
+        <input type="hidden" name="source" id="edit_source">
+        <input type="hidden" name="id" id="edit_id">
+        <input type="hidden" name="old_leave_date" id="edit_old_date">
+        <input type="hidden" name="old_member_name" id="edit_old_member">
+
+        <div class="form-group">
+          <label>Nhân viên xin nghỉ:</label>
+          <select name="new_member_name" id="edit_new_member" required>
+            <optgroup label="Anh em trực nhật 7h30 (8 người)">
+              {% for m in duty_members %}
+                <option value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </optgroup>
+            <optgroup label="Nhân sự không trực nhật (2 người)">
+              {% for m in non_duty_staff %}
+                <option value="{{ m }}">{{ m }} (Không trực nhật)</option>
+              {% endfor %}
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Ngày xin nghỉ:</label>
+          <input type="date" name="new_leave_date" id="edit_new_date" required>
+        </div>
+
+        <div class="form-group">
+          <label>Lý do xin nghỉ:</label>
+          <input type="text" name="new_reason" id="edit_new_reason" required>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:20px;">
+          <button type="button" class="btn btn-light" style="flex:1;" onclick="closeEditModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;">Lưu Thay Đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openAdminModal() {
+      const modal = document.getElementById('admin-login-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.querySelector('input[type="password"]')?.focus();
+      }
+    }
+    function closeAdminModal() {
+      const modal = document.getElementById('admin-login-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function openEditModal(source, id, leaveDate, memberName, reason) {
+      document.getElementById('edit_source').value = source;
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_old_date').value = leaveDate;
+      document.getElementById('edit_old_member').value = memberName;
+      document.getElementById('edit_new_date').value = leaveDate;
+      document.getElementById('edit_new_member').value = memberName;
+      document.getElementById('edit_new_reason').value = reason;
+
+      const modal = document.getElementById('admin-edit-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+    function closeEditModal() {
+      const modal = document.getElementById('admin-edit-modal');
+      if (modal) modal.style.display = 'none';
+    }
   </script>
 
 </body>

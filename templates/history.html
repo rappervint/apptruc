@@ -4,100 +4,354 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lịch Sử Xin Nghỉ — Cửa Hàng</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #1e3a8a;
+      --primary: #1e40af;
+      --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
       --secondary: #0284c7;
       --accent: #dc2626;
-      --bg: #f8fafc;
+      --bg: #f1f5f9;
       --card-bg: #ffffff;
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
       --success: #16a34a;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+      --radius: 16px;
+      --radius-sm: 10px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 16px; max-width: 900px; margin: 0 auto; line-height: 1.5; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      max-width: 920px;
+      margin: 0 auto;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
 
     /* Top bar */
-    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
-    .back-btn { display: inline-flex; align-items: center; gap: 6px; background: #e2e8f0; color: #1e293b; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: background 0.2s; }
-    .back-btn:hover { background: #cbd5e1; }
-    .print-btn { display: inline-flex; align-items: center; gap: 6px; background: #334155; color: #fff; padding: 8px 14px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
-    .print-btn:hover { background: #1e293b; }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      color: #1e293b;
+      padding: 9px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.88rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover {
+      background: #f8fafc;
+      transform: translateX(-2px);
+    }
+    .print-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #334155;
+      color: #fff;
+      padding: 9px 16px;
+      border-radius: 20px;
+      border: none;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+    .print-btn:hover {
+      background: #1e293b;
+      transform: translateY(-1px);
+    }
 
     .clock-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--card-bg);
-      border: 1.5px solid var(--border);
-      padding: 6px 12px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 5px 12px;
       border-radius: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
       font-size: 0.82rem;
-      color: #334155;
+      color: #1e3a8a;
     }
     .clock-badge .clock-time {
       font-size: 0.95rem;
       font-weight: 800;
-      color: #1e3a8a;
+      color: #1e40af;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.5px;
     }
     .clock-badge .clock-zone {
-      font-size: 0.7rem;
-      background: #eff6ff;
-      color: #2563eb;
+      font-size: 0.68rem;
+      background: #2563eb;
+      color: #fff;
       font-weight: 700;
       padding: 2px 6px;
-      border-radius: 10px;
+      border-radius: 8px;
     }
 
-    header { text-align: center; margin-bottom: 24px; }
-    h1 { font-size: 1.55rem; color: var(--primary); font-weight: 800; margin-bottom: 4px; }
-    .subtitle { font-size: 0.9rem; color: var(--text-muted); }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      animation: fadeIn 0.3s ease;
+    }
+    h1 {
+      font-size: 1.65rem;
+      color: #0f172a;
+      font-weight: 800;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     /* Filter Box */
-    .filter-card { background: var(--card-bg); border-radius: 14px; padding: 16px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-    .filter-grid { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 10px; align-items: flex-end; }
-    @media (max-width: 600px) { .filter-grid { grid-template-columns: 1fr; } }
-    .form-group { display: flex; flex-direction: column; gap: 4px; }
-    label { font-size: 0.82rem; font-weight: 700; color: #475569; }
-    select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.92rem; outline: none; background: #fff; }
-    select:focus { border-color: var(--secondary); }
-    .btn { padding: 9px 16px; border: none; border-radius: 8px; font-size: 0.92rem; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-    .btn-primary { background: var(--secondary); color: #fff; }
-    .btn-light { background: #e2e8f0; color: #334155; }
+    .filter-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    @media (max-width: 640px) {
+      .filter-grid { grid-template-columns: 1fr; }
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #475569;
+    }
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      outline: none;
+      background: #fff;
+      transition: all 0.2s ease;
+    }
+    select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+    }
+    .btn-light {
+      background: #e2e8f0;
+      color: #334155;
+    }
 
     /* Attendance summary stats */
-    .stats-card { background: var(--card-bg); border-radius: 14px; padding: 18px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-    .stats-title { font-size: 0.95rem; font-weight: 800; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-    .stat-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; text-align: center; }
-    .stat-name { font-size: 0.88rem; font-weight: 700; color: #1e293b; }
-    .stat-count { font-size: 1.4rem; font-weight: 800; color: var(--primary); margin-top: 2px; }
-    .stat-role { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+    .stats-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--border);
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stats-title {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .stat-item {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 10px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .stat-item:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      transform: translateY(-2px);
+    }
+    .stat-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .stat-count {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 2px;
+    }
+    .stat-role {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
 
     /* History Table */
-    .table-container { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.02); margin-bottom: 24px; }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    th { background: #f8fafc; color: #475569; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .table-container {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    tr {
+      transition: background-color 0.15s ease;
+    }
     tr:last-child td { border-bottom: none; }
-    tr:hover { background-color: #f1f5f9; }
+    tr:hover { background-color: #f8fafc; }
 
     /* Tags */
-    .tag-duty-member { background: #eff6ff; color: #1d4ed8; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
-    .tag-nonduty-member { background: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
-    .badge-past { background: #f1f5f9; color: #64748b; padding: 3px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; }
-    .badge-upcoming { background: #ecfdf5; color: #047857; padding: 3px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; }
+    .tag-duty-member {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .tag-nonduty-member {
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-past {
+      background: #f1f5f9;
+      color: #64748b;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .badge-upcoming {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
     
-    .del-btn { background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 3px 7px; border-radius: 5px; cursor: pointer; font-size: 0.75rem; font-weight: 700; }
-    .del-btn:hover { background: #fca5a5; }
+    .del-btn {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: all 0.18s ease;
+    }
+    .del-btn:hover {
+      background: #fca5a5;
+    }
 
-    .empty-state { text-align: center; padding: 40px 16px; color: var(--text-muted); }
-    .empty-state-icon { font-size: 2.2rem; margin-bottom: 8px; }
+    .empty-state {
+      text-align: center;
+      padding: 44px 16px;
+      color: var(--text-muted);
+    }
+    .empty-state-icon {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
 
     @media print {
       body { padding: 0; background: #fff; }
@@ -111,12 +365,29 @@
 
   <div class="top-bar">
     <a href="/?tab=leaves" class="back-btn">⬅️ Quay lại Lịch Trực & Xin Nghỉ</a>
-    <div class="clock-badge">
-      <span style="font-size: 1rem;">⏰</span>
-      <span id="vn-live-clock" class="clock-time">--:--:--</span>
-      <span id="vn-live-date" style="color: #64748b; font-size: 0.8rem; font-weight: 600;">--/--/----</span>
-      <span class="clock-zone">Giờ VN</span>
+    
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="clock-badge">
+        <span style="font-size: 0.95rem;">⏰</span>
+        <span id="vn-live-clock" class="clock-time">--:--:--</span>
+        <span id="vn-live-date" style="color: #64748b; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
+        <span class="clock-zone">Giờ VN</span>
+      </div>
+
+      {% if is_admin %}
+        <span style="background: #fef2f2; border: 1.5px solid #f87171; color: #b91c1c; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px;">
+          👑 Admin
+        </span>
+        <a href="/admin-logout" style="background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+          Thoát
+        </a>
+      {% else %}
+        <button type="button" onclick="openAdminModal()" style="background: #fff; border: 1.5px solid #cbd5e1; color: #475569; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+          🔐 Quản Trị
+        </button>
+      {% endif %}
     </div>
+
     <button type="button" class="print-btn" onclick="window.print()">🖨️ In Danh Sách Lịch Sử</button>
   </div>
 
@@ -141,51 +412,57 @@
       <div class="form-group">
         <label>Lọc theo Nhân Viên:</label>
         <select name="member">
-          <option value="">-- Tất cả nhân viên ({{ all_staff|length }} người) --</option>
-          <optgroup label="Anh em trực nhật (8 người)">
-            {% for staff in duty_members %}
-              <option value="{{ staff }}" {% if selected_member == staff %}selected{% endif %}>{{ staff }}</option>
+          <option value="">-- Tất cả 10 nhân sự --</option>
+          <optgroup label="Anh em trực nhật 7h30 (8 người)">
+            {% for m in duty_members %}
+              <option value="{{ m }}" {% if selected_member == m %}selected{% endif %}>{{ m }}</option>
             {% endfor %}
           </optgroup>
-          <optgroup label="Nhân viên không trực nhật (2 người)">
-            {% for staff in non_duty_staff %}
-              <option value="{{ staff }}" {% if selected_member == staff %}selected{% endif %}>{{ staff }} (Không trực)</option>
+          <optgroup label="Nhân sự không trực nhật (2 người)">
+            {% for m in non_duty_staff %}
+              <option value="{{ m }}" {% if selected_member == m %}selected{% endif %}>{{ m }} (Không trực nhật)</option>
             {% endfor %}
           </optgroup>
         </select>
       </div>
 
-      <button type="submit" class="btn btn-primary">🔍 Lọc Dữ Liệu</button>
-      <a href="/history" class="btn btn-light">🔄 Tất Cả</a>
+      <div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">🔍 Tra Cứu</button>
+      </div>
+
+      <div>
+        <a href="/history" class="btn btn-light" style="width: 100%;">🔄 Đặt lại</a>
+      </div>
     </form>
   </div>
 
-  <!-- BẢNG THỐNG KÊ SỐ NGÀY NGHỈ THEO TỪNG NHÂN SỰ -->
+  <!-- THỐNG KÊ SỐ NGÀY NGHỈ THEO TỪNG NHÂN SỰ -->
   <div class="stats-card">
     <div class="stats-title">
-      <span>📊 BẢNG TỔNG HỢP SỐ NGÀY NGHỈ</span>
-      <span style="font-size: 0.82rem; font-weight: normal; color: var(--text-muted);">
-        Tổng: <strong>{{ total_leaves }}</strong> ngày nghỉ được ghi nhận
+      <span>📊 Thống Kê Số Lần Xin Nghỉ ({% if selected_month %}Tháng {{ selected_month }}{% else %}Tất Cả Thời Gian{% endif %})</span>
+      <span style="font-size: 0.82rem; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 4px 10px; border-radius: 14px;">
+        Tổng cộng: {{ total_leaves }} lượt
       </span>
     </div>
-    
+
     <div class="stats-grid">
       {% for staff in all_staff %}
-      <div class="stat-item" style="{% if stats_by_member[staff] > 0 %}border-color: #fca5a5; background: #fff1f2;{% endif %}">
+      <div class="stat-item">
         <div class="stat-name">{{ staff }}</div>
-        <div class="stat-count" style="{% if stats_by_member[staff] > 0 %}color: #dc2626;{% else %}color: #94a3b8;{% endif %}">
-          {{ stats_by_member[staff] }}
-          <span style="font-size: 0.8rem; font-weight: normal; color: #64748b;">ngày</span>
-        </div>
+        <div class="stat-count">{{ stats_by_member[staff] }}</div>
         <div class="stat-role">
-          {% if staff in duty_members %}Trực nhật{% else %}Không trực{% endif %}
+          {% if staff in duty_members %}
+            Trực nhật
+          {% else %}
+            Không trực
+          {% endif %}
         </div>
       </div>
       {% endfor %}
     </div>
   </div>
 
-  <!-- BẢNG CHI TIẾT TỪNG CA XIN NGHỈ -->
+  <!-- BẢNG LỊCH SỬ TOÀN BỘ -->
   <div class="table-container">
     {% if history_list %}
     <table>
@@ -203,7 +480,7 @@
       <tbody>
         {% for item in history_list %}
         <tr>
-          <td>
+          <td style="white-space: nowrap;">
             <strong>{{ item.display_date }}</strong><br>
             <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.weekday_vn }}</span>
           </td>
@@ -230,19 +507,34 @@
               <span class="badge-upcoming">Sắp tới</span>
             {% endif %}
           </td>
-          <td style="text-align: center;">
-            {% if item.is_past or item.source == 'history' %}
-              <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
-                🔒 Đã chốt
-              </span>
-            {% else %}
-              <form action="/delete-history" method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đăng ký nghỉ ngày {{ item.display_date }} của {{ item.member_name }} không?')">
+          <td style="text-align: center; white-space: nowrap;">
+            {% if is_admin %}
+              <button type="button" class="btn btn-light" style="padding: 3px 8px; font-size: 0.75rem; width: auto; display: inline-flex; margin-right: 2px;" onclick="openEditModal('{{ item.source }}', '{{ item.id }}', '{{ item.leave_date }}', '{{ item.member_name }}', '{{ item.reason }}')">
+                ✏️ Sửa
+              </button>
+              <form action="/delete-history" method="POST" style="display: inline-block;" onsubmit="return confirm('ADMIN: Bạn có chắc chắn muốn XÓA VĨNH VIỄN ca nghỉ ngày {{ item.display_date }} của {{ item.member_name }}?')">
                 <input type="hidden" name="id" value="{{ item.id }}">
                 <input type="hidden" name="source" value="{{ item.source }}">
                 <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
                 <input type="hidden" name="member_name" value="{{ item.member_name }}">
-                <button type="submit" class="del-btn">Hủy đơn</button>
+                <button type="submit" class="del-btn">Xóa</button>
               </form>
+            {% else %}
+              {% if item.can_cancel %}
+                <form action="/delete-history" method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đăng ký nghỉ ngày {{ item.display_date }} của {{ item.member_name }} không?')">
+                  <input type="hidden" name="id" value="{{ item.id }}">
+                  <input type="hidden" name="source" value="{{ item.source }}">
+                  <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
+                  <input type="hidden" name="member_name" value="{{ item.member_name }}">
+                  <button type="submit" class="del-btn" title="Có thể hủy trong 15 phút sau khi nộp">
+                    Hủy (còn ~{{ item.minutes_left }}p)
+                  </button>
+                </form>
+              {% else %}
+                <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" title="Ca nghỉ đã chốt hoặc quá hạn 15 phút. Chỉ Admin mới có quyền sửa/xóa.">
+                  🔒 Đã chốt
+                </span>
+              {% endif %}
             {% endif %}
           </td>
         </tr>
@@ -257,6 +549,51 @@
     </div>
     {% endif %}
   </div>
+
+  <!-- BẢNG NHẬT KÝ VẾT (AUDIT LOGS) DÀNH RIÊNG CHO ADMIN -->
+  {% if is_admin %}
+  <div style="background: var(--card-bg); border-radius: var(--radius); border: 1.5px solid #fecaca; padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <h3 style="font-size: 1.05rem; font-weight: 800; color: #991b1b; display: flex; align-items: center; gap: 8px;">
+        🛡️ NHẬT KÝ VẾT HOẠT ĐỘNG (CHỐNG GIAN LẬN)
+      </h3>
+      <span style="font-size: 0.78rem; font-weight: 700; color: #b91c1c; background: #fee2e2; padding: 3px 9px; border-radius: 12px;">
+        Chỉ Admin mới thấy bảng này
+      </span>
+    </div>
+    
+    {% if audit_logs %}
+    <div style="max-height: 260px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+      <table style="font-size: 0.85rem;">
+        <thead style="position: sticky; top: 0; z-index: 2;">
+          <tr>
+            <th style="padding: 8px 12px; background: #fee2e2; color: #991b1b;">Thời gian (VN)</th>
+            <th style="padding: 8px 12px; background: #fee2e2; color: #991b1b;">Hành động</th>
+            <th style="padding: 8px 12px; background: #fee2e2; color: #991b1b;">Người thực hiện</th>
+            <th style="padding: 8px 12px; background: #fee2e2; color: #991b1b;">Chi tiết vết ghi nhận</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in audit_logs %}
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 8px 12px; color: #64748b; white-space: nowrap;">{{ log.created_at }}</td>
+            <td style="padding: 8px 12px;">
+              <span style="font-size: 0.74rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; {% if 'HỦY' in log.action_type or 'XÓA' in log.action_type %}background:#fee2e2; color:#b91c1c;{% elif 'SỬA' in log.action_type %}background:#fef3c7; color:#b45309;{% else %}background:#ecfdf5; color:#065f46;{% endif %}">
+                {{ log.action_type }}
+              </span>
+            </td>
+            <td style="padding: 8px 12px; font-weight: 700; color: #1e293b;">{{ log.actor }}</td>
+            <td style="padding: 8px 12px; color: #334155;">{{ log.description }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p style="font-size: 0.88rem; color: #64748b; margin: 0;">Chưa có vết hoạt động nào được ghi nhận.</p>
+    {% endif %}
+  </div>
+  {% endif %}
 
   <script>
     function updateVNClock() {
@@ -288,6 +625,109 @@
     }
     updateVNClock();
     setInterval(updateVNClock, 1000);
+  </script>
+
+  <!-- MODAL ĐĂNG NHẬP ADMIN -->
+  <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; padding:24px; max-width:360px; width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-size:1.1rem; color:#1e293b; font-weight:800; display:flex; align-items:center; gap:6px;">
+          🔐 Quyền Quản Trị Admin
+        </h3>
+        <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#64748b;">✕</button>
+      </div>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">Nhập mật khẩu quản trị để chỉnh sửa hoặc xóa lịch nghỉ của cửa hàng.</p>
+      <form action="/admin-login" method="POST">
+        <input type="hidden" name="next_url" value="{{ request.url }}">
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center;">
+        </div>
+        <div style="display:flex; gap:8px; margin-top:16px;">
+          <button type="button" class="btn btn-light" style="flex:1;" onclick="closeAdminModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;">Đăng Nhập</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CHỈNH SỬA LỊCH NGHỈ CHO ADMIN -->
+  <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; padding:24px; max-width:440px; width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-size:1.1rem; color:#1e293b; font-weight:800; display:flex; align-items:center; gap:6px;">
+          ✏️ Sửa Thông Tin Lịch Nghỉ
+        </h3>
+        <button type="button" onclick="closeEditModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#64748b;">✕</button>
+      </div>
+      <form action="/edit-leave" method="POST">
+        <input type="hidden" name="source" id="edit_source">
+        <input type="hidden" name="id" id="edit_id">
+        <input type="hidden" name="old_leave_date" id="edit_old_date">
+        <input type="hidden" name="old_member_name" id="edit_old_member">
+
+        <div class="form-group">
+          <label>Nhân viên xin nghỉ:</label>
+          <select name="new_member_name" id="edit_new_member" required>
+            <optgroup label="Anh em trực nhật 7h30 (8 người)">
+              {% for m in duty_members %}
+                <option value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </optgroup>
+            <optgroup label="Nhân sự không trực nhật (2 người)">
+              {% for m in non_duty_staff %}
+                <option value="{{ m }}">{{ m }} (Không trực nhật)</option>
+              {% endfor %}
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Ngày xin nghỉ:</label>
+          <input type="date" name="new_leave_date" id="edit_new_date" required>
+        </div>
+
+        <div class="form-group">
+          <label>Lý do xin nghỉ:</label>
+          <input type="text" name="new_reason" id="edit_new_reason" required>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:20px;">
+          <button type="button" class="btn btn-light" style="flex:1;" onclick="closeEditModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;">Lưu Thay Đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openAdminModal() {
+      const modal = document.getElementById('admin-login-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.querySelector('input[type="password"]')?.focus();
+      }
+    }
+    function closeAdminModal() {
+      const modal = document.getElementById('admin-login-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function openEditModal(source, id, leaveDate, memberName, reason) {
+      document.getElementById('edit_source').value = source;
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_old_date').value = leaveDate;
+      document.getElementById('edit_old_member').value = memberName;
+      document.getElementById('edit_new_date').value = leaveDate;
+      document.getElementById('edit_new_member').value = memberName;
+      document.getElementById('edit_new_reason').value = reason;
+
+      const modal = document.getElementById('admin-edit-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+    function closeEditModal() {
+      const modal = document.getElementById('admin-edit-modal');
+      if (modal) modal.style.display = 'none';
+    }
   </script>
 </body>
 </html>
