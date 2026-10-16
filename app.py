@@ -482,17 +482,14 @@ def history():
 
 @app.route('/delete-history', methods=['POST'])
 def delete_history():
-    """Xóa một bản ghi lịch sử xin nghỉ nếu nhập nhầm"""
-    record_id = request.form.get('id')
+    """Chỉ cho phép xóa / hủy đơn xin nghỉ sắp tới nếu nhập nhầm. Ca nghỉ đã qua ngày đã chốt vào lịch sử thì không thể xóa."""
     source = request.form.get('source')
     leave_date = request.form.get('leave_date')
     member_name = request.form.get('member_name')
+    today_str = get_vn_today().strftime('%Y-%m-%d')
     
-    if source == 'history' and record_id:
-        with get_db() as conn:
-            conn.execute('DELETE FROM leaves_history WHERE id = ?', (record_id,))
-            conn.commit()
-    elif source == 'active' and leave_date and member_name:
+    # Chỉ cho phép xóa khi là ca nghỉ hiện hành sắp tới (leave_date >= today_str)
+    if source == 'active' and leave_date and leave_date >= today_str and member_name:
         with get_db() as conn:
             conn.execute('DELETE FROM leaves WHERE leave_date = ? AND member_name = ?', (leave_date, member_name))
             conn.commit()

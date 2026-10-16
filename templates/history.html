@@ -231,13 +231,19 @@
             {% endif %}
           </td>
           <td style="text-align: center;">
-            <form action="/delete-history" method="POST" onsubmit="return confirm('Bạn có chắc muốn xóa bản ghi ngày {{ item.display_date }} của {{ item.member_name }} không?')">
-              <input type="hidden" name="id" value="{{ item.id }}">
-              <input type="hidden" name="source" value="{{ item.source }}">
-              <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
-              <input type="hidden" name="member_name" value="{{ item.member_name }}">
-              <button type="submit" class="del-btn">Xóa</button>
-            </form>
+            {% if item.is_past or item.source == 'history' %}
+              <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                🔒 Đã chốt
+              </span>
+            {% else %}
+              <form action="/delete-history" method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đăng ký nghỉ ngày {{ item.display_date }} của {{ item.member_name }} không?')">
+                <input type="hidden" name="id" value="{{ item.id }}">
+                <input type="hidden" name="source" value="{{ item.source }}">
+                <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
+                <input type="hidden" name="member_name" value="{{ item.member_name }}">
+                <button type="submit" class="del-btn">Hủy đơn</button>
+              </form>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}
