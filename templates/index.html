@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch Trực Vệ Sinh 7H30 & Quản Lý Nghỉ</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #eff6ff;
+      --secondary: #0284c7;
+      --accent: #dc2626;
+      --warning: #f59e0b;
+      --warning-bg: #fffbeb;
+      --warning-border: #fcd34d;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+      --success: #10b981;
+      --success-bg: #ecfdf5;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; max-width: 820px; margin: 0 auto; line-height: 1.5; }
+    
+    /* Header */
+    header { text-align: center; margin-bottom: 20px; }
+    h1 { font-size: 1.55rem; color: var(--primary); margin-bottom: 4px; font-weight: 800; letter-spacing: -0.5px; }
+    .subtitle { font-size: 0.9rem; color: var(--text-muted); }
+    
+    /* Tab Navigation */
+    .tab-container {
+      display: flex;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      gap: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .tab-badge {
+      font-size: 0.75rem;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: #94a3b8;
+      color: #fff;
+    }
+    .tab-badge.badge-alert {
+      background: #ef4444;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Highlight Cards */
+    .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    @media (max-width: 520px) { .cards-grid { grid-template-columns: 1fr; } }
+    
+    .card { background: var(--card-bg); border-radius: 14px; padding: 18px 16px; border: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.03); text-align: center; }
+    .card-today { border-top: 5px solid #2563eb; }
+    .card-tomorrow { border-top: 5px solid #10b981; }
+    .card-title { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+    .card-name { font-size: 1.85rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .card-meta { font-size: 0.85rem; color: var(--text-muted); }
+    .card-subtext { font-size: 0.8rem; margin-top: 6px; padding: 4px 8px; border-radius: 6px; display: inline-block; }
+    .badge-holiday { display: inline-block; background: #fef2f2; color: #b91c1c; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; }
+
+    /* Action Box / Forms */
+    .section-title { font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px; color: var(--primary); display: flex; align-items: center; justify-content: space-between; }
+    .action-box { background: var(--card-bg); border-radius: 14px; padding: 18px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    label { font-size: 0.88rem; font-weight: 700; color: #334155; }
+    select, input[type="date"], input[type="text"] { width: 100%; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; background: #fff; }
+    select:focus, input[type="date"]:focus, input[type="text"]:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+    
+    .quick-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .chip { font-size: 0.78rem; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 14px; cursor: pointer; color: #475569; transition: all 0.15s; }
+    .chip:hover { background: #e2e8f0; color: #0f172a; }
+
+    /* Alert Boxes */
+    .alert-box { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 0.88rem; line-height: 1.45; }
+    .alert-warning { background: var(--warning-bg); border: 1.5px solid var(--warning-border); color: #92400e; }
+    .alert-danger { background: var(--danger-bg); border: 1.5px solid var(--danger-border); color: #991b1b; }
+    .alert-info { background: #eff6ff; border: 1.5px solid #bfdbfe; color: #1e40af; }
+    .alert-success { background: var(--success-bg); border: 1.5px solid #a7f3d0; color: #065f46; }
+
+    /* Buttons */
+    .btn { padding: 12px 16px; border: none; border-radius: 9px; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn:active { transform: scale(0.99); opacity: 0.9; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-dark { background: #334155; color: #fff; }
+    .cancel-btn { background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 700; transition: background 0.2s; }
+    .cancel-btn:hover { background: #fca5a5; }
+
+    /* Tables */
+    .table-container { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); overflow-x: auto; margin-bottom: 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    th { background: #f8fafc; color: #475569; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    tr:last-child td { border-bottom: none; }
+    tr.tr-conflict { background-color: #fffbeb; }
+
+    /* Tags & Badges */
+    .tag-duty { background: #eff6ff; color: #1d4ed8; padding: 5px 10px; border-radius: 8px; font-weight: 800; display: inline-block; }
+    .tag-leave { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; padding: 4px 8px; border-radius: 6px; font-size: 0.82rem; font-weight: 600; display: inline-block; margin: 2px 0; }
+    .tag-shift-auto { background: #fdf4ff; color: #a21caf; border: 1px solid #f0abfc; padding: 3px 7px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; display: inline-block; margin-top: 3px; }
+    .tag-nonduty { background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; display: inline-block; }
+    .badge-conflict { background: #fee2e2; color: #991b1b; border: 1.5px solid #f87171; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; display: inline-block; }
+    .badge-first { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; padding: 5px 10px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; display: inline-block; text-align: left; }
+    .badge-later { background: #fef2f2; border: 1.5px solid #f87171; color: #991b1b; padding: 5px 10px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; display: inline-block; text-align: left; line-height: 1.35; }
+    .badge-ok { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 32px 16px; color: var(--text-muted); }
+    .empty-state-icon { font-size: 2.2rem; margin-bottom: 8px; }
+
+    /* Tips note */
+    .tip-box { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 14px; border-radius: 0 8px 8px 0; margin-bottom: 16px; font-size: 0.88rem; color: #166534; }
+    .today-status-card { background: var(--card-bg); border-radius: 14px; padding: 16px 18px; border: 1.5px solid var(--border); margin-bottom: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+  </style>
+</head>
+<body>
+
+  <header>
+    {% if active_tab == 'leaves' %}
+      <h1 id="page-title">HÔM NAY AI NGHỈ</h1>
+      <p class="subtitle" id="page-subtitle">
+        {% if today_leaves %}
+          Hôm nay có: <strong style="color:#dc2626;">{{ today_leaves | map(attribute="member_name") | join(", ") }}</strong> xin nghỉ
+        {% else %}
+          Hôm nay: <strong style="color:#16a34a;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm)
+        {% endif %}
+      </p>
+    {% else %}
+      <h1 id="page-title">HÔM NAY AI TRỰC</h1>
+      <p class="subtitle" id="page-subtitle">Người trực chính 7h30: <strong>{{ today_duty.assigned if today_duty else '---' }}</strong></p>
+    {% endif %}
+  </header>
+
+  <!-- TAB SWITCHER -->
+  <div class="tab-container">
+    <button type="button" class="tab-btn active" id="tab-btn-schedule" onclick="switchTab('schedule')">
+      📅 Lịch Trực Vệ Sinh
+    </button>
+    <button type="button" class="tab-btn" id="tab-btn-leaves" onclick="switchTab('leaves')">
+      📝 Xin Nghỉ & Báo Nghỉ
+      {% if future_leaves_count > 0 %}
+        <span class="tab-badge {% if has_any_conflict %}badge-alert{% endif %}">{{ future_leaves_count }}</span>
+      {% endif %}
+    </button>
+    <a href="/history" class="tab-btn" style="color: #334155;">
+      📜 Lịch Sử Nghỉ ↗
+    </a>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 1: LỊCH TRỰC VỆ SINH                                           -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="tab-content active" id="tab-content-schedule">
+    
+    <!-- Hai thẻ to trọng tâm cho hôm nay và ngày mai -->
+    <div class="cards-grid">
+      <div class="card card-today">
+        <div class="card-title">Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
+        {% if today_duty and today_duty.is_holiday %}
+          <div class="badge-holiday">{{ today_duty.holiday_reason }}</div>
+        {% elif today_duty and today_duty.assigned %}
+          <div class="card-name">{{ today_duty.assigned }}</div>
+          <div class="card-meta">{{ today_duty.weekday_vn }} - 7h30 sáng</div>
+          {% if today_duty.skipped_for_duty %}
+            <div class="card-subtext" style="background:#fee2e2; color:#b91c1c;">
+              ⚡ Đã đôn ca (do {% for s in today_duty.skipped_for_duty %}{{ s.member_name }}{% if not loop.last %}, {% endif %}{% endfor %} xin nghỉ)
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="card-name">---</div>
+        {% endif %}
+      </div>
+
+      <div class="card card-tomorrow">
+        <div class="card-title">Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
+        {% if tomorrow_duty and tomorrow_duty.is_holiday %}
+          <div class="badge-holiday">{{ tomorrow_duty.holiday_reason }}</div>
+        {% elif tomorrow_duty and tomorrow_duty.assigned %}
+          <div class="card-name">{{ tomorrow_duty.assigned }}</div>
+          <div class="card-meta">{{ tomorrow_duty.weekday_vn }} - 7h30 sáng</div>
+          {% if tomorrow_duty.skipped_for_duty %}
+            <div class="card-subtext" style="background:#fee2e2; color:#b91c1c;">
+              ⚡ Đã đôn ca (do {% for s in tomorrow_duty.skipped_for_duty %}{{ s.member_name }}{% if not loop.last %}, {% endif %}{% endfor %} xin nghỉ)
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="card-name">---</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Nút chuyển nhanh sang Xin Nghỉ -->
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+      <a href="/history" class="btn btn-dark" style="width: auto; padding: 8px 14px; font-size: 0.85rem; text-decoration: none;">
+        📜 Xem Lịch Sử Nghỉ
+      </a>
+      <button type="button" onclick="switchTab('leaves')" class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 0.88rem;">
+        ➕ Bạn muốn xin nghỉ? Bấm vào đây
+      </button>
+    </div>
+
+    <!-- Bảng danh sách lịch dự kiến 21 ngày tới -->
+    <div class="section-title">
+      <span>Lịch Dự Kiến Các Ngày Tới</span>
+      <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">8 người xoay tua vòng tròn</span>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Ngày</th>
+            <th>Người trực chính (7h30)</th>
+            <th>Ghi chú & Người xin nghỉ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in schedule %}
+          <tr {% if row.leaves and row.leaves|length > 1 %}class="tr-conflict"{% endif %}>
+            <td>
+              <strong>{{ row.display_date }}</strong><br>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">{{ row.weekday_vn }}</span>
+            </td>
+            <td>
+              {% if row.is_holiday %}
+                <span class="badge-holiday">{{ row.holiday_reason }}</span>
+              {% else %}
+                <span class="tag-duty">{{ row.assigned }}</span>
+                {% if row.skipped_for_duty %}
+                  <br><span class="tag-shift-auto">⚡ Đã đôn ca thay thế</span>
+                {% endif %}
+              {% endif %}
+            </td>
+            <td>
+              {% if row.leaves %}
+                {% for l in row.leaves %}
+                  <div class="tag-leave">
+                    🏖️ <strong>{{ l.member_name }}</strong>{% if not l.is_duty_member %} <span class="tag-nonduty">Không trực</span>{% elif row.leaves|length > 1 %} <span style="font-size:0.75rem; font-weight:700; color:{% if l.is_first %}#16a34a{% else %}#dc2626{% endif %};">({% if l.is_first %}Xin trước{% else %}Xin sau{% endif %})</span>{% endif %}: {{ l.reason }}
+                  </div>
+                {% endfor %}
+                {% if row.leaves|length > 1 %}
+                  <div style="font-size: 0.78rem; color: #dc2626; font-weight: 700; margin-top: 3px;">
+                    ⚠️ Trùng lịch: <strong>{{ row.leaves[0].member_name }}</strong> đã xin nghỉ trước
+                  </div>
+                {% endif %}
+              {% else %}
+                <span style="color: #cbd5e1;">-</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Cài đặt ngày nghỉ của tiệm -->
+    <div class="section-title">Cài Đặt Ngày Nghỉ Tiệm (Đóng Cửa Cả Tiệm)</div>
+    <div class="action-box">
+      <form action="/add-holiday" method="POST">
+        <div class="form-group">
+          <label>Ngày tiệm đóng cửa (Không tính lịch trực):</label>
+          <input type="date" name="holiday_date" required>
+        </div>
+        <div class="form-group">
+          <label>Lý do nghỉ (Tùy chọn):</label>
+          <input type="text" name="reason" placeholder="VD: Nghỉ Tết, Tiệm đi du lịch, Nghỉ Lễ...">
+        </div>
+        <button type="submit" class="btn btn-dark">Lưu Ngày Tiệm Nghỉ</button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 2: XIN NGHỈ & THEO DÕI NGHỈ                                     -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-content-leaves">
+
+    <!-- FORM XIN NGHỈ -->
+    <div class="action-box">
+      <h2 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; color: #b91c1c; display: flex; align-items: center; gap: 6px;">
+        📝 ĐĂNG KÝ XIN NGHỈ
+      </h2>
+
+      <form action="/report-leave" method="POST" id="leave-form">
+        <div class="form-group">
+          <label>Chọn người xin nghỉ:</label>
+          <select name="member_name" id="member_select" required onchange="checkLiveConflict()">
+            <optgroup label="Anh em trực nhật 7h30 (8 người)">
+              {% for m in duty_members %}
+                <option value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </optgroup>
+            <optgroup label="Nhân sự không trực nhật (2 người)">
+              {% for m in non_duty_staff %}
+                <option value="{{ m }}">{{ m }} (Không trực nhật)</option>
+              {% endfor %}
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Chọn ngày xin nghỉ:</label>
+          <input type="date" name="leave_date" id="leave_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" required onchange="checkLiveConflict()">
+        </div>
+
+        <div class="form-group">
+          <label>Lý do xin nghỉ (để anh em sắp xếp công việc):</label>
+          <input type="text" name="reason" id="leave_reason_input" placeholder="VD: Về quê, Đám tiệc, Khám bệnh, Việc gia đình..." required>
+          <div class="quick-chips">
+            <span class="chip" onclick="setReason('Về quê')">Về quê</span>
+            <span class="chip" onclick="setReason('Việc gia đình')">Việc gia đình</span>
+            <span class="chip" onclick="setReason('Đám tiệc / Cưới hỏi')">Đám tiệc</span>
+            <span class="chip" onclick="setReason('Khám bệnh')">Khám bệnh</span>
+            <span class="chip" onclick="setReason('Đi du lịch')">Đi du lịch</span>
+          </div>
+        </div>
+
+        <!-- VÙNG CẢNH BÁO TRỰC TIẾP (LIVE CONFLICT ALERT) -->
+        <div id="live-alert-container" style="display: none;"></div>
+
+        <button type="submit" class="btn btn-danger">
+          🚀 Xác Nhận Xin Nghỉ & Cập Nhật Lịch
+        </button>
+      </form>
+    </div>
+
+    <!-- BẢNG LIỆT KÊ TẤT CẢ CÁC CA XIN NGHỈ HIỆN HÀNH -->
+    <div class="section-title">
+      <div>
+        <span>📋 Bảng Theo Dõi Nghỉ (Hiện Tại & Sắp Tới)</span>
+        <div style="font-size: 0.78rem; font-weight: normal; color: #16a34a; margin-top: 2px;">
+          ✨ Tự động lưu vào Lịch sử và xóa khỏi bảng khi đã qua ngày để tránh rối mắt
+        </div>
+      </div>
+      <span style="font-size: 0.82rem; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 4px 10px; border-radius: 20px;">
+        {{ leaves_summary|length }} ca sắp tới
+      </span>
+    </div>
+
+    <div class="table-container">
+      {% if leaves_summary %}
+      <table>
+        <thead>
+          <tr>
+            <th>Ngày nghỉ</th>
+            <th>Người nghỉ</th>
+            <th>Lý do</th>
+            <th>Trạng thái trùng ngày</th>
+            <th>Ảnh hưởng ca trực</th>
+            <th style="text-align: center;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in leaves_summary %}
+          <tr {% if item.has_conflict %}class="tr-conflict"{% endif %}>
+            <td>
+              <strong>{{ item.display_date }}</strong><br>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.weekday_vn }}</span>
+            </td>
+            <td>
+              <strong style="font-size: 1rem; color: #1e3a8a;">{{ item.member_name }}</strong>
+              {% if not item.is_duty_member %}
+                <span class="tag-nonduty" style="margin-left: 4px;">Không trực</span>
+              {% endif %}
+              {% if item.created_at %}
+                <br><span style="font-size: 0.75rem; color: #64748b;">Nộp lúc: {{ item.created_at }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <span>{{ item.reason }}</span>
+            </td>
+            <td>
+              {% if item.has_conflict %}
+                {% if item.is_first %}
+                  <div class="badge-first">
+                    🥇 <strong>ĐÃ XIN NGHỈ TRƯỚC</strong>
+                    {% if item.later_names_str %}
+                      <div style="font-size: 0.74rem; color: #166534; font-weight: normal; margin-top: 2px;">
+                        ({{ item.later_names_str }} xin sau)
+                      </div>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <div class="badge-later">
+                    ⚠️ <strong>TRÙNG LỊCH:</strong><br>
+                    <span>👉 <strong>{{ item.earlier_names_str }}</strong> đã xin nghỉ trước</span>
+                  </div>
+                {% endif %}
+              {% else %}
+                <span class="badge-ok">✅ Không trùng ai (1 người)</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if not item.is_duty_member %}
+                <span style="color: #64748b; font-size: 0.82rem;">— Không trực nhật</span>
+              {% elif item.is_duty_skip %}
+                <span class="tag-shift-auto" style="background:#fee2e2; color:#b91c1c; border-color:#fca5a5;">
+                  🔄 Đã đôn cho <strong>{{ item.replaced_by }}</strong> trực thay
+                </span>
+              {% else %}
+                <span style="color: #94a3b8; font-size: 0.85rem;">— Không vướng trực</span>
+              {% endif %}
+            </td>
+            <td style="text-align: center;">
+              <form action="/cancel-leave" method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đơn xin nghỉ ngày {{ item.display_date }} của {{ item.member_name }} không?')">
+                <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
+                <input type="hidden" name="member_name" value="{{ item.member_name }}">
+                <input type="hidden" name="tab" value="leaves">
+                <button type="submit" class="cancel-btn">Hủy đơn</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">🎉</div>
+        <p><strong>Hiện tại không có ca xin nghỉ nào sắp tới!</strong></p>
+        <p style="font-size: 0.85rem; margin-top: 4px;">Các ca nghỉ cũ đã qua ngày được lưu trữ tự động trong <a href="/history" style="color:var(--primary); font-weight:700;">Trang Lịch Sử Nghỉ</a>.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- JAVASCRIPT XỬ LÝ TAB VÀ CẢNH BÁO TRỰC TIẾP -->
+  <script>
+    // Dữ liệu từ server truyền vào để kiểm tra trực tiếp
+    const leavesByDate = {{ leaves_by_date | tojson }};
+    const dutyByDate = {{ duty_by_date | tojson }};
+    const nonDutyStaff = {{ non_duty_staff | tojson }};
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      const targetBtn = document.getElementById('tab-btn-' + tabName);
+      const targetContent = document.getElementById('tab-content-' + tabName);
+
+      if (targetBtn && targetContent) {
+        targetBtn.classList.add('active');
+        targetContent.classList.add('active');
+        window.location.hash = 'tab-' + tabName;
+      }
+
+      // Đổi tiêu đề lớn theo tab
+      const pageTitle = document.getElementById('page-title');
+      const pageSubtitle = document.getElementById('page-subtitle');
+      if (tabName === 'schedule') {
+        if (pageTitle) pageTitle.innerHTML = 'HÔM NAY AI TRỰC';
+        if (pageSubtitle) pageSubtitle.innerHTML = 'Người trực chính 7h30: <strong>{{ today_duty.assigned if today_duty else "---" }}</strong>';
+        document.title = 'Hôm Nay Ai Trực? — 7H30 Sáng';
+      } else if (tabName === 'leaves') {
+        if (pageTitle) pageTitle.innerHTML = 'HÔM NAY AI NGHỈ';
+        {% if today_leaves %}
+          const leaveNames = '{{ today_leaves | map(attribute="member_name") | join(", ") }}';
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay có: <strong style="color:#dc2626;">' + leaveNames + '</strong> xin nghỉ';
+        {% else %}
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay: <strong style="color:#16a34a;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm)';
+        {% endif %}
+        document.title = 'Hôm Nay Ai Nghỉ? — Báo Nghỉ & Theo Dõi';
+      }
+    }
+
+    function setReason(text) {
+      const input = document.getElementById('leave_reason_input');
+      if (input) {
+        input.value = text;
+        input.focus();
+      }
+    }
+
+    function checkLiveConflict() {
+      const dateInput = document.getElementById('leave_date_input');
+      const memberSelect = document.getElementById('member_select');
+      const alertContainer = document.getElementById('live-alert-container');
+
+      if (!dateInput || !memberSelect || !alertContainer) return;
+
+      const selectedDate = dateInput.value;
+      const selectedMember = memberSelect.value;
+
+      if (!selectedDate) {
+        alertContainer.style.display = 'none';
+        return;
+      }
+
+      const existingOnDate = leavesByDate[selectedDate] || [];
+      // Lọc ra những người khác (không tính chính người này nếu họ sửa đơn)
+      const otherMembers = existingOnDate.filter(item => item.member_name !== selectedMember);
+
+      let html = '';
+
+      // 1. Kiểm tra TRÙNG NGÀY NGHỈ
+      if (otherMembers.length > 0) {
+        const firstPerson = otherMembers[0];
+        const timeNote = firstPerson.created_at ? ` (gửi lúc ${firstPerson.created_at})` : '';
+        const allNames = otherMembers.map(item => `<strong>${item.member_name}</strong>`).join(', ');
+
+        html += `
+          <div class="alert-box alert-warning" style="border-left: 5px solid #dc2626;">
+            ⚠️ <strong>CẢNH BÁO TRÙNG LỊCH NGHỈ:</strong><br>
+            • Ngày này <strong>${firstPerson.member_name}</strong> đã xin nghỉ trước${timeNote}!<br>
+            • Lý do của ${firstPerson.member_name}: <em>"${firstPerson.reason}"</em>.<br>
+            ${otherMembers.length > 1 ? `• Các anh em đã xin nghỉ: ${allNames}.<br>` : ''}
+            👉 <strong>LƯU Ý:</strong> Nếu bạn gửi đơn, trên bảng theo dõi sẽ ghi nhận bạn là <strong>người xin nghỉ sau</strong> (ngày này sẽ có ${otherMembers.length + 1} người cùng nghỉ).
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="alert-box alert-success" style="padding: 8px 12px; margin-bottom: 10px;">
+            ✅ Ngày này hiện chưa có ai xin nghỉ (Tránh được trùng lịch).
+          </div>
+        `;
+      }
+
+      // 2. Kiểm tra TRÙNG NGÀY TRỰC
+      if (nonDutyStaff.includes(selectedMember)) {
+        html += `
+          <div class="alert-box" style="background: #fefce8; border: 1.5px solid #fde047; color: #854d0e;">
+            ℹ️ <strong>NHÂN VIÊN KHÔNG TRỰC NHẬT:</strong><br>
+            Bạn thuộc nhóm không trực nhật vệ sinh sáng.<br>
+            Lịch xin nghỉ vẫn được ghi nhận vào bảng theo dõi và lưu lịch sử nghỉ của tiệm.
+          </div>
+        `;
+      } else {
+        const scheduledPerson = dutyByDate[selectedDate];
+        if (scheduledPerson === selectedMember) {
+          html += `
+            <div class="alert-box alert-info">
+              🔄 <strong>LƯU Ý CA TRỰC:</strong><br>
+              Ngày này đúng vào lượt <strong>trực vệ sinh 7h30 của bạn</strong>.<br>
+              Khi gửi đơn, hệ thống sẽ <strong>tự động đôn người tiếp theo</strong> lên trực thay.
+            </div>
+          `;
+        }
+      }
+
+      alertContainer.innerHTML = html;
+      alertContainer.style.display = 'block';
+    }
+
+    // Khởi tạo tab khi tải trang theo URL hash hoặc server param
+    window.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash;
+      const serverTab = '{{ active_tab }}';
+
+      if (hash === '#tab-leaves' || serverTab === 'leaves') {
+        switchTab('leaves');
+      } else {
+        switchTab('schedule');
+      }
+
+      // Kích hoạt kiểm tra ngay khi mở
+      checkLiveConflict();
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch Sử Xin Nghỉ — Cửa Hàng</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #0284c7;
+      --accent: #dc2626;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; max-width: 900px; margin: 0 auto; line-height: 1.5; }
+
+    /* Top bar */
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; background: #e2e8f0; color: #1e293b; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: background 0.2s; }
+    .back-btn:hover { background: #cbd5e1; }
+    .print-btn { display: inline-flex; align-items: center; gap: 6px; background: #334155; color: #fff; padding: 8px 14px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
+    .print-btn:hover { background: #1e293b; }
+
+    header { text-align: center; margin-bottom: 24px; }
+    h1 { font-size: 1.55rem; color: var(--primary); font-weight: 800; margin-bottom: 4px; }
+    .subtitle { font-size: 0.9rem; color: var(--text-muted); }
+
+    /* Filter Box */
+    .filter-card { background: var(--card-bg); border-radius: 14px; padding: 16px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .filter-grid { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 10px; align-items: flex-end; }
+    @media (max-width: 600px) { .filter-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    label { font-size: 0.82rem; font-weight: 700; color: #475569; }
+    select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.92rem; outline: none; background: #fff; }
+    select:focus { border-color: var(--secondary); }
+    .btn { padding: 9px 16px; border: none; border-radius: 8px; font-size: 0.92rem; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-primary { background: var(--secondary); color: #fff; }
+    .btn-light { background: #e2e8f0; color: #334155; }
+
+    /* Attendance summary stats */
+    .stats-card { background: var(--card-bg); border-radius: 14px; padding: 18px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .stats-title { font-size: 0.95rem; font-weight: 800; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+    .stat-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; text-align: center; }
+    .stat-name { font-size: 0.88rem; font-weight: 700; color: #1e293b; }
+    .stat-count { font-size: 1.4rem; font-weight: 800; color: var(--primary); margin-top: 2px; }
+    .stat-role { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* History Table */
+    .table-container { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.02); margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    th { background: #f8fafc; color: #475569; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background-color: #f1f5f9; }
+
+    /* Tags */
+    .tag-duty-member { background: #eff6ff; color: #1d4ed8; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+    .tag-nonduty-member { background: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+    .badge-past { background: #f1f5f9; color: #64748b; padding: 3px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; }
+    .badge-upcoming { background: #ecfdf5; color: #047857; padding: 3px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; }
+    
+    .del-btn { background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 3px 7px; border-radius: 5px; cursor: pointer; font-size: 0.75rem; font-weight: 700; }
+    .del-btn:hover { background: #fca5a5; }
+
+    .empty-state { text-align: center; padding: 40px 16px; color: var(--text-muted); }
+    .empty-state-icon { font-size: 2.2rem; margin-bottom: 8px; }
+
+    @media print {
+      body { padding: 0; background: #fff; }
+      .top-bar, .filter-card, .del-btn { display: none !important; }
+      .table-container, .stats-card { box-shadow: none; border: 1px solid #000; }
+      table th, table td { border-color: #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="/?tab=leaves" class="back-btn">⬅️ Quay lại Lịch Trực & Xin Nghỉ</a>
+    <button type="button" class="print-btn" onclick="window.print()">🖨️ In Danh Sách Lịch Sử</button>
+  </div>
+
+  <header>
+    <h1>📜 LỊCH SỬ XIN NGHỈ</h1>
+    <p class="subtitle">Tra cứu toàn diện các ca xin nghỉ của anh em cửa hàng</p>
+  </header>
+
+  <!-- BỘ LỌC TÌM KIẾM -->
+  <div class="filter-card">
+    <form action="/history" method="GET" class="filter-grid">
+      <div class="form-group">
+        <label>Lọc theo Tháng:</label>
+        <select name="month">
+          <option value="">-- Tất cả các tháng --</option>
+          {% for m in available_months %}
+            <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>Tháng {{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Lọc theo Nhân Viên:</label>
+        <select name="member">
+          <option value="">-- Tất cả nhân viên ({{ all_staff|length }} người) --</option>
+          <optgroup label="Anh em trực nhật (8 người)">
+            {% for staff in duty_members %}
+              <option value="{{ staff }}" {% if selected_member == staff %}selected{% endif %}>{{ staff }}</option>
+            {% endfor %}
+          </optgroup>
+          <optgroup label="Nhân viên không trực nhật (2 người)">
+            {% for staff in non_duty_staff %}
+              <option value="{{ staff }}" {% if selected_member == staff %}selected{% endif %}>{{ staff }} (Không trực)</option>
+            {% endfor %}
+          </optgroup>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">🔍 Lọc Dữ Liệu</button>
+      <a href="/history" class="btn btn-light">🔄 Tất Cả</a>
+    </form>
+  </div>
+
+  <!-- BẢNG THỐNG KÊ SỐ NGÀY NGHỈ THEO TỪNG NHÂN SỰ -->
+  <div class="stats-card">
+    <div class="stats-title">
+      <span>📊 BẢNG TỔNG HỢP SỐ NGÀY NGHỈ</span>
+      <span style="font-size: 0.82rem; font-weight: normal; color: var(--text-muted);">
+        Tổng: <strong>{{ total_leaves }}</strong> ngày nghỉ được ghi nhận
+      </span>
+    </div>
+    
+    <div class="stats-grid">
+      {% for staff in all_staff %}
+      <div class="stat-item" style="{% if stats_by_member[staff] > 0 %}border-color: #fca5a5; background: #fff1f2;{% endif %}">
+        <div class="stat-name">{{ staff }}</div>
+        <div class="stat-count" style="{% if stats_by_member[staff] > 0 %}color: #dc2626;{% else %}color: #94a3b8;{% endif %}">
+          {{ stats_by_member[staff] }}
+          <span style="font-size: 0.8rem; font-weight: normal; color: #64748b;">ngày</span>
+        </div>
+        <div class="stat-role">
+          {% if staff in duty_members %}Trực nhật{% else %}Không trực{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- BẢNG CHI TIẾT TỪNG CA XIN NGHỈ -->
+  <div class="table-container">
+    {% if history_list %}
+    <table>
+      <thead>
+        <tr>
+          <th>Ngày nghỉ</th>
+          <th>Nhân viên</th>
+          <th>Phân loại</th>
+          <th>Lý do xin nghỉ</th>
+          <th>Thời gian nộp đơn</th>
+          <th>Trạng thái</th>
+          <th style="text-align: center;">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in history_list %}
+        <tr>
+          <td>
+            <strong>{{ item.display_date }}</strong><br>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.weekday_vn }}</span>
+          </td>
+          <td>
+            <strong style="font-size: 1rem; color: #1e3a8a;">{{ item.member_name }}</strong>
+          </td>
+          <td>
+            {% if item.is_duty_staff %}
+              <span class="tag-duty-member">Trực nhật 7h30</span>
+            {% else %}
+              <span class="tag-nonduty-member">Không trực nhật</span>
+            {% endif %}
+          </td>
+          <td>
+            <span>{{ item.reason }}</span>
+          </td>
+          <td>
+            <span style="font-size: 0.82rem; color: #64748b;">{{ item.created_at if item.created_at else '—' }}</span>
+          </td>
+          <td>
+            {% if item.is_past %}
+              <span class="badge-past">Đã nghỉ (Quá khứ)</span>
+            {% else %}
+              <span class="badge-upcoming">Sắp tới</span>
+            {% endif %}
+          </td>
+          <td style="text-align: center;">
+            <form action="/delete-history" method="POST" onsubmit="return confirm('Bạn có chắc muốn xóa bản ghi ngày {{ item.display_date }} của {{ item.member_name }} không?')">
+              <input type="hidden" name="id" value="{{ item.id }}">
+              <input type="hidden" name="source" value="{{ item.source }}">
+              <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
+              <input type="hidden" name="member_name" value="{{ item.member_name }}">
+              <button type="submit" class="del-btn">Xóa</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📂</div>
+      <p><strong>Không tìm thấy dữ liệu xin nghỉ nào!</strong></p>
+      <p style="font-size: 0.85rem; margin-top: 4px;">Chưa có ca xin nghỉ nào thỏa mãn điều kiện lọc.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</body>
+</html>

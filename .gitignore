@@ -1,0 +1,19 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Môi trường ảo
+venv/
+env/
+.venv/
+
+# Database (không đẩy lên github để tránh ghi đè dữ liệu thực tế trên PythonAnywhere)
+duty_schedule.db
+
+# VS Code & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
