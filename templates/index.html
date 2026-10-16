@@ -26,6 +26,51 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding: 16px; max-width: 820px; margin: 0 auto; line-height: 1.5; }
     
+    /* Top Header with Live Clock */
+    .top-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .clock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      font-size: 0.82rem;
+      color: #334155;
+    }
+    .clock-badge .clock-time {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #1e3a8a;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.5px;
+    }
+    .clock-badge .clock-zone {
+      font-size: 0.7rem;
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    
     /* Header */
     header { text-align: center; margin-bottom: 20px; }
     h1 { font-size: 1.55rem; color: var(--primary); margin-bottom: 4px; font-weight: 800; letter-spacing: -0.5px; }
@@ -154,6 +199,17 @@
   </style>
 </head>
 <body>
+
+  <!-- Top bar với Đồng hồ thời gian thực Giờ Việt Nam -->
+  <div class="top-header-bar">
+    <div class="brand-title">🏢 Cửa Hàng</div>
+    <div class="clock-badge">
+      <span style="font-size: 1rem;">⏰</span>
+      <span id="vn-live-clock" class="clock-time">--:--:--</span>
+      <span id="vn-live-date" style="color: #64748b; font-size: 0.8rem; font-weight: 600;">--/--/----</span>
+      <span class="clock-zone">Giờ VN (UTC+7)</span>
+    </div>
+  </div>
 
   <header>
     {% if active_tab == 'leaves' %}
@@ -582,8 +638,42 @@
       alertContainer.style.display = 'block';
     }
 
+    // Đồng hồ thời gian thực Giờ Việt Nam (Asia/Ho_Chi_Minh - UTC+7)
+    function updateVNClock() {
+      try {
+        const now = new Date();
+        const timeFormatter = new Intl.DateTimeFormat('vi-VN', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+        const dateFormatter = new Intl.DateTimeFormat('vi-VN', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        
+        const clockEl = document.getElementById('vn-live-clock');
+        const dateEl = document.getElementById('vn-live-date');
+        if (clockEl) clockEl.textContent = timeFormatter.format(now);
+        if (dateEl) dateEl.textContent = dateFormatter.format(now);
+      } catch (e) {
+        // Fallback đơn giản nếu trình duyệt cũ
+        const now = new Date();
+        const clockEl = document.getElementById('vn-live-clock');
+        if (clockEl) clockEl.textContent = now.toLocaleTimeString('vi-VN');
+      }
+    }
+
     // Khởi tạo tab khi tải trang theo URL hash hoặc server param
     window.addEventListener('DOMContentLoaded', () => {
+      // Khởi động đồng hồ ngay lập tức và cập nhật mỗi giây
+      updateVNClock();
+      setInterval(updateVNClock, 1000);
+
       const hash = window.location.hash;
       const serverTab = '{{ active_tab }}';
 

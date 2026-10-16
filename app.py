@@ -1,7 +1,18 @@
 import os
 import sqlite3
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 from flask import Flask, render_template, request, redirect, url_for
+
+# Múi giờ Việt Nam (UTC+7)
+VN_TZ = timezone(timedelta(hours=7))
+
+def get_vn_now():
+    """Lấy thời điểm hiện tại chính xác theo giờ Việt Nam (UTC+7)"""
+    return datetime.now(VN_TZ)
+
+def get_vn_today():
+    """Lấy ngày hôm nay chính xác theo giờ Việt Nam (UTC+7)"""
+    return get_vn_now().date()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_NAME = os.path.join(BASE_DIR, 'duty_schedule.db')
@@ -77,11 +88,12 @@ init_db()
 
 def cleanup_and_advance_checkpoint():
     """
-    Cập nhật mốc xoay tua lịch trực tới ngày hôm nay, tự động chuyển các ca nghỉ đã qua ngày vào
+    Cập nhật mốc xoay tua lịch trực tới ngày hôm nay (giờ VN), tự động chuyển các ca nghỉ đã qua ngày vào
     bảng LỊCH SỬ (leaves_history) và xóa khỏi bảng hiện hành để tránh rối mắt.
     """
-    today = date.today()
+    today = get_vn_today()
     today_str = today.strftime('%Y-%m-%d')
+    vn_now_str = get_vn_now().strftime('%Y-%m-%d %H:%M:%S')
     
     with get_db() as conn:
         row = conn.execute('SELECT checkpoint_date, next_cycle_index FROM rotation_checkpoint WHERE id = 1').fetchone()
@@ -130,10 +142,10 @@ def cleanup_and_advance_checkpoint():
         # 1. TỰ ĐỘNG CHUYỂN CÁC CA NGHỈ ĐÃ QUA NGÀY VÀO BẢNG LỊCH SỬ NGHỈ
         conn.execute('''
             INSERT OR IGNORE INTO leaves_history (leave_date, member_name, reason, created_at, archived_at)
-            SELECT leave_date, member_name, reason, created_at, datetime('now', 'localtime')
+            SELECT leave_date, member_name, reason, created_at, ?
             FROM leaves
             WHERE leave_date < ?
-        ''', (today_str,))
+        ''', (vn_now_str, today_str))
 
         # 2. XÓA KHỎI BẢNG HIỆN HÀNH ĐỂ KHÔNG BỊ RỐI MẮT
         conn.execute('DELETE FROM leaves WHERE leave_date < ?', (today_str,))
@@ -152,7 +164,7 @@ def get_current_checkpoint():
 
 def get_schedule(days_ahead=21):
     """Tính toán lịch trực cho n ngày tới tính từ hôm nay cho 8 người trực nhật"""
-    today = date.today()
+    today = get_vn_today()
     start_date, start_cycle_index = get_current_checkpoint()
     
     with get_db() as conn:
@@ -234,7 +246,7 @@ def get_schedule(days_ahead=21):
 
 def get_leaves_summary(schedule):
     """Lấy danh sách các ca xin nghỉ hiện hành (từ hôm nay trở đi) kèm thông tin ưu tiên nộp trước"""
-    today = date.today()
+    today = get_vn_today()
     today_str = today.strftime('%Y-%m-%d')
     with get_db() as conn:
         rows = conn.execute('''
@@ -356,7 +368,7 @@ def index():
     duty_by_date = {s['date_str']: s['assigned'] for s in schedule if not s.get('is_holiday')}
     has_any_conflict = any(l['has_conflict'] for l in leaves_summary)
 
-    today_str = date.today().strftime('%Y-%m-%d')
+    today_str = get_vn_today().strftime('%Y-%m-%d')
     today_leaves = [item for item in leaves_summary if item['leave_date'] == today_str]
 
     return render_template('index.html', 
@@ -382,7 +394,7 @@ def history():
     
     selected_month = request.args.get('month', '')  # Định dạng YYYY-MM
     selected_member = request.args.get('member', '')
-    today_str = date.today().strftime('%Y-%m-%d')
+    today_str = get_vn_today().strftime('%Y-%m-%d')
     
     with get_db() as conn:
         # Lấy từ cả bảng lịch sử và bảng hiện hành
@@ -449,7 +461,7 @@ def history():
         
     sorted_months = sorted(list(available_months), reverse=True)
     if not sorted_months:
-        sorted_months = [date.today().strftime('%Y-%m')]
+        sorted_months = [get_vn_today().strftime('%Y-%m')]
 
     # Thống kê số ngày nghỉ theo từng nhân sự trong kết quả đã lọc
     stats_by_member = {}
@@ -493,9 +505,9 @@ def report_leave():
     leave_date = request.form.get('leave_date')
     member_name = request.form.get('member_name')
     reason = request.form.get('reason', '').strip() or 'Việc cá nhân'
-    created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    created_at = get_vn_now().strftime('%Y-%m-%d %H:%M:%S')
     
-    today_str = date.today().strftime('%Y-%m-%d')
+    today_str = get_vn_today().strftime('%Y-%m-%d')
     if leave_date and leave_date >= today_str and member_name in ALL_STAFF:
         with get_db() as conn:
             conn.execute('''

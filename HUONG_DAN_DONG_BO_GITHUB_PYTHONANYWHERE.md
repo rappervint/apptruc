@@ -1,7 +1,8 @@
 # HƯỚNG DẪN ĐỒNG BỘ CODE LÊN GITHUB & PYTHONANYWHERE (TỰ ĐỘNG CẬP NHẬT)
 
 Tài khoản GitHub của bạn: **rappervint**  
-Tài khoản PythonAnywhere của bạn: **rappervint**
+Tài khoản PythonAnywhere của bạn: **tranbinhauto**  
+Tên miền web online: **https://tranbinhauto.pythonanywhere.com**
 
 ---
 
@@ -31,29 +32,29 @@ git push -u origin main
 ## BƯỚC 3: TẢI VÀ CHẠY WEB TRÊN PYTHONANYWHERE (Chỉ làm 1 lần đầu)
 
 ### 3.1. Kéo code về PythonAnywhere:
-1. Đăng nhập vào [pythonanywhere.com](https://www.pythonanywhere.com/)
+1. Đăng nhập vào [pythonanywhere.com](https://www.pythonanywhere.com/) (tài khoản `tranbinhauto`).
 2. Vào mục **Consoles** ➔ Bấm vào **Bash** để mở cửa sổ dòng lệnh.
 3. Chạy 2 lệnh sau:
    ```bash
    git clone https://github.com/rappervint/apptruc.git
-   pip install -r apptruc/requirements.txt
+   pip install --user Flask gunicorn
    ```
 
 ### 3.2. Cấu hình Web App trên PythonAnywhere:
 1. Vào tab **Web** trên thanh menu trên cùng.
 2. Nếu chưa có Web App: Bấm **Add a new web app** ➔ Bấm **Next** ➔ Chọn **Manual configuration** ➔ Chọn **Python 3.10** ➔ Bấm **Next** cho xong.
 3. Cuộn xuống phần **Code**, điền chính xác đường dẫn:
-   - **Source code**: `/home/rappervint/apptruc`
-   - **Working directory**: `/home/rappervint/apptruc`
+   - **Source code**: `/home/tranbinhauto/apptruc`
+   - **Working directory**: `/home/tranbinhauto/apptruc`
 4. Ngay bên dưới có mục **WSGI configuration file**, bấm vào link file màu xanh có dạng:  
-   `/var/www/rappervint_pythonanywhere_com_wsgi.py`
+   `/var/www/tranbinhauto_pythonanywhere_com_wsgi.py`
 5. Nhấn **Ctrl + A** rồi bấm **Delete** để xóa sạch nội dung cũ, sau đó dán đoạn mã này vào:
 
 ```python
 import sys
 import os
 
-path = '/home/rappervint/apptruc'
+path = '/home/tranbinhauto/apptruc'
 if path not in sys.path:
     sys.path.insert(0, path)
 
@@ -62,9 +63,9 @@ os.chdir(path)
 from wsgi import application
 ```
 6. Bấm nút **Save** màu xanh ở góc trên bên phải để lưu lại.
-7. Quay lại tab **Web**, bấm nút màu xanh to **Reload rappervint.pythonanywhere.com**.
+7. Quay lại tab **Web**, bấm nút màu xanh to **Reload tranbinhauto.pythonanywhere.com**.
 
-🎉 Trang web của bạn đã chính thức chạy online tại: `https://rappervint.pythonanywhere.com`
+🎉 Trang web của bạn chạy online tại: `https://tranbinhauto.pythonanywhere.com`
 
 ---
 
@@ -83,7 +84,7 @@ git push
 ### 2. Trên PythonAnywhere:
 Vào cửa sổ **Bash Console** trên PythonAnywhere và gõ đúng 1 dòng này:
 ```bash
-cd ~/apptruc && git pull && touch /var/www/rappervint_pythonanywhere_com_wsgi.py
+cd ~/apptruc && git pull && touch /var/www/tranbinhauto_pythonanywhere_com_wsgi.py
 ```
 *(Lệnh `touch ...wsgi.py` tự động kích hoạt server nạp lại code mới ngay lập tức mà bạn không cần phải bấm Reload trên web nữa).*
 
@@ -92,7 +93,7 @@ cd ~/apptruc && git pull && touch /var/www/rappervint_pythonanywhere_com_wsgi.py
 ### 💡 MẸO TẠO LỆNH TẮT 1 CHẠM TRÊN PYTHONANYWHERE:
 Trong cửa sổ Bash trên PythonAnywhere, bạn chạy lệnh này 1 lần duy nhất:
 ```bash
-echo "cd ~/apptruc && git pull && touch /var/www/rappervint_pythonanywhere_com_wsgi.py && echo '>>> ĐÃ CẬP NHẬT CODE MỚI XONG! <<<' " > ~/capnhat.sh
+echo "cd ~/apptruc && git pull && touch /var/www/tranbinhauto_pythonanywhere_com_wsgi.py && echo '>>> ĐÃ CẬP NHẬT CODE MỚI XONG! <<<' " > ~/capnhat.sh
 chmod +x ~/capnhat.sh
 ```
 
@@ -101,4 +102,3 @@ Từ nay về sau, mỗi lần sửa code xong trên máy tính và `git push`, 
 ./capnhat.sh
 ```
 Hệ thống sẽ tự kéo code mới về và tự khởi động lại web app trong vòng 2 giây!
-

@@ -26,6 +26,34 @@
     .print-btn { display: inline-flex; align-items: center; gap: 6px; background: #334155; color: #fff; padding: 8px 14px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
     .print-btn:hover { background: #1e293b; }
 
+    .clock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      font-size: 0.82rem;
+      color: #334155;
+    }
+    .clock-badge .clock-time {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #1e3a8a;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.5px;
+    }
+    .clock-badge .clock-zone {
+      font-size: 0.7rem;
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
     header { text-align: center; margin-bottom: 24px; }
     h1 { font-size: 1.55rem; color: var(--primary); font-weight: 800; margin-bottom: 4px; }
     .subtitle { font-size: 0.9rem; color: var(--text-muted); }
@@ -83,6 +111,12 @@
 
   <div class="top-bar">
     <a href="/?tab=leaves" class="back-btn">⬅️ Quay lại Lịch Trực & Xin Nghỉ</a>
+    <div class="clock-badge">
+      <span style="font-size: 1rem;">⏰</span>
+      <span id="vn-live-clock" class="clock-time">--:--:--</span>
+      <span id="vn-live-date" style="color: #64748b; font-size: 0.8rem; font-weight: 600;">--/--/----</span>
+      <span class="clock-zone">Giờ VN</span>
+    </div>
     <button type="button" class="print-btn" onclick="window.print()">🖨️ In Danh Sách Lịch Sử</button>
   </div>
 
@@ -218,5 +252,36 @@
     {% endif %}
   </div>
 
+  <script>
+    function updateVNClock() {
+      try {
+        const now = new Date();
+        const timeFormatter = new Intl.DateTimeFormat('vi-VN', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+        const dateFormatter = new Intl.DateTimeFormat('vi-VN', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        
+        const clockEl = document.getElementById('vn-live-clock');
+        const dateEl = document.getElementById('vn-live-date');
+        if (clockEl) clockEl.textContent = timeFormatter.format(now);
+        if (dateEl) dateEl.textContent = dateFormatter.format(now);
+      } catch (e) {
+        const now = new Date();
+        const clockEl = document.getElementById('vn-live-clock');
+        if (clockEl) clockEl.textContent = now.toLocaleTimeString('vi-VN');
+      }
+    }
+    updateVNClock();
+    setInterval(updateVNClock, 1000);
+  </script>
 </body>
 </html>
