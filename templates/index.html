@@ -196,168 +196,6 @@
     /* Tips note */
     .tip-box { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 14px; border-radius: 0 8px 8px 0; margin-bottom: 16px; font-size: 0.88rem; color: #166534; }
     .today-status-card { background: var(--card-bg); border-radius: 14px; padding: 16px 18px; border: 1.5px solid var(--border); margin-bottom: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-
-    /* Wizard Step Indicator */
-    .wizard-progress {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-      margin-bottom: 24px;
-      padding: 0 8px;
-    }
-    .wizard-progress::before {
-      content: "";
-      position: absolute;
-      top: 18px;
-      left: 36px;
-      right: 36px;
-      height: 3px;
-      background: #e2e8f0;
-      z-index: 1;
-    }
-    .wizard-progress-bar {
-      position: absolute;
-      top: 18px;
-      left: 36px;
-      height: 3px;
-      background: var(--primary);
-      z-index: 2;
-      transition: width 0.3s ease;
-      width: 0%;
-    }
-    .wizard-step-node {
-      position: relative;
-      z-index: 3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-    .wizard-node-circle {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #fff;
-      border: 3px solid #cbd5e1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: #64748b;
-      transition: all 0.25s ease;
-    }
-    .wizard-step-node.active .wizard-node-circle {
-      border-color: var(--primary);
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.15);
-    }
-    .wizard-step-node.completed .wizard-node-circle {
-      border-color: var(--success);
-      background: var(--success);
-      color: #fff;
-    }
-    .wizard-node-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #64748b;
-      text-align: center;
-    }
-    .wizard-step-node.active .wizard-node-label {
-      color: var(--primary);
-      font-weight: 800;
-    }
-
-    /* Wizard Step Containers */
-    .wizard-step-pane {
-      display: none;
-      animation: fadeIn 0.25s ease;
-    }
-    .wizard-step-pane.active {
-      display: block;
-    }
-    .wizard-step-header {
-      margin-bottom: 16px;
-    }
-    .wizard-step-header h3 {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #1e293b;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .wizard-step-header p {
-      font-size: 0.84rem;
-      color: var(--text-muted);
-      margin-top: 3px;
-    }
-
-    /* Selection Grids for Step 1 */
-    .member-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .member-card-option {
-      background: #fff;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-    .member-card-option:hover {
-      border-color: var(--secondary);
-      background: #f0f9ff;
-    }
-    .member-card-option.selected {
-      border-color: var(--primary);
-      background: #eff6ff;
-      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
-    }
-    .member-card-name {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #1e293b;
-    }
-    .member-card-role {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-    .member-card-option.selected .member-card-name {
-      color: var(--primary);
-    }
-
-    /* Wizard Navigation Buttons */
-    .wizard-nav {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-    }
-    .btn-prev {
-      background: #e2e8f0;
-      color: #334155;
-      flex: 1;
-    }
-    .btn-next {
-      background: var(--primary);
-      color: #fff;
-      flex: 2;
-    }
-    .btn-prev:hover { background: #cbd5e1; }
-    .btn-next:hover { opacity: 0.95; }
   </style>
 </head>
 <body>
@@ -534,184 +372,52 @@
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <div class="tab-content" id="tab-content-leaves">
 
-    <!-- BỘ CÀI ĐẶT / ĐĂNG KÝ XIN NGHỈ DẠNG TỪNG BƯỚC (WIZARD) -->
+    <!-- FORM XIN NGHỈ -->
     <div class="action-box">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-        <h2 style="font-size: 1.1rem; font-weight: 800; color: #b91c1c; display: flex; align-items: center; gap: 8px;">
-          📲 ĐĂNG KÝ XIN NGHỈ (4 BƯỚC)
-        </h2>
-        <span id="step-indicator-text" style="font-size: 0.8rem; font-weight: 700; background: #fee2e2; color: #b91c1c; padding: 3px 9px; border-radius: 12px;">
-          Bước 1 / 4
-        </span>
-      </div>
+      <h2 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; color: #b91c1c; display: flex; align-items: center; gap: 6px;">
+        📝 ĐĂNG KÝ XIN NGHỈ
+      </h2>
 
-      <!-- Thanh tiến trình Wizard -->
-      <div class="wizard-progress">
-        <div class="wizard-progress-bar" id="wizard-progress-bar"></div>
-        <div class="wizard-step-node active" id="node-step-1" onclick="goToStep(1)">
-          <div class="wizard-node-circle">1</div>
-          <div class="wizard-node-label">Người nghỉ</div>
+      <form action="/report-leave" method="POST" id="leave-form">
+        <div class="form-group">
+          <label>Chọn người xin nghỉ:</label>
+          <select name="member_name" id="member_select" required onchange="checkLiveConflict()">
+            <optgroup label="Anh em trực nhật 7h30 (8 người)">
+              {% for m in duty_members %}
+                <option value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </optgroup>
+            <optgroup label="Nhân sự không trực nhật (2 người)">
+              {% for m in non_duty_staff %}
+                <option value="{{ m }}">{{ m }} (Không trực nhật)</option>
+              {% endfor %}
+            </optgroup>
+          </select>
         </div>
-        <div class="wizard-step-node" id="node-step-2" onclick="goToStep(2)">
-          <div class="wizard-node-circle">2</div>
-          <div class="wizard-node-label">Ngày nghỉ</div>
+
+        <div class="form-group">
+          <label>Chọn ngày xin nghỉ:</label>
+          <input type="date" name="leave_date" id="leave_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" required onchange="checkLiveConflict()">
         </div>
-        <div class="wizard-step-node" id="node-step-3" onclick="goToStep(3)">
-          <div class="wizard-node-circle">3</div>
-          <div class="wizard-node-label">Lý do</div>
-        </div>
-        <div class="wizard-step-node" id="node-step-4" onclick="goToStep(4)">
-          <div class="wizard-node-circle">4</div>
-          <div class="wizard-node-label">Xác nhận</div>
-        </div>
-      </div>
 
-      <form action="/report-leave" method="POST" id="leave-wizard-form">
-        <!-- Input ẩn giữ giá trị để submit form -->
-        <input type="hidden" name="member_name" id="wizard_member_name" value="{{ duty_members[0] }}">
-
-        <!-- ══════════════════════════════════════════════════════════ -->
-        <!-- BƯỚC 1: CHỌN NGƯỜI XIN NGHỈ                              -->
-        <!-- ══════════════════════════════════════════════════════════ -->
-        <div class="wizard-step-pane active" id="pane-step-1">
-          <div class="wizard-step-header">
-            <h3>👤 Bước 1: Bạn là ai? Chọn tên người xin nghỉ</h3>
-            <p>Chọn đúng tên của bạn trong danh sách 10 anh em ở cửa hàng.</p>
-          </div>
-
-          <div style="font-size: 0.82rem; font-weight: 700; color: #1e3a8a; margin: 10px 0 6px;">
-            🧹 Nhóm trực nhật 7h30 sáng (8 anh em):
-          </div>
-          <div class="member-grid">
-            {% for m in duty_members %}
-            <div class="member-card-option {% if loop.first %}selected{% endif %}" onclick="selectWizardMember('{{ m }}', this)">
-              <div style="font-size: 1.3rem;">👷</div>
-              <div class="member-card-name">{{ m }}</div>
-              <div class="member-card-role">Trực nhật 7h30</div>
-            </div>
-            {% endfor %}
-          </div>
-
-          <div style="font-size: 0.82rem; font-weight: 700; color: #b45309; margin: 14px 0 6px;">
-            💼 Nhóm không trực nhật (2 nhân sự):
-          </div>
-          <div class="member-grid">
-            {% for m in non_duty_staff %}
-            <div class="member-card-option" onclick="selectWizardMember('{{ m }}', this)">
-              <div style="font-size: 1.3rem;">🧑‍💼</div>
-              <div class="member-card-name">{{ m }}</div>
-              <div class="member-card-role">Không trực nhật</div>
-            </div>
-            {% endfor %}
-          </div>
-
-          <div class="wizard-nav">
-            <button type="button" class="btn btn-next" onclick="nextStep(2)">
-              Tiếp tục: Chọn ngày nghỉ ➡️
-            </button>
+        <div class="form-group">
+          <label>Lý do xin nghỉ (để anh em sắp xếp công việc):</label>
+          <input type="text" name="reason" id="leave_reason_input" placeholder="VD: Về quê, Đám tiệc, Khám bệnh, Việc gia đình..." required>
+          <div class="quick-chips">
+            <span class="chip" onclick="setReason('Về quê')">Về quê</span>
+            <span class="chip" onclick="setReason('Việc gia đình')">Việc gia đình</span>
+            <span class="chip" onclick="setReason('Đám tiệc / Cưới hỏi')">Đám tiệc</span>
+            <span class="chip" onclick="setReason('Khám bệnh')">Khám bệnh</span>
+            <span class="chip" onclick="setReason('Đi du lịch')">Đi du lịch</span>
           </div>
         </div>
 
-        <!-- ══════════════════════════════════════════════════════════ -->
-        <!-- BƯỚC 2: CHỌN NGÀY XIN NGHỈ                               -->
-        <!-- ══════════════════════════════════════════════════════════ -->
-        <div class="wizard-step-pane" id="pane-step-2">
-          <div class="wizard-step-header">
-            <h3>📅 Bước 2: Chọn ngày bạn muốn xin nghỉ</h3>
-            <p>Đang chọn cho: <strong id="step2-member-display" style="color: var(--primary);">---</strong></p>
-          </div>
+        <!-- VÙNG CẢNH BÁO TRỰC TIẾP (LIVE CONFLICT ALERT) -->
+        <div id="live-alert-container" style="display: none;"></div>
 
-          <div class="form-group">
-            <label for="wizard_leave_date">Chọn ngày xin nghỉ trên lịch:</label>
-            <input type="date" name="leave_date" id="wizard_leave_date" min="{{ today_date_str }}" value="{{ today_date_str }}" required style="font-size: 1.05rem; padding: 12px; font-weight: 700;">
-          </div>
-
-          <div class="quick-chips" style="margin-bottom: 12px;">
-            <span class="chip" onclick="setQuickDate(0)">Hôm nay</span>
-            <span class="chip" onclick="setQuickDate(1)">Ngày mai</span>
-            <span class="chip" onclick="setQuickDate(2)">Ngày mốt</span>
-            <span class="chip" onclick="setQuickDate(3)">3 ngày nữa</span>
-            <span class="chip" onclick="setQuickDate(7)">Tuần sau (+7 ngày)</span>
-          </div>
-
-          <div id="step2-live-hint" style="margin-top: 10px;"></div>
-
-          <div class="wizard-nav">
-            <button type="button" class="btn btn-prev" onclick="prevStep(1)">
-              ⬅️ Quay lại
-            </button>
-            <button type="button" class="btn btn-next" onclick="nextStep(3)">
-              Tiếp tục: Điền lý do ➡️
-            </button>
-          </div>
-        </div>
-
-        <!-- ══════════════════════════════════════════════════════════ -->
-        <!-- BƯỚC 3: ĐIỀN LÝ DO XIN NGHỈ                              -->
-        <!-- ══════════════════════════════════════════════════════════ -->
-        <div class="wizard-step-pane" id="pane-step-3">
-          <div class="wizard-step-header">
-            <h3>📝 Bước 3: Lý do bạn xin nghỉ là gì?</h3>
-            <p>Để anh em và cửa hàng nắm thông tin sắp xếp công việc chu đáo.</p>
-          </div>
-
-          <div class="form-group">
-            <label for="wizard_leave_reason">Nhập lý do xin nghỉ:</label>
-            <input type="text" name="reason" id="wizard_leave_reason" placeholder="VD: Về quê, Đám tiệc, Khám bệnh, Việc gia đình..." value="Việc cá nhân" required style="font-size: 1rem; padding: 12px;">
-            
-            <div style="font-size: 0.8rem; color: #64748b; margin-top: 8px; font-weight: 700;">Chọn nhanh lý do phổ biến:</div>
-            <div class="quick-chips">
-              <span class="chip" onclick="setWizardReason('Về quê')">🏡 Về quê</span>
-              <span class="chip" onclick="setWizardReason('Việc gia đình')">👨‍👩‍👧 Việc gia đình</span>
-              <span class="chip" onclick="setWizardReason('Đám tiệc / Cưới hỏi')">🎉 Đám tiệc</span>
-              <span class="chip" onclick="setWizardReason('Khám bệnh')">🏥 Khám bệnh</span>
-              <span class="chip" onclick="setWizardReason('Đi du lịch')">✈️ Đi du lịch</span>
-              <span class="chip" onclick="setWizardReason('Việc cá nhân')">💼 Việc cá nhân</span>
-            </div>
-          </div>
-
-          <div class="wizard-nav">
-            <button type="button" class="btn btn-prev" onclick="prevStep(2)">
-              ⬅️ Quay lại
-            </button>
-            <button type="button" class="btn btn-next" onclick="nextStep(4)">
-              Tiếp tục: Kiểm tra trùng lịch ➡️
-            </button>
-          </div>
-        </div>
-
-        <!-- ══════════════════════════════════════════════════════════ -->
-        <!-- BƯỚC 4: BẢNG THÔNG BÁO TRÙNG LỊCH & BẤM XÁC NHẬN        -->
-        <!-- ══════════════════════════════════════════════════════════ -->
-        <div class="wizard-step-pane" id="pane-step-4">
-          <div class="wizard-step-header">
-            <h3>🔍 Bước 4: Kiểm tra trùng lịch & Xác nhận</h3>
-            <p>Hệ thống tự động rà soát trùng ca trực nhật và trùng ngày nghỉ của các anh em khác.</p>
-          </div>
-
-          <!-- Tóm tắt đơn đăng ký -->
-          <div style="background: #f8fafc; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
-            <div style="font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Thông tin đơn đăng ký của bạn:</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.92rem;">
-              <div>👤 Người xin nghỉ: <strong id="summary-member" style="color: var(--primary);">---</strong></div>
-              <div>📅 Ngày xin nghỉ: <strong id="summary-date" style="color: var(--primary);">---</strong></div>
-              <div style="grid-column: 1 / -1;">📝 Lý do: <strong id="summary-reason">---</strong></div>
-            </div>
-          </div>
-
-          <!-- BẢNG THÔNG BÁO TRÙNG LỊCH ĐƯỢC SINH TỰ ĐỘNG -->
-          <div id="step4-conflict-report"></div>
-
-          <div class="wizard-nav">
-            <button type="button" class="btn btn-prev" onclick="prevStep(3)">
-              ⬅️ Quay lại chỉnh sửa
-            </button>
-            <button type="submit" class="btn btn-danger" style="flex: 2; font-size: 1rem;">
-              ✅ Bấm Xác Nhận Để Tạo Lịch Nghỉ
-            </button>
-          </div>
-        </div>
-
+        <button type="submit" class="btn btn-danger">
+          🚀 Xác Nhận Xin Nghỉ & Cập Nhật Lịch
+        </button>
       </form>
     </div>
 
@@ -854,245 +560,82 @@
       }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // BỘ ĐIỀU KHIỂN CÀI ĐẶT / ĐĂNG KÝ XIN NGHỈ DẠNG TỪNG BƯỚC (WIZARD)
-    // ═══════════════════════════════════════════════════════════════════
-    let currentWizardStep = 1;
-
-    function selectWizardMember(memberName, cardEl) {
-      document.getElementById('wizard_member_name').value = memberName;
-      document.querySelectorAll('.member-card-option').forEach(el => el.classList.remove('selected'));
-      if (cardEl) cardEl.classList.add('selected');
-      
-      const step2Display = document.getElementById('step2-member-display');
-      if (step2Display) step2Display.textContent = memberName;
-      
-      updateStep2Hint();
-    }
-
-    function setQuickDate(daysOffset) {
-      const now = new Date();
-      now.setDate(now.getDate() + daysOffset);
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
-      const dateStr = `${yyyy}-${mm}-${dd}`;
-      
-      const dateInput = document.getElementById('wizard_leave_date');
-      if (dateInput) {
-        dateInput.value = dateStr;
-        updateStep2Hint();
+    function setReason(text) {
+      const input = document.getElementById('leave_reason_input');
+      if (input) {
+        input.value = text;
+        input.focus();
       }
     }
 
-    function setWizardReason(text) {
-      const reasonInput = document.getElementById('wizard_leave_reason');
-      if (reasonInput) {
-        reasonInput.value = text;
-        reasonInput.focus();
+    function checkLiveConflict() {
+      const dateInput = document.getElementById('leave_date_input');
+      const memberSelect = document.getElementById('member_select');
+      const alertContainer = document.getElementById('live-alert-container');
+
+      if (!dateInput || !memberSelect || !alertContainer) return;
+
+      const selectedDate = dateInput.value;
+      const selectedMember = memberSelect.value;
+
+      if (!selectedDate) {
+        alertContainer.style.display = 'none';
+        return;
       }
-    }
-
-    function updateStep2Hint() {
-      const dateVal = document.getElementById('wizard_leave_date').value;
-      const memberVal = document.getElementById('wizard_member_name').value;
-      const hintEl = document.getElementById('step2-live-hint');
-      if (!hintEl || !dateVal) return;
-
-      const existing = (leavesByDate[dateVal] || []).filter(item => item.member_name !== memberVal);
-      if (existing.length > 0) {
-        hintEl.innerHTML = `
-          <div style="font-size: 0.84rem; color: #b45309; background: #fefce8; border: 1px solid #fef08a; padding: 8px 12px; border-radius: 8px;">
-            ⚠️ <em>Lưu ý nhanh:</em> Ngày này đã có <strong>${existing[0].member_name}</strong> xin nghỉ trước!
-          </div>
-        `;
-      } else {
-        hintEl.innerHTML = `
-          <div style="font-size: 0.84rem; color: #15803d; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 8px;">
-            ✅ <em>Lưu ý nhanh:</em> Ngày này hiện chưa có ai xin nghỉ.
-          </div>
-        `;
-      }
-    }
-
-    document.getElementById('wizard_leave_date')?.addEventListener('change', updateStep2Hint);
-
-    function goToStep(targetStep) {
-      // Chỉ cho phép nhảy đến các bước hợp lệ
-      if (targetStep < 1 || targetStep > 4) return;
-      if (targetStep > currentWizardStep + 1) return; // Không cho phép nhảy cóc bước chưa điền
-      
-      // Validate bước hiện tại trước khi đi tiếp
-      if (targetStep > currentWizardStep) {
-        if (!validateStep(currentWizardStep)) return;
-      }
-      
-      renderStep(targetStep);
-    }
-
-    function nextStep(step) {
-      if (!validateStep(currentWizardStep)) return;
-      renderStep(step);
-    }
-
-    function prevStep(step) {
-      renderStep(step);
-    }
-
-    function validateStep(step) {
-      if (step === 1) {
-        const member = document.getElementById('wizard_member_name').value;
-        if (!member) {
-          alert('Vui lòng chọn tên người xin nghỉ!');
-          return false;
-        }
-      } else if (step === 2) {
-        const dateVal = document.getElementById('wizard_leave_date').value;
-        if (!dateVal) {
-          alert('Vui lòng chọn ngày bạn muốn xin nghỉ!');
-          return false;
-        }
-      } else if (step === 3) {
-        const reasonVal = document.getElementById('wizard_leave_reason').value.trim();
-        if (!reasonVal) {
-          alert('Vui lòng nhập lý do xin nghỉ!');
-          return false;
-        }
-      }
-      return true;
-    }
-
-    function renderStep(step) {
-      currentWizardStep = step;
-
-      // Cập nhật panes
-      for (let i = 1; i <= 4; i++) {
-        const pane = document.getElementById(`pane-step-${i}`);
-        if (pane) pane.classList.toggle('active', i === step);
-
-        const node = document.getElementById(`node-step-${i}`);
-        if (node) {
-          node.classList.remove('active', 'completed');
-          if (i === step) {
-            node.classList.add('active');
-          } else if (i < step) {
-            node.classList.add('completed');
-          }
-        }
-      }
-
-      // Cập nhật thanh tiến trình %
-      const progressPercent = ((step - 1) / 3) * 100;
-      const progressBar = document.getElementById('wizard-progress-bar');
-      if (progressBar) progressBar.style.width = `${progressPercent}%`;
-
-      // Cập nhật nhãn text bước
-      const stepIndicator = document.getElementById('step-indicator-text');
-      if (stepIndicator) stepIndicator.textContent = `Bước ${step} / 4`;
-
-      // Đồng bộ thông tin khi vào từng bước
-      const memberVal = document.getElementById('wizard_member_name').value;
-      const dateVal = document.getElementById('wizard_leave_date').value;
-      const reasonVal = document.getElementById('wizard_leave_reason').value;
-
-      if (step === 2) {
-        const step2Display = document.getElementById('step2-member-display');
-        if (step2Display) step2Display.textContent = memberVal;
-        updateStep2Hint();
-      }
-
-      if (step === 4) {
-        // Tóm tắt
-        const sumMember = document.getElementById('summary-member');
-        const sumDate = document.getElementById('summary-date');
-        const sumReason = document.getElementById('summary-reason');
-        
-        // Format hiển thị ngày dd/mm/yyyy
-        let displayDate = dateVal;
-        try {
-          const parts = dateVal.split('-');
-          displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-        } catch(e) {}
-
-        if (sumMember) sumMember.textContent = memberVal;
-        if (sumDate) sumDate.textContent = displayDate;
-        if (sumReason) sumReason.textContent = reasonVal;
-
-        // Sinh bảng thông báo trùng lịch chi tiết
-        buildStep4ConflictReport(memberVal, dateVal, displayDate);
-      }
-    }
-
-    function buildStep4ConflictReport(selectedMember, selectedDate, displayDate) {
-      const container = document.getElementById('step4-conflict-report');
-      if (!container) return;
 
       const existingOnDate = leavesByDate[selectedDate] || [];
+      // Lọc ra những người khác (không tính chính người này nếu họ sửa đơn)
       const otherMembers = existingOnDate.filter(item => item.member_name !== selectedMember);
 
       let html = '';
 
-      // 1. KIỂM TRA TRÙNG LỊCH NGHỈ VỚI ANH EM KHÁC
+      // 1. Kiểm tra TRÙNG NGÀY NGHỈ
       if (otherMembers.length > 0) {
         const firstPerson = otherMembers[0];
-        const timeNote = firstPerson.created_at ? ` (nộp lúc ${firstPerson.created_at})` : '';
+        const timeNote = firstPerson.created_at ? ` (gửi lúc ${firstPerson.created_at})` : '';
         const allNames = otherMembers.map(item => `<strong>${item.member_name}</strong>`).join(', ');
 
         html += `
-          <div class="alert-box alert-warning" style="border-left: 5px solid #dc2626; margin-bottom: 14px;">
-            <div style="font-size: 1rem; font-weight: 800; color: #991b1b; margin-bottom: 6px;">
-              ⚠️ CẢNH BÁO: PHÁT HIỆN TRÙNG LỊCH NGHỈ VỚI ANH EM!
-            </div>
-            <div style="font-size: 0.92rem; line-height: 1.5;">
-              • Ngày <strong>${displayDate}</strong> đã có <strong>${firstPerson.member_name} xin nghỉ trước</strong>${timeNote}.<br>
-              • Lý do của ${firstPerson.member_name}: <em>"${firstPerson.reason}"</em>.<br>
-              ${otherMembers.length > 1 ? `• Tất cả người đã xin nghỉ trước bạn: ${allNames}.<br>` : ''}
-              👉 <strong>KẾT QUẢ GHI NHẬN:</strong> Khi bạn bấm xác nhận, hệ thống sẽ lưu đơn của bạn và hiển thị bạn là <strong>người xin nghỉ sau</strong> (ngày này có ${otherMembers.length + 1} người nghỉ).
-            </div>
+          <div class="alert-box alert-warning" style="border-left: 5px solid #dc2626;">
+            ⚠️ <strong>CẢNH BÁO TRÙNG LỊCH NGHỈ:</strong><br>
+            • Ngày này <strong>${firstPerson.member_name}</strong> đã xin nghỉ trước${timeNote}!<br>
+            • Lý do của ${firstPerson.member_name}: <em>"${firstPerson.reason}"</em>.<br>
+            ${otherMembers.length > 1 ? `• Các anh em đã xin nghỉ: ${allNames}.<br>` : ''}
+            👉 <strong>LƯU Ý:</strong> Nếu bạn gửi đơn, trên bảng theo dõi sẽ ghi nhận bạn là <strong>người xin nghỉ sau</strong> (ngày này sẽ có ${otherMembers.length + 1} người cùng nghỉ).
           </div>
         `;
       } else {
         html += `
-          <div class="alert-box alert-success" style="border-left: 5px solid #16a34a; margin-bottom: 14px;">
-            <div style="font-size: 1rem; font-weight: 800; color: #166534; margin-bottom: 4px;">
-              ✅ TUYỆT VỜI: KHÔNG BỊ TRÙNG LỊCH NGHỈ
-            </div>
-            <div style="font-size: 0.9rem;">
-              Ngày <strong>${displayDate}</strong> hiện tại chưa có ai đăng ký xin nghỉ. Bạn là người đăng ký đầu tiên cho ngày này.
-            </div>
+          <div class="alert-box alert-success" style="padding: 8px 12px; margin-bottom: 10px;">
+            ✅ Ngày này hiện chưa có ai xin nghỉ (Tránh được trùng lịch).
           </div>
         `;
       }
 
-      // 2. KIỂM TRA TRÙNG LỊCH TRỰC NHẬT 7H30 SÁNG
+      // 2. Kiểm tra TRÙNG NGÀY TRỰC
       if (nonDutyStaff.includes(selectedMember)) {
         html += `
           <div class="alert-box" style="background: #fefce8; border: 1.5px solid #fde047; color: #854d0e;">
-            ℹ️ <strong>NHÂN SỰ KHÔNG TRỰC NHẬT:</strong><br>
-            Bạn thuộc nhóm không trực nhật sáng. Đơn xin nghỉ của bạn sẽ được lưu vào bảng theo dõi và lịch sử nghỉ của tiệm mà không làm gián đoạn ca trực nhật của 8 anh em.
+            ℹ️ <strong>NHÂN VIÊN KHÔNG TRỰC NHẬT:</strong><br>
+            Bạn thuộc nhóm không trực nhật vệ sinh sáng.<br>
+            Lịch xin nghỉ vẫn được ghi nhận vào bảng theo dõi và lưu lịch sử nghỉ của tiệm.
           </div>
         `;
       } else {
         const scheduledPerson = dutyByDate[selectedDate];
         if (scheduledPerson === selectedMember) {
           html += `
-            <div class="alert-box alert-info" style="border-left: 5px solid #2563eb;">
-              🔄 <strong>TRÙNG CA TRỰC NHẬT CỦA BẠN:</strong><br>
-              Ngày <strong>${displayDate}</strong> chính là lượt <strong>trực vệ sinh 7h30 sáng của bạn</strong>.<br>
-              ⚡ Khi bấm xác nhận, hệ thống sẽ <strong>tự động đôn người kế tiếp trong 8 người</strong> lên thay thế ca trực này giúp bạn.
-            </div>
-          `;
-        } else {
-          html += `
-            <div class="alert-box alert-info" style="background: #f8fafc; border: 1.5px solid #cbd5e1; color: #334155;">
-              🧹 <strong>LỊCH TRỰC NHẬT NGÀY NÀY:</strong><br>
-              Ngày <strong>${displayDate}</strong> người phụ trách trực 7h30 sáng là <strong>${scheduledPerson || '---'}</strong> (Bạn không bị trùng lịch trực của mình).
+            <div class="alert-box alert-info">
+              🔄 <strong>LƯU Ý CA TRỰC:</strong><br>
+              Ngày này đúng vào lượt <strong>trực vệ sinh 7h30 của bạn</strong>.<br>
+              Khi gửi đơn, hệ thống sẽ <strong>tự động đôn người tiếp theo</strong> lên trực thay.
             </div>
           `;
         }
       }
 
-      container.innerHTML = html;
+      alertContainer.innerHTML = html;
+      alertContainer.style.display = 'block';
     }
 
     // Đồng hồ thời gian thực Giờ Việt Nam (Asia/Ho_Chi_Minh - UTC+7)
@@ -1118,13 +661,14 @@
         if (clockEl) clockEl.textContent = timeFormatter.format(now);
         if (dateEl) dateEl.textContent = dateFormatter.format(now);
       } catch (e) {
+        // Fallback đơn giản nếu trình duyệt cũ
         const now = new Date();
         const clockEl = document.getElementById('vn-live-clock');
         if (clockEl) clockEl.textContent = now.toLocaleTimeString('vi-VN');
       }
     }
 
-    // Khởi tạo khi tải trang
+    // Khởi tạo tab khi tải trang theo URL hash hoặc server param
     window.addEventListener('DOMContentLoaded', () => {
       // Khởi động đồng hồ ngay lập tức và cập nhật mỗi giây
       updateVNClock();
@@ -1139,8 +683,8 @@
         switchTab('schedule');
       }
 
-      // Khởi động giao diện bước 1 của Wizard
-      renderStep(1);
+      // Kích hoạt kiểm tra ngay khi mở
+      checkLiveConflict();
     });
   </script>
 
