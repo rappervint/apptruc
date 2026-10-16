@@ -762,34 +762,52 @@
 
     <!-- Cài đặt ngày nghỉ của tiệm (dạng thu gọn collapsible) -->
     <details class="holiday-settings">
-      <summary>⚙️ Cài đặt ngày tiệm đóng cửa / Nghỉ lễ (Hỗ trợ chọn nhiều ngày liên tiếp)</summary>
+      <summary>
+        {% if is_admin %}
+          ⚙️ Cài đặt ngày tiệm đóng cửa / Nghỉ lễ (Quyền Admin)
+        {% else %}
+          🏢 Xem lịch ngày tiệm đóng cửa / Nghỉ lễ
+        {% endif %}
+      </summary>
       <div class="holiday-content">
-        <form action="/add-holiday" method="POST" style="margin-top: 16px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="form-group">
-              <label>Từ ngày:</label>
-              <input type="date" name="start_date" id="holiday_start_date" required onchange="syncHolidayEndDate()">
+        {% if is_admin %}
+          <form action="/add-holiday" method="POST" style="margin-top: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label>Từ ngày:</label>
+                <input type="date" name="start_date" id="holiday_start_date" required onchange="syncHolidayEndDate()">
+              </div>
+              <div class="form-group">
+                <label>Đến ngày (chọn nếu nghỉ nhiều ngày):</label>
+                <input type="date" name="end_date" id="holiday_end_date">
+              </div>
+            </div>
+            <div class="quick-chips" style="margin-top: -6px; margin-bottom: 12px;">
+              <span class="chip" onclick="setQuickHolidayRange(1)">Nghỉ 1 ngày</span>
+              <span class="chip" onclick="setQuickHolidayRange(2)">Nghỉ 2 ngày</span>
+              <span class="chip" onclick="setQuickHolidayRange(3)">Nghỉ 3 ngày</span>
+              <span class="chip" onclick="setQuickHolidayRange(4)">Nghỉ 4 ngày</span>
+              <span class="chip" onclick="setQuickHolidayRange(7)">Nghỉ Tết / 1 tuần (7 ngày)</span>
             </div>
             <div class="form-group">
-              <label>Đến ngày (chọn nếu nghỉ nhiều ngày):</label>
-              <input type="date" name="end_date" id="holiday_end_date">
+              <label>Lý do nghỉ (Tùy chọn):</label>
+              <input type="text" name="reason" placeholder="VD: Nghỉ Tết Âm Lịch, Du lịch công ty, Lễ 30/4 - 1/5...">
             </div>
+            <button type="submit" class="btn btn-dark" style="width: auto; padding: 10px 22px;">
+              ➕ Lưu Các Ngày Tiệm Nghỉ
+            </button>
+          </form>
+        {% else %}
+          <div style="padding: 12px 16px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; margin-top: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 0.88rem; color: #475569; display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.15rem;">🔒</span>
+              <span>Chỉ <strong>Quản trị viên (Admin)</strong> mới có quyền cài đặt hoặc xóa ngày tiệm đóng cửa.</span>
+            </div>
+            <button type="button" class="btn btn-light" style="padding: 5px 12px; font-size: 0.78rem; width: auto;" onclick="openAdminModal()">
+              🔑 Đăng nhập Admin
+            </button>
           </div>
-          <div class="quick-chips" style="margin-top: -6px; margin-bottom: 12px;">
-            <span class="chip" onclick="setQuickHolidayRange(1)">Nghỉ 1 ngày</span>
-            <span class="chip" onclick="setQuickHolidayRange(2)">Nghỉ 2 ngày</span>
-            <span class="chip" onclick="setQuickHolidayRange(3)">Nghỉ 3 ngày</span>
-            <span class="chip" onclick="setQuickHolidayRange(4)">Nghỉ 4 ngày</span>
-            <span class="chip" onclick="setQuickHolidayRange(7)">Nghỉ Tết / 1 tuần (7 ngày)</span>
-          </div>
-          <div class="form-group">
-            <label>Lý do nghỉ (Tùy chọn):</label>
-            <input type="text" name="reason" placeholder="VD: Nghỉ Tết Âm Lịch, Du lịch công ty, Lễ 30/4 - 1/5...">
-          </div>
-          <button type="submit" class="btn btn-dark" style="width: auto; padding: 10px 22px;">
-            ➕ Lưu Các Ngày Tiệm Nghỉ
-          </button>
-        </form>
+        {% endif %}
 
         {% if holidays_list %}
         <div style="margin-top: 22px; border-top: 1px dashed var(--border); padding-top: 16px;">
@@ -803,14 +821,24 @@
                 <strong style="color: #b91c1c;">📅 {{ h.holiday_date }}</strong>
                 <span style="color: #475569; font-size: 0.86rem; margin-left: 8px;">— {{ h.reason }}</span>
               </div>
+              {% if is_admin %}
               <form action="/remove-holiday" method="POST" style="margin: 0;" onsubmit="return confirm('Mở lại hoạt động cho ngày {{ h.holiday_date }}?')">
                 <input type="hidden" name="holiday_date" value="{{ h.holiday_date }}">
                 <button type="submit" class="cancel-btn" style="padding: 2px 8px; font-size: 0.74rem;">Xóa</button>
               </form>
+              {% else %}
+              <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 700; background: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">🔒 Đóng cửa</span>
+              {% endif %}
             </div>
             {% endfor %}
           </div>
         </div>
+        {% else %}
+          {% if not is_admin %}
+          <div style="text-align: center; padding: 16px; color: #94a3b8; font-size: 0.85rem;">
+            Hiện tiệm chưa có ngày nghỉ lễ hoặc đóng cửa nào sắp tới.
+          </div>
+          {% endif %}
         {% endif %}
       </div>
     </details>

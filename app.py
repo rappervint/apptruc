@@ -718,6 +718,10 @@ def cancel_leave():
 @app.route('/add-holiday', methods=['POST'])
 def add_holiday():
     cleanup_and_advance_checkpoint()
+    if not is_admin():
+        log_action('CẢNH BÁO', 'Người dùng cố gắng cài đặt ngày tiệm đóng cửa khi chưa đăng nhập Admin', actor='Người dùng')
+        return redirect(url_for('index', tab='schedule'))
+
     start_date_str = request.form.get('start_date') or request.form.get('holiday_date')
     end_date_str = request.form.get('end_date') or start_date_str
     reason = request.form.get('reason', '').strip() or 'Tiệm đóng cửa / Nghỉ lễ'
@@ -737,6 +741,7 @@ def add_holiday():
                     conn.execute('INSERT OR REPLACE INTO shop_holidays (holiday_date, reason) VALUES (?, ?)', 
                                  (cur_str, reason))
                 conn.commit()
+            log_action('CÀI ĐẶT NGHỈ TIỆM', f"Admin cài đặt tiệm đóng cửa từ {d_start.strftime('%d/%m/%Y')} đến {d_end.strftime('%d/%m/%Y')} ({num_days} ngày, lý do: '{reason}')", actor='Admin')
         except Exception:
             pass
             
@@ -745,11 +750,16 @@ def add_holiday():
 @app.route('/remove-holiday', methods=['POST'])
 def remove_holiday():
     cleanup_and_advance_checkpoint()
+    if not is_admin():
+        log_action('CẢNH BÁO', 'Người dùng cố gắng xóa ngày tiệm đóng cửa khi chưa đăng nhập Admin', actor='Người dùng')
+        return redirect(url_for('index', tab='schedule'))
+
     holiday_date = request.form.get('holiday_date')
     if holiday_date:
         with get_db() as conn:
             conn.execute('DELETE FROM shop_holidays WHERE holiday_date = ?', (holiday_date,))
             conn.commit()
+        log_action('MỞ LẠI TIỆM', f"Admin mở lại hoạt động ngày {holiday_date}", actor='Admin')
     return redirect(url_for('index', tab='schedule'))
 
 if __name__ == '__main__':
