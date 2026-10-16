@@ -811,8 +811,17 @@
 
         {% if holidays_list %}
         <div style="margin-top: 22px; border-top: 1px dashed var(--border); padding-top: 16px;">
-          <div style="font-size: 0.88rem; font-weight: 800; color: #1e293b; margin-bottom: 10px;">
-            📌 Danh sách các ngày tiệm đã cài đặt đóng cửa:
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 0.88rem; font-weight: 800; color: #1e293b;">
+              📌 Danh sách các ngày tiệm đã cài đặt đóng cửa ({{ holidays_list|length }} ngày):
+            </div>
+            {% if is_admin %}
+            <form action="/clear-all-holidays" method="POST" style="margin: 0;" onsubmit="return confirm('⚠️ CẢNH BÁO ADMIN: Bạn có chắc chắn muốn XÓA TẤT CẢ {{ holidays_list|length }} ngày đóng cửa của tiệm và mở lại hoạt động cho toàn bộ các ngày này không?')">
+              <button type="submit" class="cancel-btn" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 10px; font-size: 0.76rem; font-weight: 700; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Xóa toàn bộ các ngày nghỉ tiệm đang cài đặt">
+                🗑️ Xóa tất cả ({{ holidays_list|length }} ngày)
+              </button>
+            </form>
+            {% endif %}
           </div>
           <div style="display: flex; flex-direction: column; gap: 8px;">
             {% for h in holidays_list %}

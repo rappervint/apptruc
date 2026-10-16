@@ -762,5 +762,21 @@ def remove_holiday():
         log_action('MỞ LẠI TIỆM', f"Admin mở lại hoạt động ngày {holiday_date}", actor='Admin')
     return redirect(url_for('index', tab='schedule'))
 
+@app.route('/clear-all-holidays', methods=['POST'])
+def clear_all_holidays():
+    cleanup_and_advance_checkpoint()
+    if not is_admin():
+        log_action('CẢNH BÁO', 'Người dùng cố gắng xóa tất cả ngày tiệm đóng cửa khi chưa đăng nhập Admin', actor='Người dùng')
+        return redirect(url_for('index', tab='schedule'))
+
+    with get_db() as conn:
+        count_row = conn.execute('SELECT COUNT(*) as cnt FROM shop_holidays').fetchone()
+        cnt = count_row['cnt'] if count_row else 0
+        conn.execute('DELETE FROM shop_holidays')
+        conn.commit()
+        
+    log_action('XÓA TẤT CẢ NGHỈ TIỆM', f"Admin đã xóa toàn bộ {cnt} ngày đóng cửa của tiệm (mở lại toàn bộ lịch hoạt động)", actor='Admin')
+    return redirect(url_for('index', tab='schedule'))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
