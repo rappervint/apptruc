@@ -677,7 +677,12 @@ def remove_accents(input_str):
     return ''.join([c for c in nfkd if not unicodedata.combining(c)]).replace('đ', 'd').replace('Đ', 'D')
 
 def parse_with_rule_engine(text, today):
-    """Bộ phân tích ngôn ngữ tự nhiên Tiếng Việt tốc độ cao (0ms, không phụ thuộc server ngoài)"""
+    """Bộ phân tích ngôn ngữ tự nhiên Tiếng Việt tốc độ cao (0ms, không phụ thuộc server ngoài)
+    Hỗ trợ:
+    - 1 ngày cụ thể (25/10, ngày mai, thứ hai...)
+    - Khoảng ngày liên tiếp (từ 20/10 đến 23/10, nghỉ 3 ngày từ ngày mai...)
+    - Danh sách nhiều ngày (ngày 20, 22 và 25/10...)
+    """
     text_clean = text.strip()
     norm_text = remove_accents(text_clean.lower())
     
@@ -689,68 +694,156 @@ def parse_with_rule_engine(text, today):
             found_member = staff
             break
             
-    # 2. Tìm ngày nghỉ
-    found_date = None
-    # DD/MM/YYYY hoặc DD-MM-YYYY
-    m = re.search(r'(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})', norm_text)
-    if m:
+    # 2. Tìm ngày nghỉ (Trích xuất danh sách ngày: found_dates)
+    found_dates = []
+
+    # 2.1. Dạng khoảng ngày liên tiếp: "từ DD/MM/YYYY đến DD/MM/YYYY" hoặc "từ DD/MM đến DD/MM"
+    range_match = re.search(r'(?:tu|từ)\s*(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?\s*(?:den|đến|toi|tới|-)\s*(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', norm_text)
+    if range_match:
         try:
-            found_date = date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
-        except ValueError:
+            d1 = int(range_match.group(1))
+            m1 = int(range_match.group(2))
+            y1 = int(range_match.group(3)) if range_match.group(3) else today.year
+            
+            d2 = int(range_match.group(4))
+            m2 = int(range_match.group(5))
+            y2 = int(range_match.group(6)) if range_match.group(6) else y1
+            
+            start_d = date(y1, m1, d1)
+            end_d = date(y2, m2, d2)
+            if start_d > end_d:
+                start_d, end_d = end_d, start_d
+            
+            num_days = (end_d - start_d).days + 1
+            if 0 < num_days <= 31:
+                found_dates = [start_d + timedelta(days=i) for i in range(num_days)]
+        except Exception:
             pass
-            
-    # DD/MM hoặc DD-MM
-    if not found_date:
-        m = re.search(r'(\d{1,2})[/\-](\d{1,2})', norm_text)
+
+    # 2.2. Dạng "nghỉ N ngày từ..." (VD: "nghỉ 3 ngày từ 20/10", "nghỉ 2 ngày từ ngày mai")
+    if not found_dates:
+        n_days_match = re.search(r'ngh[i|y]\s*(\d{1,2})\s*ngay\s*(?:lien tiep)?\s*(?:tu|từ|bat dau tu)?\s*(.*)', norm_text)
+        if n_days_match:
+            try:
+                count_days = int(n_days_match.group(1))
+                tail = n_days_match.group(2)
+                base_d = None
+                
+                dm = re.search(r'(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', tail)
+                if dm:
+                    d_val = int(dm.group(1))
+                    m_val = int(dm.group(2))
+                    y_val = int(dm.group(3)) if dm.group(3) else today.year
+                    base_d = date(y_val, m_val, d_val)
+                elif re.search(r'\b(ngay mai|mai)\b', tail):
+                    base_d = today + timedelta(days=1)
+                elif re.search(r'\b(ngay mot|mot)\b', tail):
+                    base_d = today + timedelta(days=2)
+                elif re.search(r'\b(hom nay|nay)\b', tail):
+                    base_d = today
+
+                if base_d and 0 < count_days <= 31:
+                    found_dates = [base_d + timedelta(days=i) for i in range(count_days)]
+            except Exception:
+                pass
+
+    # 2.3. Dạng danh sách các ngày cách nhau (VD: "20/10, 22/10 và 25/10" hoặc "20, 22 và 25/10")
+    if not found_dates:
+        # Nhóm ngày chung tháng: "ngày 20, 22 và 25/10" hoặc "20, 22, 25/10"
+        m_group = re.search(r'((?:\d{1,2}(?:\s*,\s*|\s+va\s+|\s+voi\s+))+\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', norm_text)
+        if m_group:
+            try:
+                days = [int(x) for x in re.findall(r'\b\d{1,2}\b', m_group.group(1))]
+                m_val = int(m_group.group(2))
+                y = int(m_group.group(3)) if m_group.group(3) else today.year
+                for d in days:
+                    d_obj = date(y, m_val, d)
+                    if d_obj not in found_dates:
+                        found_dates.append(d_obj)
+            except Exception:
+                pass
+
+        # Tìm tất cả các pattern ngày DD/MM hoặc DD/MM/YYYY đầy đủ
+        if not found_dates:
+            date_matches = list(re.finditer(r'(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', norm_text))
+            if len(date_matches) > 1:
+                for dm in date_matches:
+                    try:
+                        d = int(dm.group(1))
+                        m_val = int(dm.group(2))
+                        y = int(dm.group(3)) if dm.group(3) else today.year
+                        d_obj = date(y, m_val, d)
+                        if d_obj not in found_dates:
+                            found_dates.append(d_obj)
+                    except ValueError:
+                        pass
+
+    # 2.4. Nếu vẫn chưa có danh sách, tìm ngày đơn lẻ (DD/MM/YYYY, DD/MM, ngày mai, thứ trong tuần)
+    if not found_dates:
+        single_date = None
+        # DD/MM/YYYY
+        m = re.search(r'(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})', norm_text)
         if m:
             try:
-                d = int(m.group(1))
-                m_val = int(m.group(2))
-                y = today.year
-                d_obj = date(y, m_val, d)
-                if d_obj < today and m_val < today.month:
-                    d_obj = date(y + 1, m_val, d)
-                found_date = d_obj
+                single_date = date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
             except ValueError:
                 pass
                 
-    # 'ngày DD tháng MM'
-    if not found_date:
-        m = re.search(r'ngay\s*(\d{1,2})\s*thang\s*(\d{1,2})', norm_text)
-        if m:
-            try:
-                found_date = date(today.year, int(m.group(2)), int(m.group(1)))
-            except ValueError:
-                pass
+        # DD/MM
+        if not single_date:
+            m = re.search(r'(\d{1,2})[/\-](\d{1,2})', norm_text)
+            if m:
+                try:
+                    d = int(m.group(1))
+                    m_val = int(m.group(2))
+                    y = today.year
+                    d_obj = date(y, m_val, d)
+                    if d_obj < today and m_val < today.month:
+                        d_obj = date(y + 1, m_val, d)
+                    single_date = d_obj
+                except ValueError:
+                    pass
+                    
+        # 'ngày DD tháng MM'
+        if not single_date:
+            m = re.search(r'ngay\s*(\d{1,2})\s*thang\s*(\d{1,2})', norm_text)
+            if m:
+                try:
+                    single_date = date(today.year, int(m.group(2)), int(m.group(1)))
+                except ValueError:
+                    pass
+                    
+        # Từ ngữ tương đối: hôm nay, mai, ngày mốt
+        if not single_date:
+            if re.search(r'\b(hom nay|nay|hom ni)\b', norm_text):
+                single_date = today
+            elif re.search(r'\b(ngay mai|mai)\b', norm_text):
+                single_date = today + timedelta(days=1)
+            elif re.search(r'\b(ngay mot|mot|ngay kia)\b', norm_text):
+                single_date = today + timedelta(days=2)
                 
-    # Từ ngữ tương đối: hôm nay, mai, ngày mốt
-    if not found_date:
-        if re.search(r'\b(hom nay|nay|hom ni)\b', norm_text):
-            found_date = today
-        elif re.search(r'\b(ngay mai|mai)\b', norm_text):
-            found_date = today + timedelta(days=1)
-        elif re.search(r'\b(ngay mot|mot|ngay kia)\b', norm_text):
-            found_date = today + timedelta(days=2)
+        # Thứ trong tuần
+        if not single_date:
+            weekdays = {
+                'thu 2': 0, 'thu hai': 0,
+                'thu 3': 1, 'thu ba': 1,
+                'thu 4': 2, 'thu tu': 2,
+                'thu 5': 3, 'thu nam': 3,
+                'thu 6': 4, 'thu sau': 4,
+                'thu 7': 5, 'thu bay': 5,
+                'chu nhat': 6, 'cn': 6
+            }
+            for w_str, w_num in weekdays.items():
+                if re.search(r'\b' + re.escape(w_str) + r'\b', norm_text):
+                    days_ahead = (w_num - today.weekday()) % 7
+                    if days_ahead == 0 or 'tuan sau' in norm_text:
+                        days_ahead += 7
+                    single_date = today + timedelta(days=days_ahead)
+                    break
+                    
+        if single_date:
+            found_dates = [single_date]
             
-    # Thứ trong tuần
-    if not found_date:
-        weekdays = {
-            'thu 2': 0, 'thu hai': 0,
-            'thu 3': 1, 'thu ba': 1,
-            'thu 4': 2, 'thu tu': 2,
-            'thu 5': 3, 'thu nam': 3,
-            'thu 6': 4, 'thu sau': 4,
-            'thu 7': 5, 'thu bay': 5,
-            'chu nhat': 6, 'cn': 6
-        }
-        for w_str, w_num in weekdays.items():
-            if re.search(r'\b' + re.escape(w_str) + r'\b', norm_text):
-                days_ahead = (w_num - today.weekday()) % 7
-                if days_ahead == 0 or 'tuan sau' in norm_text:
-                    days_ahead += 7
-                found_date = today + timedelta(days=days_ahead)
-                break
-                
     # 3. Trích xuất lý do
     found_reason = 'Việc cá nhân'
     kw_map = [
@@ -773,7 +866,8 @@ def parse_with_rule_engine(text, today):
             val = m.group(1).strip(' ,.:;-!?')
             found_reason = val[0].upper() + val[1:]
 
-    return found_member, found_date, found_reason
+    first_date = found_dates[0] if found_dates else None
+    return found_member, first_date, found_dates, found_reason
 
 _ollama_checked_time = 0
 _ollama_available = False
@@ -797,9 +891,9 @@ def is_ollama_online():
         return False
 
 def parse_with_ollama(text, today):
-    """Gửi yêu cầu tới Ollama nếu service đang hoạt động"""
+    """Gửi yêu cầu tới Ollama nếu service đang hoạt động (hỗ trợ nhiều ngày)"""
     if not is_ollama_online():
-        return None, None, None
+        return None, None, [], None
 
     prompt = f"""
 Bạn là trợ lý AI trích xuất thông tin xin nghỉ việc cho cửa hàng.
@@ -810,9 +904,10 @@ Tin nhắn của nhân viên: "{text}"
 Yêu cầu: Hãy phân tích và trả về DUY NHẤT một đối tượng JSON:
 {{
   "member_name": "Tên chính xác trong danh sách 10 nhân sự",
-  "leave_date": "YYYY-MM-DD",
+  "leave_dates": ["YYYY-MM-DD", ...],
   "reason": "Lý do xin nghỉ"
 }}
+Nếu là 1 ngày, leave_dates có 1 phần tử. Nếu là nhiều ngày liên tiếp hoặc nhiều ngày lẻ, trả về toàn bộ các ngày đó dạng mảng YYYY-MM-DD.
 Nếu không có tên hợp lệ hoặc ngày hợp lệ, trả về null.
 """
     try:
@@ -831,14 +926,22 @@ Nếu không có tên hợp lệ hoặc ngày hợp lệ, trả về null.
             data = json.loads(resp.read().decode('utf-8'))
             res_json = json.loads(data.get('response', '{}'))
             m_name = res_json.get('member_name')
-            l_date = res_json.get('leave_date')
+            l_dates_raw = res_json.get('leave_dates') or ([res_json.get('leave_date')] if res_json.get('leave_date') else [])
             reason = res_json.get('reason') or 'Việc cá nhân'
-            if m_name in ALL_STAFF and l_date:
-                d_obj = datetime.strptime(l_date, '%Y-%m-%d').date()
-                return m_name, d_obj, reason
+            
+            parsed_dates = []
+            for ld in l_dates_raw:
+                try:
+                    parsed_dates.append(datetime.strptime(ld, '%Y-%m-%d').date())
+                except Exception:
+                    pass
+
+            if m_name in ALL_STAFF and parsed_dates:
+                first_d = parsed_dates[0]
+                return m_name, first_d, parsed_dates, reason
     except Exception:
         pass
-    return None, None, None
+    return None, None, [], None
 
 def ai_parse_message(text):
     """
@@ -848,15 +951,15 @@ def ai_parse_message(text):
     """
     today = get_vn_today()
     # 1. Thử Ollama trước
-    m_name, d_obj, reason = parse_with_ollama(text, today)
+    m_name, first_d, found_dates, reason = parse_with_ollama(text, today)
     engine = f"Ollama ({OLLAMA_MODEL})"
     
     # 2. Fallback sang Rule-based NLP nếu Ollama không phản hồi
-    if not m_name or not d_obj:
-        m_name, d_obj, reason = parse_with_rule_engine(text, today)
+    if not m_name or not found_dates:
+        m_name, first_d, found_dates, reason = parse_with_rule_engine(text, today)
         engine = "Trợ lý AI Tiếng Việt"
         
-    return m_name, d_obj, reason, engine
+    return m_name, first_d, found_dates, reason, engine
 
 @app.route('/api/ai-parse-leave', methods=['POST'])
 def api_ai_parse_leave():
@@ -1166,14 +1269,16 @@ def api_ai_chat_schedule():
 
     # Nếu câu có dấu hiệu báo nghỉ và không phải là câu hỏi tra cứu thông thường
     if is_leave_statement and not is_question:
-        m_name, d_obj, reason, engine = ai_parse_message(question)
-        if m_name and d_obj:
+        m_name, first_d, found_dates, reason, engine = ai_parse_message(question)
+        if m_name and found_dates:
             today = get_vn_today()
-            if d_obj < today:
+            # Lọc các ngày từ hôm nay trở đi
+            valid_dates = [d for d in found_dates if d >= today]
+            if not valid_dates:
                 return jsonify({
                     'success': True,
                     'is_leave_intent': False,
-                    'answer': f"⚠️ Ngày <strong>{d_obj.strftime('%d/%m/%Y')}</strong> đã ở trong quá khứ nên không thể đăng ký xin nghỉ được nữa.",
+                    'answer': f"⚠️ Các ngày bạn yêu cầu đều đã ở trong quá khứ nên không thể đăng ký xin nghỉ được nữa.",
                     'engine': engine
                 })
 
@@ -1181,48 +1286,62 @@ def api_ai_chat_schedule():
                 'Monday': 'Thứ Hai', 'Tuesday': 'Thứ Ba', 'Wednesday': 'Thứ Tư',
                 'Thursday': 'Thứ Năm', 'Friday': 'Thứ Sáu', 'Saturday': 'Thứ Bảy', 'Sunday': 'Chủ Nhật'
             }
-            d_str = d_obj.strftime('%Y-%m-%d')
-            disp_date = d_obj.strftime('%d/%m/%Y')
-            w_str = weekday_vn.get(d_obj.strftime('%A'), '')
-
-            # Kiểm tra xem chính người này hoặc ai khác đã xin nghỉ vào ngày này chưa
+            
+            leave_dates_str = [d.strftime('%Y-%m-%d') for d in valid_dates]
+            display_dates = [f"{d.strftime('%d/%m/%Y')} ({weekday_vn.get(d.strftime('%A'), '')})" for d in valid_dates]
+            
+            # Kiểm tra xung đột và lịch đóng cửa cho từng ngày
+            conflict_notes = []
+            has_any_conflict = False
+            
             with get_db() as conn:
-                my_existing = conn.execute(
-                    'SELECT reason, created_at FROM leaves WHERE leave_date = ? AND member_name = ?',
-                    (d_str, m_name)
-                ).fetchone()
-                existing_leaves = conn.execute(
-                    'SELECT member_name, reason, created_at FROM leaves WHERE leave_date = ? AND member_name != ?',
-                    (d_str, m_name)
-                ).fetchall()
-                holiday_match = conn.execute(
-                    'SELECT reason FROM shop_holidays WHERE holiday_date = ?',
-                    (d_str,)
-                ).fetchone()
+                for d, d_str, disp in zip(valid_dates, leave_dates_str, display_dates):
+                    my_existing = conn.execute(
+                        'SELECT reason FROM leaves WHERE leave_date = ? AND member_name = ?',
+                        (d_str, m_name)
+                    ).fetchone()
+                    existing_leaves = conn.execute(
+                        'SELECT member_name, reason FROM leaves WHERE leave_date = ? AND member_name != ?',
+                        (d_str, m_name)
+                    ).fetchall()
+                    holiday_match = conn.execute(
+                        'SELECT reason FROM shop_holidays WHERE holiday_date = ?',
+                        (d_str,)
+                    ).fetchone()
 
-            has_conflict = len(existing_leaves) > 0
-            conflict_note = ""
-            if holiday_match:
-                conflict_note = f"⚠️ Lưu ý: Ngày {disp_date} tiệm đang có lịch đóng cửa ({holiday_match['reason']})."
-            elif my_existing:
-                conflict_note = f"ℹ️ Bạn đã đăng ký nghỉ ngày {disp_date} trước đó (Lý do cũ: <em>\"{my_existing['reason']}\"</em>). Nếu xác nhận, hệ thống sẽ cập nhật lý do mới thành: <em>\"{reason}\"</em>."
-            elif has_conflict:
-                first_p = existing_leaves[0]
-                conflict_note = f"⚠️ Lưu ý: Ngày {disp_date} đã có <strong>{first_p['member_name']}</strong> xin nghỉ trước! (Nếu nộp bạn sẽ là người nghỉ thứ {len(existing_leaves)+1})."
+                    if holiday_match:
+                        conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: 🏢 Tiệm đóng cửa ({holiday_match['reason']}).")
+                    elif my_existing:
+                        conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: ℹ️ Bạn đã đăng ký trước đó (Lý do cũ: <em>\"{my_existing['reason']}\"</em>) ➔ Sẽ cập nhật lý do mới.")
+                    elif existing_leaves:
+                        has_any_conflict = True
+                        names = ", ".join([f"<strong>{p['member_name']}</strong>" for p in existing_leaves])
+                        conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: ⚠️ Đã có {names} xin nghỉ trước.")
+
+            if not conflict_notes:
+                summary_note = f"✅ Toàn bộ {len(valid_dates)} ngày này hiện chưa có ai xin nghỉ (Tránh được trùng lịch)."
             else:
-                conflict_note = f"✅ Ngày {disp_date} hiện chưa có ai xin nghỉ (Tránh được trùng lịch)."
+                summary_note = "<br>".join(conflict_notes)
 
-            # Trả về kèm cấu trúc xác nhận tạo đơn ngay trong bong bóng chat
+            # Tạo text hiển thị tóm tắt
+            if len(valid_dates) == 1:
+                display_date = valid_dates[0].strftime('%d/%m/%Y')
+                weekday_info = weekday_vn.get(valid_dates[0].strftime('%A'), '')
+            else:
+                display_date = f"Từ {valid_dates[0].strftime('%d/%m/%Y')} đến {valid_dates[-1].strftime('%d/%m/%Y')}"
+                weekday_info = f"{len(valid_dates)} ngày liên tiếp"
+
             return jsonify({
                 'success': True,
                 'is_leave_intent': True,
                 'member_name': m_name,
-                'leave_date': d_str,
-                'display_date': disp_date,
-                'weekday_vn': w_str,
+                'leave_date': leave_dates_str[0], # ngày đầu tiên
+                'leave_dates': leave_dates_str,   # toàn bộ danh sách ngày
+                'display_date': display_date,
+                'weekday_vn': weekday_info,
                 'reason': reason,
-                'has_conflict': has_conflict,
-                'conflict_note': conflict_note,
+                'has_conflict': has_any_conflict,
+                'conflict_note': summary_note,
                 'engine': engine
             })
 
@@ -1237,61 +1356,95 @@ def api_ai_chat_schedule():
 
 @app.route('/api/ai-confirm-leave', methods=['POST'])
 def api_ai_confirm_leave():
-    """Tạo đơn xin nghỉ trực tiếp từ bong bóng chat AI"""
+    """Tạo đơn xin nghỉ trực tiếp từ bong bóng chat AI (Hỗ trợ 1 ngày hoặc nhiều ngày liên tiếp)"""
     cleanup_and_advance_checkpoint()
     data = request.get_json(silent=True) or request.form
-    leave_date = (data.get('leave_date') or '').strip()
     member_name = (data.get('member_name') or '').strip()
     reason = (data.get('reason') or '').strip() or 'Việc cá nhân'
     created_at = get_vn_now().strftime('%Y-%m-%d %H:%M:%S')
 
-    today_str = get_vn_today().strftime('%Y-%m-%d')
-    if not leave_date or leave_date < today_str:
-        return jsonify({'success': False, 'error': 'Ngày xin nghỉ không hợp lệ hoặc đã qua.'})
     if member_name not in ALL_STAFF:
         return jsonify({'success': False, 'error': f'Nhân viên "{member_name}" không thuộc danh sách nhân sự.'})
 
-    with get_db() as conn:
-        conn.execute('''
-            INSERT INTO leaves (leave_date, member_name, reason, created_at)
-            VALUES (?, ?, ?, ?)
-            ON CONFLICT(leave_date, member_name) DO UPDATE SET
-                reason = excluded.reason
-        ''', (leave_date, member_name, reason, created_at))
-        conn.commit()
+    # Hỗ trợ nhận mảng leave_dates hoặc leave_date đơn lẻ
+    leave_dates = data.get('leave_dates')
+    if isinstance(leave_dates, str):
+        try:
+            leave_dates = json.loads(leave_dates)
+        except Exception:
+            leave_dates = [leave_dates]
+    if not leave_dates:
+        single_date = (data.get('leave_date') or '').strip()
+        leave_dates = [single_date] if single_date else []
 
-    actor_name = f"Admin ({member_name})" if is_admin() else member_name
-    log_action('XIN NGHỈ (AI CHAT)', f"{member_name} đăng ký xin nghỉ ngày {leave_date} qua Trợ lý AI (Lý do: '{reason}')", actor=actor_name)
-
-    return jsonify({
-        'success': True,
-        'member_name': member_name,
-        'leave_date': leave_date,
-        'reason': reason,
-        'message': f"Đã ghi nhận thành công đơn xin nghỉ của {member_name}!"
-    })
-
-@app.route('/report-leave', methods=['POST'])
-def report_leave():
-    cleanup_and_advance_checkpoint()
-    leave_date = request.form.get('leave_date')
-    member_name = request.form.get('member_name')
-    reason = request.form.get('reason', '').strip() or 'Việc cá nhân'
-    created_at = get_vn_now().strftime('%Y-%m-%d %H:%M:%S')
-    
     today_str = get_vn_today().strftime('%Y-%m-%d')
-    if leave_date and leave_date >= today_str and member_name in ALL_STAFF:
-        with get_db() as conn:
+    valid_dates = [d for d in leave_dates if d and d >= today_str]
+
+    if not valid_dates:
+        return jsonify({'success': False, 'error': 'Không có ngày xin nghỉ nào hợp lệ hoặc ngày đã qua.'})
+
+    with get_db() as conn:
+        for l_date in valid_dates:
             conn.execute('''
                 INSERT INTO leaves (leave_date, member_name, reason, created_at)
                 VALUES (?, ?, ?, ?)
                 ON CONFLICT(leave_date, member_name) DO UPDATE SET
                     reason = excluded.reason
-            ''', (leave_date, member_name, reason, created_at))
-            conn.commit()
+            ''', (l_date, member_name, reason, created_at))
+        conn.commit()
+
+    actor_name = f"Admin ({member_name})" if is_admin() else member_name
+    dates_desc = f"{len(valid_dates)} ngày ({', '.join(valid_dates)})" if len(valid_dates) > 1 else valid_dates[0]
+    log_action('XIN NGHỈ (AI CHAT)', f"{member_name} đăng ký xin nghỉ {dates_desc} qua Trợ lý AI (Lý do: '{reason}')", actor=actor_name)
+
+    return jsonify({
+        'success': True,
+        'member_name': member_name,
+        'leave_dates': valid_dates,
+        'reason': reason,
+        'message': f"Đã ghi nhận thành công {len(valid_dates)} ngày nghỉ của {member_name}!"
+    })
+
+@app.route('/report-leave', methods=['POST'])
+def report_leave():
+    cleanup_and_advance_checkpoint()
+    member_name = request.form.get('member_name')
+    start_date_str = request.form.get('leave_date')
+    end_date_str = request.form.get('end_date') or start_date_str
+    reason = request.form.get('reason', '').strip() or 'Việc cá nhân'
+    created_at = get_vn_now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    today_str = get_vn_today().strftime('%Y-%m-%d')
+    if start_date_str and member_name in ALL_STAFF:
+        try:
+            d_start = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            d_end = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else d_start
+            if d_end < d_start:
+                d_start, d_end = d_end, d_start
+                
+            num_days = (d_end - d_start).days + 1
+            num_days = min(num_days, 31) # Giới hạn tối đa 31 ngày một lần
             
-        actor_name = f"Admin ({member_name})" if is_admin() else member_name
-        log_action('XIN NGHỈ', f"{member_name} đăng ký xin nghỉ ngày {leave_date} (Lý do: '{reason}')", actor=actor_name)
+            with get_db() as conn:
+                saved_count = 0
+                for i in range(num_days):
+                    cur_d = d_start + timedelta(days=i)
+                    cur_str = cur_d.strftime('%Y-%m-%d')
+                    if cur_str >= today_str:
+                        conn.execute('''
+                            INSERT INTO leaves (leave_date, member_name, reason, created_at)
+                            VALUES (?, ?, ?, ?)
+                            ON CONFLICT(leave_date, member_name) DO UPDATE SET
+                                reason = excluded.reason
+                        ''', (cur_str, member_name, reason, created_at))
+                        saved_count += 1
+                conn.commit()
+                
+            actor_name = f"Admin ({member_name})" if is_admin() else member_name
+            dates_info = f"từ {d_start.strftime('%d/%m/%Y')} đến {d_end.strftime('%d/%m/%Y')} ({saved_count} ngày)" if num_days > 1 else f"ngày {start_date_str}"
+            log_action('XIN NGHỈ', f"{member_name} đăng ký xin nghỉ {dates_info} (Lý do: '{reason}')", actor=actor_name)
+        except Exception:
+            pass
             
     return redirect(url_for('index', tab='leaves'))
 

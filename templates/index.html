@@ -1031,14 +1031,22 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label>Chọn ngày xin nghỉ:</label>
-          <input type="date" name="leave_date" id="leave_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" required onchange="checkLiveConflict()">
-          <div class="quick-chips" style="margin-top: 6px;">
-            <span class="chip" onclick="setQuickLeaveDate(0)">Hôm nay</span>
-            <span class="chip" onclick="setQuickLeaveDate(1)">Ngày mai</span>
-            <span class="chip" onclick="setQuickLeaveDate(2)">Ngày mốt</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Từ ngày:</label>
+            <input type="date" name="leave_date" id="leave_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" required onchange="syncLeaveEndDate(); checkLiveConflict();">
           </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Đến ngày (tùy chọn):</label>
+            <input type="date" name="end_date" id="leave_end_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" onchange="checkLiveConflict();">
+          </div>
+        </div>
+        <div class="quick-chips" style="margin-top: 6px; margin-bottom: 14px;">
+          <span class="chip" onclick="setQuickLeaveDays(1)">1 ngày</span>
+          <span class="chip" onclick="setQuickLeaveDays(2)">2 ngày liên tiếp</span>
+          <span class="chip" onclick="setQuickLeaveDays(3)">3 ngày liên tiếp</span>
+          <span class="chip" onclick="setQuickLeaveOffset(1, 1)">Ngày mai</span>
+          <span class="chip" onclick="setQuickLeaveOffset(2, 1)">Ngày mốt</span>
         </div>
 
         <div class="form-group">
@@ -1184,6 +1192,11 @@
     const leavesByDate = {{ leaves_by_date | tojson }};
     const dutyByDate = {{ duty_by_date | tojson }};
     const nonDutyStaff = {{ non_duty_staff | tojson }};
+    const holidaysByDate = {
+      {% for h in holidays_list %}
+        "{{ h.holiday_date }}": "{{ (h.reason or 'Tiệm nghỉ') | replace('"', '\\"') }}",
+      {% endfor %}
+    };
 
     function switchTab(tabName) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -1278,6 +1291,11 @@
         if (data.is_leave_intent) {
           // Thẻ xác nhận tạo đơn xin nghỉ ngay trong khung chat
           const conflictStyle = data.has_conflict ? 'background:#fffbeb; border:1px solid #fde68a;' : 'background:#ecfdf5; border:1px solid #a7f3d0;';
+          const datesPayload = encodeURIComponent(JSON.stringify(data.leave_dates || [data.leave_date]));
+          const btnLabel = (data.leave_dates && data.leave_dates.length > 1)
+            ? `🚀 Xác Nhận Tạo ${data.leave_dates.length} Ngày Luôn`
+            : '🚀 Xác Nhận Tạo Luôn';
+
           aiBubble.innerHTML = `
             <span>🤖</span>
             <div style="background: #ffffff; border: 1.5px solid #93c5fd; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #1e293b; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.06); max-width: 92%;">
@@ -1287,15 +1305,15 @@
               </div>
               <div style="margin-bottom: 6px;">
                 • Nhân viên: <strong style="color: #2563eb;">${data.member_name}</strong><br>
-                • Ngày nghỉ: <strong>${data.display_date}</strong> (${data.weekday_vn})<br>
+                • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: #64748b;">(${data.weekday_vn})</span><br>
                 • Lý do: <em>"${data.reason}"</em>
               </div>
               <div style="padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; font-size: 0.78rem; ${conflictStyle}">
                 ${data.conflict_note}
               </div>
               <div style="display: flex; gap: 6px;">
-                <button type="button" onclick="confirmLeaveFromChat('${data.member_name}', '${data.leave_date}', '${encodeURIComponent(data.reason)}', this)" style="flex: 1; padding: 7px 10px; font-size: 0.8rem; background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                  🚀 Xác Nhận Tạo Luôn
+                <button type="button" onclick="confirmLeaveFromChat('${data.member_name}', '${datesPayload}', '${encodeURIComponent(data.reason)}', this)" style="flex: 1; padding: 7px 10px; font-size: 0.8rem; background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                  ${btnLabel}
                 </button>
               </div>
             </div>
@@ -1326,8 +1344,16 @@
       }
     }
 
-    async function confirmLeaveFromChat(member, leaveDate, reasonEncoded, btnEl) {
+    async function confirmLeaveFromChat(member, datesJsonEncoded, reasonEncoded, btnEl) {
       const reason = decodeURIComponent(reasonEncoded);
+      let leaveDates = [];
+      try {
+        leaveDates = JSON.parse(decodeURIComponent(datesJsonEncoded));
+      } catch (e) {
+        leaveDates = [datesJsonEncoded];
+      }
+      if (!Array.isArray(leaveDates)) leaveDates = [leaveDates];
+
       if (btnEl) {
         btnEl.disabled = true;
         btnEl.innerHTML = '⏳ Đang lưu...';
@@ -1339,7 +1365,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             member_name: member,
-            leave_date: leaveDate,
+            leave_dates: leaveDates,
             reason: reason
           })
         });
@@ -1351,9 +1377,10 @@
             btnEl.parentNode.innerHTML = `<span style="font-size: 0.8rem; color: #16a34a; font-weight: 700;">✅ Đã tạo đơn thành công!</span>`;
           }
           if (container) {
+            const countStr = leaveDates.length > 1 ? `${leaveDates.length} ngày` : `ngày ${leaveDates[0]}`;
             const successBubble = document.createElement('div');
             successBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
-            successBubble.innerHTML = `<span>🎉</span><div style="background: #f0fdf4; border: 1px solid #86efac; padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; color: #166534;"><strong>Đã ghi nhận thành công!</strong> Ca nghỉ của <strong>${member}</strong> ngày <strong>${leaveDate}</strong> đã được thêm vào hệ thống.<br><small style="color: #15803d;">Đang tự động làm mới trang...</small></div>`;
+            successBubble.innerHTML = `<span>🎉</span><div style="background: #f0fdf4; border: 1px solid #86efac; padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; color: #166534;"><strong>Đã ghi nhận thành công!</strong> Ca nghỉ (${countStr}) của <strong>${member}</strong> đã được thêm vào hệ thống.<br><small style="color: #15803d;">Đang tự động làm mới trang...</small></div>`;
             container.appendChild(successBubble);
             container.scrollTop = container.scrollHeight;
           }
@@ -1376,7 +1403,36 @@
       }
     }
 
-    function setQuickLeaveDate(offset) {
+    function getDatesInRange(startStr, endStr) {
+      const dates = [];
+      const [sy, sm, sd] = startStr.split('-').map(Number);
+      const [ey, em, ed] = endStr.split('-').map(Number);
+      let cur = new Date(sy, sm - 1, sd);
+      const end = new Date(ey, em - 1, ed);
+      let count = 0;
+      while (cur <= end && count < 31) {
+        const y = cur.getFullYear();
+        const m = String(cur.getMonth() + 1).padStart(2, '0');
+        const d = String(cur.getDate()).padStart(2, '0');
+        dates.push(`${y}-${m}-${d}`);
+        cur.setDate(cur.getDate() + 1);
+        count++;
+      }
+      return dates;
+    }
+
+    function syncLeaveEndDate() {
+      const startDateInput = document.getElementById('leave_date_input');
+      const endDateInput = document.getElementById('leave_end_date_input');
+      if (startDateInput && endDateInput) {
+        endDateInput.min = startDateInput.value;
+        if (!endDateInput.value || endDateInput.value < startDateInput.value) {
+          endDateInput.value = startDateInput.value;
+        }
+      }
+    }
+
+    function setQuickLeaveOffset(offset, daysCount = 1) {
       const now = new Date();
       now.setDate(now.getDate() + offset);
       const yyyy = now.getFullYear();
@@ -1385,8 +1441,40 @@
       const dateInput = document.getElementById('leave_date_input');
       if (dateInput) {
         dateInput.value = `${yyyy}-${mm}-${dd}`;
-        checkLiveConflict();
       }
+      setQuickLeaveDays(daysCount);
+    }
+
+    function setQuickLeaveDate(offset) {
+      setQuickLeaveOffset(offset, 1);
+    }
+
+    function setQuickLeaveDays(daysCount) {
+      const startDateInput = document.getElementById('leave_date_input');
+      const endDateInput = document.getElementById('leave_end_date_input');
+      if (!startDateInput || !endDateInput) return;
+
+      let baseDate;
+      if (startDateInput.value) {
+        const parts = startDateInput.value.split('-').map(Number);
+        baseDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      } else {
+        baseDate = new Date();
+        const yyyy = baseDate.getFullYear();
+        const mm = String(baseDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(baseDate.getDate()).padStart(2, '0');
+        startDateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+
+      const targetDate = new Date(baseDate);
+      targetDate.setDate(targetDate.getDate() + (daysCount - 1));
+
+      const y = targetDate.getFullYear();
+      const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const d = String(targetDate.getDate()).padStart(2, '0');
+      endDateInput.value = `${y}-${m}-${d}`;
+      endDateInput.min = startDateInput.value;
+      checkLiveConflict();
     }
 
     function syncHolidayEndDate() {
@@ -1424,67 +1512,124 @@
 
     function checkLiveConflict() {
       const dateInput = document.getElementById('leave_date_input');
+      const endDateInput = document.getElementById('leave_end_date_input');
       const memberSelect = document.getElementById('member_select');
       const alertContainer = document.getElementById('live-alert-container');
 
       if (!dateInput || !memberSelect || !alertContainer) return;
 
-      const selectedDate = dateInput.value;
+      const startDateStr = dateInput.value;
+      let endDateStr = (endDateInput && endDateInput.value) ? endDateInput.value : startDateStr;
       const selectedMember = memberSelect.value;
 
-      if (!selectedDate) {
+      if (!startDateStr) {
         alertContainer.style.display = 'none';
         return;
       }
 
-      const existingOnDate = leavesByDate[selectedDate] || [];
-      const otherMembers = existingOnDate.filter(item => item.member_name !== selectedMember);
+      if (endDateStr < startDateStr) {
+        endDateStr = startDateStr;
+      }
+
+      const dateList = getDatesInRange(startDateStr, endDateStr);
+      if (dateList.length === 0) dateList.push(startDateStr);
+
+      const conflicts = [];
+      const dutyNotes = [];
+      const holidayNotes = [];
+
+      dateList.forEach(dStr => {
+        // 1. Kiểm tra ngày tiệm nghỉ
+        if (typeof holidaysByDate !== 'undefined' && holidaysByDate[dStr]) {
+          holidayNotes.push({ date: dStr, reason: holidaysByDate[dStr] });
+        }
+
+        // 2. Kiểm tra người khác đã xin nghỉ
+        const existingOnDate = leavesByDate[dStr] || [];
+        const otherMembers = existingOnDate.filter(item => item.member_name !== selectedMember);
+        if (otherMembers.length > 0) {
+          conflicts.push({
+            date: dStr,
+            others: otherMembers
+          });
+        }
+
+        // 3. Kiểm tra trùng ca trực vệ sinh
+        if (!nonDutyStaff.includes(selectedMember)) {
+          if (dutyByDate[dStr] === selectedMember) {
+            dutyNotes.push(dStr);
+          }
+        }
+      });
 
       let html = '';
 
-      // 1. Kiểm tra TRÙNG NGÀY NGHỈ
-      if (otherMembers.length > 0) {
-        const firstPerson = otherMembers[0];
-        const timeNote = firstPerson.created_at ? ` (gửi lúc ${firstPerson.created_at})` : '';
-        const allNames = otherMembers.map(item => `<strong>${item.member_name}</strong>`).join(', ');
-
+      // Tóm tắt số ngày đăng ký
+      if (dateList.length > 1) {
+        const dStartFmt = dateList[0].split('-').reverse().join('/');
+        const dEndFmt = dateList[dateList.length - 1].split('-').reverse().join('/');
         html += `
-          <div class="alert-box alert-warning" style="border-left: 5px solid #dc2626;">
-            ⚠️ <strong>CẢNH BÁO TRÙNG LỊCH NGHỈ:</strong><br>
-            • Ngày này <strong>${firstPerson.member_name}</strong> đã xin nghỉ trước${timeNote}!<br>
-            • Lý do của ${firstPerson.member_name}: <em>"${firstPerson.reason}"</em>.<br>
-            ${otherMembers.length > 1 ? `• Các anh em đã xin nghỉ: ${allNames}.<br>` : ''}
-            👉 <strong>LƯU Ý:</strong> Nếu bạn gửi đơn, trên bảng theo dõi sẽ ghi nhận bạn là <strong>người xin nghỉ sau</strong> (ngày này sẽ có ${otherMembers.length + 1} người cùng nghỉ).
-          </div>
-        `;
-      } else {
-        html += `
-          <div class="alert-box alert-success" style="padding: 10px 14px; margin-bottom: 14px;">
-            ✅ Ngày này hiện chưa có ai xin nghỉ (Tránh được trùng lịch).
+          <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-weight: 600; font-size: 0.9rem;">
+            📅 Đang chọn xin nghỉ <strong>${dateList.length} ngày liên tiếp</strong> (từ <strong>${dStartFmt}</strong> đến <strong>${dEndFmt}</strong>)
           </div>
         `;
       }
 
-      // 2. Kiểm tra TRÙNG NGÀY TRỰC
+      // 1. CẢNH BÁO TRÙNG LỊCH NGHỈ
+      if (conflicts.length > 0) {
+        let conflictDetails = conflicts.map(c => {
+          const dFmt = c.date.split('-').reverse().slice(0, 2).join('/');
+          const names = c.others.map(o => `<strong>${o.member_name}</strong> (lý do: <em>"${o.reason}"</em>)`).join(', ');
+          return `• Ngày <strong>${dFmt}</strong>: ${names}`;
+        }).join('<br>');
+
+        html += `
+          <div class="alert-box alert-warning" style="border-left: 5px solid #dc2626; margin-bottom: 12px;">
+            ⚠️ <strong>CẢNH BÁO TRÙNG LỊCH NGHỈ:</strong><br>
+            ${conflictDetails}<br>
+            👉 <strong>LƯU Ý:</strong> Nếu bạn gửi đơn, bạn sẽ là <strong>người xin nghỉ sau</strong> vào các ngày trên.
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="alert-box alert-success" style="padding: 10px 14px; margin-bottom: 12px;">
+            ✅ ${dateList.length > 1 ? 'Tất cả các ngày đã chọn' : 'Ngày này'} hiện chưa có ai xin nghỉ (Tránh được trùng lịch).
+          </div>
+        `;
+      }
+
+      // 2. LƯU Ý CA TRỰC
       if (nonDutyStaff.includes(selectedMember)) {
         html += `
-          <div class="alert-box" style="background: #fefce8; border: 1.5px solid #fde047; color: #854d0e;">
+          <div class="alert-box" style="background: #fefce8; border: 1.5px solid #fde047; color: #854d0e; margin-bottom: 12px;">
             ℹ️ <strong>NHÂN VIÊN KHÔNG TRỰC NHẬT:</strong><br>
             Bạn thuộc nhóm không trực nhật vệ sinh sáng.<br>
             Lịch xin nghỉ vẫn được ghi nhận vào bảng theo dõi và lưu lịch sử nghỉ của tiệm.
           </div>
         `;
-      } else {
-        const scheduledPerson = dutyByDate[selectedDate];
-        if (scheduledPerson === selectedMember) {
-          html += `
-            <div class="alert-box alert-info">
-              🔄 <strong>LƯU Ý CA TRỰC:</strong><br>
-              Ngày này đúng vào lượt <strong>trực vệ sinh 7h30 của bạn</strong>.<br>
-              Khi gửi đơn, hệ thống sẽ <strong>tự động đôn người tiếp theo</strong> lên trực thay.
-            </div>
-          `;
-        }
+      } else if (dutyNotes.length > 0) {
+        const dutyDatesFmt = dutyNotes.map(d => d.split('-').reverse().slice(0, 2).join('/')).join(', ');
+        html += `
+          <div class="alert-box alert-info" style="margin-bottom: 12px;">
+            🔄 <strong>LƯU Ý CA TRỰC:</strong><br>
+            ${dutyNotes.length > 1 ? `Các ngày <strong>${dutyDatesFmt}</strong>` : `Ngày <strong>${dutyDatesFmt}</strong>`} đúng vào lượt <strong>trực vệ sinh 7h30 của bạn</strong>.<br>
+            Khi gửi đơn, hệ thống sẽ <strong>tự động đôn người tiếp theo</strong> lên trực thay.
+          </div>
+        `;
+      }
+
+      // 3. LƯU Ý TIỆM NGHỈ
+      if (holidayNotes.length > 0) {
+        const hDetails = holidayNotes.map(h => {
+          const dFmt = h.date.split('-').reverse().slice(0, 2).join('/');
+          return `• <strong>${dFmt}</strong>: Tiệm đóng cửa (${h.reason})`;
+        }).join('<br>');
+        html += `
+          <div class="alert-box" style="background: #f1f5f9; border: 1.5px solid #cbd5e1; color: #334155; margin-bottom: 12px;">
+            🏢 <strong>LƯU Ý NGÀY TIỆM NGHỈ:</strong><br>
+            ${hDetails}
+          </div>
+        `;
       }
 
       alertContainer.innerHTML = html;
