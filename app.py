@@ -698,7 +698,7 @@ def parse_with_rule_engine(text, today):
     found_dates = []
 
     # 2.1. Dạng khoảng ngày liên tiếp: "từ [ngày] D1 [tháng M1] đến [ngày] D2 tháng M2"
-    pat_range = r'(?:tu|từ)\s*(?:ngay\s*)?(\d{1,2})(?:\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2}))?(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?\s*(?:den|đến|toi|tới|-)\s*(?:ngay\s*)?(\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?'
+    pat_range = r'(?:tu\s*|từ\s*)?(?:ngay\s*)?(\d{1,2})(?:\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2}))?(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?\s*(?:den|đến|toi|tới|-)\s*(?:ngay\s*)?(\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?'
     range_match = re.search(pat_range, norm_text)
     if range_match:
         try:
@@ -748,13 +748,13 @@ def parse_with_rule_engine(text, today):
             except Exception:
                 pass
 
-    # 2.3. Dạng nhóm ngày chung tháng (VD: "ngày 25,26 tháng 10", "ngày 25, 26 tháng 10", "20, 22 và 25/10", "20-22-25/10")
+    # 2.3. Dạng nhóm ngày chung tháng (VD: "ngày 25 26 tháng 10", "25,26 tháng 10", "25, 26 tháng 10", "20, 22 và 25/10", "20-22-25/10")
     if not found_dates:
-        pat_group = r'((?:\d{1,2}(?:\s*,\s*|\s+va\s+|\s+voi\s+|\s*-\s*))+\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?'
+        pat_group = r'((?:\b\d{1,2}\b(?:\s*,\s*|\s+va\s+|\s+voi\s+|\s*-\s*|\s+))+\b\d{1,2}\b)\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?'
         m_group = re.search(pat_group, norm_text)
         if m_group:
             try:
-                days = [int(x) for x in re.findall(r'\b\d{1,2}\b', m_group.group(1))]
+                days = [int(x) for x in re.findall(r'\b\d{1,2}\b', m_group.group(1)) if 1 <= int(x) <= 31]
                 m_val = int(m_group.group(2))
                 y = int(m_group.group(3)) if m_group.group(3) else today.year
                 for d in days:
@@ -1448,13 +1448,18 @@ def api_ai_chat_schedule():
                 'engine': engine
             })
         elif not m_name and found_dates:
-            dates_disp = ', '.join([d.strftime('%d/%m') for d in found_dates])
+            if len(found_dates) > 1:
+                dates_disp = ', '.join([d.strftime('%d/%m') for d in found_dates])
+                lbl = f"các ngày {dates_disp} ({len(found_dates)} ngày)"
+            else:
+                dates_disp = found_dates[0].strftime('%d/%m')
+                lbl = f"ngày {dates_disp}"
             chips = make_ai_chips([(f"👤 {m}", f"{m} xin nghỉ ngày {dates_disp}") for m in ALL_STAFF])
             return jsonify({
                 'success': True,
                 'is_leave_intent': False,
                 'answer': (
-                    f"❓ Bạn muốn đăng ký xin nghỉ vào <strong>ngày {dates_disp}</strong> cho ai vậy bạn?<br>"
+                    f"❓ Bạn muốn đăng ký xin nghỉ vào <strong>{lbl}</strong> cho ai vậy bạn?<br>"
                     f"👉 Vui lòng bấm chọn tên nhân viên bên dưới:{chips}"
                 ),
                 'engine': engine
