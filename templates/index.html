@@ -706,50 +706,16 @@
       </button>
     </div>
 
-    <!-- KHUNG TRỢ LÝ AI HỎI ĐÁP LỊCH TRỰC NHẬT -->
-    <div class="ai-chat-box" style="background: linear-gradient(135deg, #f0f7ff, #ffffff); border: 1.5px solid #bfdbfe; border-radius: var(--radius); padding: 18px; margin-bottom: 22px; box-shadow: var(--shadow-sm);">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 1.3rem;">🤖</span>
-          <div>
-            <strong style="color: #1e40af; font-size: 0.96rem;">HỎI ĐÁP AI VỀ LỊCH TRỰC NHẬT</strong>
-            <div style="font-size: 0.76rem; color: #64748b;">Hỏi xem ai trực ngày nào, thứ mấy, hoặc khi nào tới lượt mình</div>
-          </div>
-        </div>
-        <span id="ai-chat-engine-badge" style="font-size: 0.72rem; color: #2563eb; font-weight: 700; background: #dbeafe; padding: 2px 8px; border-radius: 10px;">
-          ✨ Trợ lý AI Trực Nhật
-        </span>
-      </div>
-
-      <!-- Vùng hiển thị tin nhắn chat -->
-      <div id="ai-chat-messages" style="display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px;">
-        <div style="display: flex; align-items: flex-start; gap: 8px;">
-          <span style="font-size: 1.1rem;">🤖</span>
-          <div style="background: #fff; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; font-size: 0.86rem; color: #334155; line-height: 1.45; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-            Xin chào anh em! Tôi có thể tra cứu nhanh lịch trực và thông tin ai xin nghỉ. Bạn có thể bấm các gợi ý bên dưới hoặc tự gõ câu hỏi nhé!
-          </div>
-        </div>
-      </div>
-
-      <!-- Các câu hỏi gợi ý nhanh -->
-      <div class="quick-chips" style="margin-bottom: 10px;">
-        <span style="font-size: 0.74rem; color: #64748b; margin-right: 4px; display: flex; align-items: center;">Gợi ý:</span>
-        <span class="chip" onclick="askAiDuty('Hôm nay có ai nghỉ không?')">🌴 Hôm nay ai nghỉ?</span>
-        <span class="chip" onclick="askAiDuty('Ngày mai có ai nghỉ không?')">🌴 Mai ai nghỉ?</span>
-        <span class="chip" onclick="askAiDuty('Vinh có xin nghỉ không?')">👤 Vinh có nghỉ không?</span>
-        <span class="chip" onclick="askAiDuty('Hôm nay ai trực?')">🔔 Hôm nay ai trực?</span>
-        <span class="chip" onclick="askAiDuty('Ngày mai ai trực?')">🌱 Mai ai trực?</span>
-        <span class="chip" onclick="askAiDuty('Vinh trực những ngày nào?')">📅 Vinh trực ngày nào?</span>
-        <span class="chip" onclick="askAiDuty('Khi nào tiệm nghỉ lễ?')">🏢 Khi nào tiệm nghỉ lễ?</span>
-      </div>
-
-      <!-- Ô nhập câu hỏi -->
+    <!-- THANH HỎI ĐÁP AI NHANH (SIÊU GỌN - TỐI ƯU CHO ĐIỆN THOẠI) -->
+    <div class="ai-chat-box" style="background: #f8fafc; border: 1.5px solid #bfdbfe; border-radius: var(--radius); padding: 10px 12px; margin-bottom: 20px;">
       <div style="display: flex; gap: 8px;">
-        <input type="text" id="ai-chat-input" placeholder="Hỏi AI... (VD: Hôm nay có ai nghỉ không? Vinh trực ngày nào?)" style="flex: 1; padding: 10px 14px; border: 1.5px solid #93c5fd; border-radius: 8px; font-size: 0.92rem; outline: none; background: #fff;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
-        <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 18px; font-size: 0.88rem; width: auto; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.25);">
-          <span>Gửi 💬</span>
+        <input type="text" id="ai-chat-input" placeholder="🤖 Hỏi AI (VD: Hôm nay ai trực? Mai ai nghỉ? Vinh trực ngày nào?)..." style="flex: 1; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none; background: #fff;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
+        <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 9px 15px; font-size: 0.86rem; width: auto; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+          <span>Hỏi 💬</span>
         </button>
       </div>
+      <!-- Vùng hiển thị tin nhắn (chỉ hiện khi có câu hỏi, không chiếm chỗ lúc ban đầu) -->
+      <div id="ai-chat-messages" style="display: none; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; padding: 10px 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 10px;"></div>
     </div>
 
     <!-- Bảng danh sách lịch dự kiến 21 ngày tới -->
@@ -829,11 +795,10 @@
               </div>
             </div>
             <div class="quick-chips" style="margin-top: -6px; margin-bottom: 12px;">
-              <span class="chip" onclick="setQuickHolidayRange(1)">Nghỉ 1 ngày</span>
-              <span class="chip" onclick="setQuickHolidayRange(2)">Nghỉ 2 ngày</span>
-              <span class="chip" onclick="setQuickHolidayRange(3)">Nghỉ 3 ngày</span>
-              <span class="chip" onclick="setQuickHolidayRange(4)">Nghỉ 4 ngày</span>
-              <span class="chip" onclick="setQuickHolidayRange(7)">Nghỉ Tết / 1 tuần (7 ngày)</span>
+              <span class="chip" onclick="setQuickHolidayRange(1)">1 ngày</span>
+              <span class="chip" onclick="setQuickHolidayRange(2)">2 ngày</span>
+              <span class="chip" onclick="setQuickHolidayRange(3)">3 ngày</span>
+              <span class="chip" onclick="setQuickHolidayRange(7)">Nghỉ Tết (7 ngày)</span>
             </div>
             <div class="form-group">
               <label>Lý do nghỉ (Tùy chọn):</label>
@@ -916,51 +881,38 @@
         </span>
       </div>
 
-      <!-- KHUNG TRỢ LÝ AI NHẬN DIỆN TIN NHẮN TỰ NHIÊN -->
-      <div class="ai-assistant-card" style="background: linear-gradient(135deg, #f0f7ff, #f8fafc); border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(37,99,235,0.06);">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-          <div style="font-weight: 800; font-size: 0.92rem; color: #1e40af; display: flex; align-items: center; gap: 6px;">
-            <span>🤖</span>
-            <span>Báo Nghỉ Bằng Tin Nhắn Tự Nhiên (AI Tự Hiểu)</span>
-          </div>
+      <!-- KHUNG TRỢ LÝ AI BÁO NGHỈ (SIÊU GỌN - TỐI ƯU CHO ĐIỆN THOẠI) -->
+      <div class="ai-assistant-card" style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;">
+        <div style="font-weight: 800; font-size: 0.88rem; color: #1e40af; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span>🤖</span> Báo Nghỉ Nhanh Bằng Tin Nhắn Tự Nhiên
+          </span>
           <span id="ai-engine-badge" style="font-size: 0.72rem; color: #2563eb; font-weight: 700; background: #dbeafe; padding: 2px 8px; border-radius: 10px;">
             ⚡ AI Ready
           </span>
         </div>
-        
-        <p style="font-size: 0.82rem; color: #475569; margin-bottom: 10px; margin-top: 0;">
-          Dán hoặc nhập tin nhắn của anh em, AI sẽ tự phân tích tên, ngày và lý do để điền vào form:
-        </p>
 
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <input type="text" id="ai-prompt-input" placeholder="Ví dụ: vinh xin nghĩ ngày 25/10/2026 có việc gia đình..." style="flex: 1; min-width: 240px; padding: 11px 14px; border: 1.5px solid #93c5fd; border-radius: 8px; font-size: 0.92rem; outline: none; background: #fff;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); runAiParse(); }">
-          <button type="button" onclick="runAiParse()" id="ai-parse-btn" style="padding: 10px 18px; font-size: 0.88rem; width: auto; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.25); transition: all 0.2s ease;">
-            <span>✨ Phân Tích & Điền Đơn</span>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="ai-prompt-input" placeholder="Dán tin nhắn (VD: vinh xin nghĩ ngày 25/10 có việc gia đình)..." style="flex: 1; padding: 9px 12px; border: 1.5px solid #93c5fd; border-radius: 8px; font-size: 0.88rem; outline: none; background: #fff;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); runAiParse(); }">
+          <button type="button" onclick="runAiParse()" id="ai-parse-btn" style="padding: 9px 14px; font-size: 0.86rem; width: auto; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; white-space: nowrap;">
+            <span>✨ Điền Đơn</span>
           </button>
         </div>
 
-        <div class="quick-chips" style="margin-top: 8px;">
-          <span style="font-size: 0.74rem; color: #64748b; margin-right: 4px; display: flex; align-items: center;">Mẫu thử:</span>
-          <span class="chip" onclick="setAiSample('vinh xin nghĩ ngày 25/10/2026 có việc gia đình')">Vinh xin nghỉ 25/10</span>
-          <span class="chip" onclick="setAiSample('mai anh bảo mập bận đám tiệc')">Mai Bảo Mập bận đám tiệc</span>
-          <span class="chip" onclick="setAiSample('nguyên xin nghỉ ngày mốt đi khám bệnh')">Nguyên nghỉ mốt khám bệnh</span>
-          <span class="chip" onclick="setAiSample('thứ 2 tuần sau lợi bận về quê')">Thứ 2 tuần sau Lợi về quê</span>
-        </div>
-
         <!-- HỘP THÔNG BÁO KẾT QUẢ AI -->
-        <div id="ai-result-box" style="display: none; margin-top: 14px; padding: 12px 14px; background: #ecfdf5; border: 1.5px solid #86efac; border-radius: 8px; animation: tabFadeIn 0.2s ease;">
-          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-            <div id="ai-result-text" style="font-size: 0.88rem; color: #166534; line-height: 1.4;"></div>
-            <button type="button" onclick="document.getElementById('leave-form').submit()" style="padding: 6px 14px; font-size: 0.82rem; width: auto; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(22,163,74,0.3); display: inline-flex; align-items: center; gap: 4px;">
-              🚀 Xác Nhận Tạo Đơn Luôn
+        <div id="ai-result-box" style="display: none; margin-top: 10px; padding: 10px 12px; background: #ecfdf5; border: 1.5px solid #86efac; border-radius: 8px; animation: tabFadeIn 0.2s ease;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <div id="ai-result-text" style="font-size: 0.85rem; color: #166534; line-height: 1.4;"></div>
+            <button type="button" onclick="document.getElementById('leave-form').submit()" style="padding: 5px 12px; font-size: 0.8rem; width: auto; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;">
+              🚀 Xác Nhận Tạo Luôn
             </button>
           </div>
         </div>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 12px; margin: 16px 0 18px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin: 14px 0 16px;">
         <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-        <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">HOẶC CHỌN THỦ CÔNG TỪ DANH SÁCH BÊN DƯỚI</span>
+        <span style="font-size: 0.74rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">HOẶC CHỌN TỰ TAY BÊN DƯỚI</span>
         <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
       </div>
 
@@ -984,25 +936,21 @@
         <div class="form-group">
           <label>Chọn ngày xin nghỉ:</label>
           <input type="date" name="leave_date" id="leave_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" required onchange="checkLiveConflict()">
-          <div class="quick-chips">
+          <div class="quick-chips" style="margin-top: 6px;">
             <span class="chip" onclick="setQuickLeaveDate(0)">Hôm nay</span>
             <span class="chip" onclick="setQuickLeaveDate(1)">Ngày mai</span>
             <span class="chip" onclick="setQuickLeaveDate(2)">Ngày mốt</span>
-            <span class="chip" onclick="setQuickLeaveDate(3)">3 ngày nữa</span>
-            <span class="chip" onclick="setQuickLeaveDate(7)">+7 ngày tới</span>
           </div>
         </div>
 
         <div class="form-group">
           <label>Lý do xin nghỉ (để anh em sắp xếp công việc):</label>
           <input type="text" name="reason" id="leave_reason_input" placeholder="VD: Về quê, Đám tiệc, Khám bệnh, Việc gia đình..." value="Việc cá nhân" required>
-          <div class="quick-chips">
-            <span class="chip" onclick="setReason('Về quê')">🏡 Về quê</span>
-            <span class="chip" onclick="setReason('Việc gia đình')">👨‍👩‍👧 Việc gia đình</span>
-            <span class="chip" onclick="setReason('Đám tiệc / Cưới hỏi')">🎉 Đám tiệc</span>
-            <span class="chip" onclick="setReason('Khám bệnh')">🏥 Khám bệnh</span>
-            <span class="chip" onclick="setReason('Đi du lịch')">✈️ Đi du lịch</span>
-            <span class="chip" onclick="setReason('Việc cá nhân')">💼 Việc cá nhân</span>
+          <div class="quick-chips" style="margin-top: 6px;">
+            <span class="chip" onclick="setReason('Về quê')">Về quê</span>
+            <span class="chip" onclick="setReason('Việc gia đình')">Việc gia đình</span>
+            <span class="chip" onclick="setReason('Đám tiệc')">Đám tiệc</span>
+            <span class="chip" onclick="setReason('Khám bệnh')">Khám bệnh</span>
           </div>
         </div>
 
@@ -1264,6 +1212,7 @@
       const question = input ? input.value.trim() : '';
 
       if (!question || !container) return;
+      container.style.display = 'flex';
 
       // 1. Hiển thị tin nhắn người dùng
       const userBubble = document.createElement('div');
