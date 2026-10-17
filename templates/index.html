@@ -307,6 +307,9 @@
     }
     select, input[type="date"], input[type="text"] {
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
       padding: 12px 14px;
       border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
@@ -321,32 +324,86 @@
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
 
+    /* Date Picker Card & Range Grid (Chống tràn di động 100%) */
+    .date-picker-card {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 14px 12px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .date-range-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .date-range-grid .form-group {
+      margin-bottom: 0;
+      min-width: 0;
+    }
+    .date-range-grid label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .date-range-grid input[type="date"] {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+      height: 44px;
+      padding: 10px 12px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      color: var(--text);
+    }
+    .date-range-grid input[type="date"]::-webkit-date-and-time-value {
+      text-align: left;
+    }
+
     /* Quick Suggestion Chips */
     .quick-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 7px;
       margin-top: 8px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .chip {
       font-size: 0.8rem;
       font-weight: 600;
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
-      padding: 4px 10px;
-      border-radius: 16px;
+      padding: 5px 11px;
+      border-radius: 18px;
       cursor: pointer;
       color: #475569;
       transition: all 0.15s ease;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
     .chip:hover {
       background: #e2e8f0;
       color: #0f172a;
+      border-color: #94a3b8;
       transform: translateY(-1px);
     }
     .chip:active {
       transform: scale(0.96);
+      background: #cbd5e1;
     }
 
     /* Buttons */
@@ -418,6 +475,9 @@
       font-size: 0.9rem;
       line-height: 1.5;
       animation: alertFadeIn 0.22s ease-out;
+      box-sizing: border-box;
+      word-break: break-word;
+      width: 100%;
     }
     @keyframes alertFadeIn {
       from { opacity: 0; transform: translateY(-4px); }
@@ -696,6 +756,19 @@
       input, select, textarea {
         font-size: 16px !important;
       }
+      /* Tối ưu hộp điền đơn xin nghỉ & chọn ngày trên di động chống tràn 100% */
+      .action-box {
+        padding: 16px 14px;
+        border-radius: 14px;
+        margin-bottom: 18px;
+      }
+      .date-picker-card {
+        padding: 12px 10px 10px;
+      }
+      .date-range-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+      }
     }
     @keyframes popIn {
       from { opacity: 0; transform: scale(0.92) translateY(12px); }
@@ -920,21 +993,23 @@
       <div class="holiday-content">
         {% if is_admin %}
           <form action="/add-holiday" method="POST" style="margin-top: 16px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group">
-                <label>Từ ngày:</label>
-                <input type="date" name="start_date" id="holiday_start_date" required onchange="syncHolidayEndDate()">
+            <div class="date-picker-card" style="margin-top: 14px;">
+              <div class="date-range-grid">
+                <div class="form-group">
+                  <label>📅 Từ ngày:</label>
+                  <input type="date" name="start_date" id="holiday_start_date" required onchange="syncHolidayEndDate()">
+                </div>
+                <div class="form-group">
+                  <label>📅 Đến ngày <span style="font-weight: normal; color: #64748b; font-size: 0.8rem;">(chọn nếu nghỉ nhiều ngày)</span>:</label>
+                  <input type="date" name="end_date" id="holiday_end_date">
+                </div>
               </div>
-              <div class="form-group">
-                <label>Đến ngày (chọn nếu nghỉ nhiều ngày):</label>
-                <input type="date" name="end_date" id="holiday_end_date">
+              <div class="quick-chips" style="margin-top: 10px;">
+                <span class="chip" onclick="setQuickHolidayRange(1)">⚡ 1 ngày</span>
+                <span class="chip" onclick="setQuickHolidayRange(2)">✨ 2 ngày</span>
+                <span class="chip" onclick="setQuickHolidayRange(3)">🌟 3 ngày</span>
+                <span class="chip" onclick="setQuickHolidayRange(7)">🧧 Nghỉ Tết (7 ngày)</span>
               </div>
-            </div>
-            <div class="quick-chips" style="margin-top: -6px; margin-bottom: 12px;">
-              <span class="chip" onclick="setQuickHolidayRange(1)">1 ngày</span>
-              <span class="chip" onclick="setQuickHolidayRange(2)">2 ngày</span>
-              <span class="chip" onclick="setQuickHolidayRange(3)">3 ngày</span>
-              <span class="chip" onclick="setQuickHolidayRange(7)">Nghỉ Tết (7 ngày)</span>
             </div>
             <div class="form-group">
               <label>Lý do nghỉ (Tùy chọn):</label>
@@ -1016,7 +1091,7 @@
 
       <form action="/report-leave" method="POST" id="leave-form">
         <div class="form-group">
-          <label>Chọn người xin nghỉ:</label>
+          <label>👤 Chọn người xin nghỉ:</label>
           <select name="member_name" id="member_select" required onchange="checkLiveConflict()">
             <optgroup label="Anh em trực nhật 7h30 (8 người)">
               {% for m in duty_members %}
@@ -1031,32 +1106,34 @@
           </select>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div class="form-group" style="margin-bottom: 0;">
-            <label>Từ ngày:</label>
-            <input type="date" name="leave_date" id="leave_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" required onchange="syncLeaveEndDate(); checkLiveConflict();">
+        <div class="date-picker-card">
+          <div class="date-range-grid">
+            <div class="form-group">
+              <label>📅 Từ ngày:</label>
+              <input type="date" name="leave_date" id="leave_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" required onchange="syncLeaveEndDate(); checkLiveConflict();">
+            </div>
+            <div class="form-group">
+              <label>📅 Đến ngày <span style="font-weight: normal; color: #64748b; font-size: 0.8rem;">(chọn nếu nghỉ nhiều ngày)</span>:</label>
+              <input type="date" name="end_date" id="leave_end_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" onchange="checkLiveConflict();">
+            </div>
           </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label>Đến ngày (tùy chọn):</label>
-            <input type="date" name="end_date" id="leave_end_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" onchange="checkLiveConflict();">
+          <div class="quick-chips" style="margin-top: 10px;">
+            <span class="chip" onclick="setQuickLeaveDays(1)">⚡ 1 ngày</span>
+            <span class="chip" onclick="setQuickLeaveDays(2)">✨ 2 ngày liên tiếp</span>
+            <span class="chip" onclick="setQuickLeaveDays(3)">🌟 3 ngày liên tiếp</span>
+            <span class="chip" onclick="setQuickLeaveOffset(1, 1)">🌅 Ngày mai</span>
+            <span class="chip" onclick="setQuickLeaveOffset(2, 1)">🌄 Ngày mốt</span>
           </div>
-        </div>
-        <div class="quick-chips" style="margin-top: 6px; margin-bottom: 14px;">
-          <span class="chip" onclick="setQuickLeaveDays(1)">1 ngày</span>
-          <span class="chip" onclick="setQuickLeaveDays(2)">2 ngày liên tiếp</span>
-          <span class="chip" onclick="setQuickLeaveDays(3)">3 ngày liên tiếp</span>
-          <span class="chip" onclick="setQuickLeaveOffset(1, 1)">Ngày mai</span>
-          <span class="chip" onclick="setQuickLeaveOffset(2, 1)">Ngày mốt</span>
         </div>
 
         <div class="form-group">
-          <label>Lý do xin nghỉ (để anh em sắp xếp công việc):</label>
+          <label>📝 Lý do xin nghỉ (để anh em sắp xếp công việc):</label>
           <input type="text" name="reason" id="leave_reason_input" placeholder="VD: Về quê, Đám tiệc, Khám bệnh, Việc gia đình..." value="Việc cá nhân" required>
           <div class="quick-chips" style="margin-top: 6px;">
-            <span class="chip" onclick="setReason('Về quê')">Về quê</span>
-            <span class="chip" onclick="setReason('Việc gia đình')">Việc gia đình</span>
-            <span class="chip" onclick="setReason('Đám tiệc')">Đám tiệc</span>
-            <span class="chip" onclick="setReason('Khám bệnh')">Khám bệnh</span>
+            <span class="chip" onclick="setReason('Về quê')">🏠 Về quê</span>
+            <span class="chip" onclick="setReason('Việc gia đình')">👨‍👩‍👧 Việc gia đình</span>
+            <span class="chip" onclick="setReason('Đám tiệc')">🎉 Đám tiệc</span>
+            <span class="chip" onclick="setReason('Khám bệnh')">🏥 Khám bệnh</span>
           </div>
         </div>
 
@@ -1739,8 +1816,8 @@
   </div>
 
   <!-- MODAL ĐĂNG NHẬP ADMIN -->
-  <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:16px; padding:24px; max-width:360px; width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); animation:tabFadeIn 0.2s ease;">
+  <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
+    <div style="background:#fff; border-radius:16px; padding:22px 18px; max-width:360px; width:100%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <h3 style="font-size:1.1rem; color:#1e293b; font-weight:800; display:flex; align-items:center; gap:6px;">
           🔐 Quyền Quản Trị Admin
@@ -1751,7 +1828,7 @@
       <form action="/admin-login" method="POST">
         <input type="hidden" name="next_url" value="{{ request.url }}">
         <div class="form-group">
-          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center;">
+          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; box-sizing:border-box; width:100%;">
         </div>
         <div style="display:flex; gap:8px; margin-top:16px;">
           <button type="button" class="btn btn-light" style="flex:1;" onclick="closeAdminModal()">Hủy</button>
@@ -1762,8 +1839,8 @@
   </div>
 
   <!-- MODAL CHỈNH SỬA LỊCH NGHỈ CHO ADMIN -->
-  <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:16px; padding:24px; max-width:440px; width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); animation:tabFadeIn 0.2s ease;">
+  <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
+    <div style="background:#fff; border-radius:16px; padding:22px 18px; max-width:440px; width:100%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <h3 style="font-size:1.1rem; color:#1e293b; font-weight:800; display:flex; align-items:center; gap:6px;">
           ✏️ Sửa Thông Tin Lịch Nghỉ
