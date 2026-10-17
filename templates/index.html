@@ -584,6 +584,92 @@
       border-top: 1px solid var(--border);
       animation: tabFadeIn 0.2s ease;
     }
+
+    /* Floating Chat Bubble & Popup Window */
+    .ai-fab-btn {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.55rem;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+      cursor: pointer;
+      z-index: 9998;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+      user-select: none;
+    }
+    .ai-fab-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.45);
+    }
+    .ai-fab-btn:active {
+      transform: scale(0.94);
+    }
+    .ai-fab-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 14px;
+      height: 14px;
+      background: #10b981;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+
+    .ai-chat-popup {
+      display: none;
+      position: fixed;
+      bottom: 84px;
+      right: 22px;
+      width: 350px;
+      max-width: calc(100vw - 32px);
+      height: 460px;
+      max-height: calc(100vh - 110px);
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.2);
+      border: 1px solid #cbd5e1;
+      z-index: 9999;
+      flex-direction: column;
+      overflow: hidden;
+      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92) translateY(12px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .ai-popup-header {
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ai-popup-messages {
+      flex: 1;
+      padding: 12px 14px;
+      overflow-y: auto;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ai-popup-footer {
+      padding: 10px 12px;
+      background: #fff;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 6px;
+    }
   </style>
 </head>
 <body>
@@ -704,18 +790,6 @@
       <button type="button" onclick="switchTab('leaves')" class="btn btn-primary" style="width: auto; padding: 10px 18px; font-size: 0.9rem;">
         ➕ Bạn muốn xin nghỉ? Bấm vào đây
       </button>
-    </div>
-
-    <!-- THANH HỎI ĐÁP AI NHANH (SIÊU GỌN - TỐI ƯU CHO ĐIỆN THOẠI) -->
-    <div class="ai-chat-box" style="background: #f8fafc; border: 1.5px solid #bfdbfe; border-radius: var(--radius); padding: 10px 12px; margin-bottom: 20px;">
-      <div style="display: flex; gap: 8px;">
-        <input type="text" id="ai-chat-input" placeholder="🤖 Hỏi AI (VD: Hôm nay ai trực? Mai ai nghỉ? Vinh trực ngày nào?)..." style="flex: 1; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none; background: #fff;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
-        <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 9px 15px; font-size: 0.86rem; width: auto; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
-          <span>Hỏi 💬</span>
-        </button>
-      </div>
-      <!-- Vùng hiển thị tin nhắn (chỉ hiện khi có câu hỏi, không chiếm chỗ lúc ban đầu) -->
-      <div id="ai-chat-messages" style="display: none; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; padding: 10px 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 10px;"></div>
     </div>
 
     <!-- Bảng danh sách lịch dự kiến 21 ngày tới -->
@@ -1434,6 +1508,49 @@
     });
   </script>
 
+  <!-- BONG BÓNG CHAT AI NỔI (FLOATING CHAT BUBBLE) -->
+  <div class="ai-fab-btn" id="ai-fab-button" onclick="toggleAiChatPopup()" title="Hỏi nhanh trợ lý AI về lịch trực & ngày nghỉ">
+    <span>🤖</span>
+    <span class="ai-fab-badge"></span>
+  </div>
+
+  <!-- CỬA SỔ POPUP CHAT AI NHỎ GỌN -->
+  <div class="ai-chat-popup" id="ai-chat-popup">
+    <div class="ai-popup-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.25rem;">🤖</span>
+        <div>
+          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý AI Cửa Hàng</strong>
+          <span style="font-size: 0.72rem; opacity: 0.9; display: flex; align-items: center; gap: 4px;">
+            <span style="width: 6px; height: 6px; background: #34d399; border-radius: 50%; display: inline-block;"></span> Sẵn sàng giải đáp
+          </span>
+        </div>
+      </div>
+      <button type="button" onclick="toggleAiChatPopup()" style="background: rgba(255,255,255,0.18); border: none; color: #fff; width: 26px; height: 26px; border-radius: 50%; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        ✕
+      </button>
+    </div>
+
+    <!-- Vùng tin nhắn chat -->
+    <div class="ai-popup-messages" id="ai-chat-messages">
+      <div style="display: flex; align-items: flex-start; gap: 8px;">
+        <span style="font-size: 1.1rem;">🤖</span>
+        <div style="background: #fff; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 12px; font-size: 0.86rem; color: #334155; line-height: 1.45; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          Xin chào! Tôi có thể tra cứu nhanh lịch trực và danh sách ai xin nghỉ.<br>
+          <small style="color: #64748b; margin-top: 4px; display: block;">VD: <em>"Hôm nay ai trực?"</em>, <em>"Mai có ai nghỉ không?"</em>, <em>"Vinh trực ngày nào?"</em></small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thanh nhập câu hỏi -->
+    <div class="ai-popup-footer">
+      <input type="text" id="ai-chat-input" placeholder="Hỏi AI (VD: Ai trực hôm nay?)..." style="flex: 1; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
+      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 8px 14px; font-size: 0.86rem; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; white-space: nowrap;">
+        Gửi
+      </button>
+    </div>
+  </div>
+
   <!-- MODAL ĐĂNG NHẬP ADMIN -->
   <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:16px; padding:24px; max-width:360px; width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); animation:tabFadeIn 0.2s ease;">
@@ -1534,6 +1651,20 @@
     function closeEditModal() {
       const modal = document.getElementById('admin-edit-modal');
       if (modal) modal.style.display = 'none';
+    }
+
+    function toggleAiChatPopup() {
+      const popup = document.getElementById('ai-chat-popup');
+      const input = document.getElementById('ai-chat-input');
+      const messagesContainer = document.getElementById('ai-chat-messages');
+      if (!popup) return;
+      if (popup.style.display === 'flex') {
+        popup.style.display = 'none';
+      } else {
+        popup.style.display = 'flex';
+        if (input) input.focus();
+        if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
     }
   </script>
 
