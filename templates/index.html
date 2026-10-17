@@ -706,6 +706,51 @@
       </button>
     </div>
 
+    <!-- KHUNG TRỢ LÝ AI HỎI ĐÁP LỊCH TRỰC NHẬT -->
+    <div class="ai-chat-box" style="background: linear-gradient(135deg, #f0f7ff, #ffffff); border: 1.5px solid #bfdbfe; border-radius: var(--radius); padding: 18px; margin-bottom: 22px; box-shadow: var(--shadow-sm);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.3rem;">🤖</span>
+          <div>
+            <strong style="color: #1e40af; font-size: 0.96rem;">HỎI ĐÁP AI VỀ LỊCH TRỰC NHẬT</strong>
+            <div style="font-size: 0.76rem; color: #64748b;">Hỏi xem ai trực ngày nào, thứ mấy, hoặc khi nào tới lượt mình</div>
+          </div>
+        </div>
+        <span id="ai-chat-engine-badge" style="font-size: 0.72rem; color: #2563eb; font-weight: 700; background: #dbeafe; padding: 2px 8px; border-radius: 10px;">
+          ✨ Trợ lý AI Trực Nhật
+        </span>
+      </div>
+
+      <!-- Vùng hiển thị tin nhắn chat -->
+      <div id="ai-chat-messages" style="display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px;">
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <span style="font-size: 1.1rem;">🤖</span>
+          <div style="background: #fff; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; font-size: 0.86rem; color: #334155; line-height: 1.45; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            Xin chào anh em! Tôi có thể tra cứu nhanh lịch trực giúp bạn. Bạn có thể bấm các câu hỏi gợi ý bên dưới hoặc tự gõ câu hỏi bất kỳ nhé!
+          </div>
+        </div>
+      </div>
+
+      <!-- Các câu hỏi gợi ý nhanh -->
+      <div class="quick-chips" style="margin-bottom: 10px;">
+        <span style="font-size: 0.74rem; color: #64748b; margin-right: 4px; display: flex; align-items: center;">Gợi ý:</span>
+        <span class="chip" onclick="askAiDuty('Hôm nay ai trực?')">Hôm nay ai trực?</span>
+        <span class="chip" onclick="askAiDuty('Ngày mai ai trực?')">Ngày mai ai trực?</span>
+        <span class="chip" onclick="askAiDuty('Vinh trực những ngày nào?')">Vinh trực ngày nào?</span>
+        <span class="chip" onclick="askAiDuty('Thứ 2 tuần sau ai trực?')">Thứ 2 tuần sau ai trực?</span>
+        <span class="chip" onclick="askAiDuty('Bảo trực khi nào?')">Bảo trực khi nào?</span>
+        <span class="chip" onclick="askAiDuty('Hôm nay có ai nghỉ không?')">Hôm nay ai nghỉ?</span>
+      </div>
+
+      <!-- Ô nhập câu hỏi -->
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="ai-chat-input" placeholder="Hỏi AI... (VD: Vinh trực ngày nào? Thứ 2 tuần sau ai trực?)" style="flex: 1; padding: 10px 14px; border: 1.5px solid #93c5fd; border-radius: 8px; font-size: 0.92rem; outline: none; background: #fff;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
+        <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 18px; font-size: 0.88rem; width: auto; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.25);">
+          <span>Gửi 💬</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Bảng danh sách lịch dự kiến 21 ngày tới -->
     <div class="section-title">
       <span>Lịch Dự Kiến Các Ngày Tới</span>
@@ -1199,6 +1244,81 @@
           btn.disabled = false;
           btn.innerHTML = '<span>✨ Phân Tích & Điền Đơn</span>';
         }
+      }
+    }
+
+    function askAiDuty(questionText) {
+      const input = document.getElementById('ai-chat-input');
+      if (input) {
+        input.value = questionText;
+        sendAiChat();
+      }
+    }
+
+    async function sendAiChat() {
+      const input = document.getElementById('ai-chat-input');
+      const btn = document.getElementById('ai-chat-btn');
+      const container = document.getElementById('ai-chat-messages');
+      const badge = document.getElementById('ai-chat-engine-badge');
+      const question = input ? input.value.trim() : '';
+
+      if (!question || !container) return;
+
+      // 1. Hiển thị tin nhắn người dùng
+      const userBubble = document.createElement('div');
+      userBubble.style.cssText = 'display: flex; justify-content: flex-end; margin-bottom: 4px;';
+      userBubble.innerHTML = `<div style="background: #2563eb; color: #fff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; max-width: 82%; line-height: 1.4; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 500;">${question}</div>`;
+      container.appendChild(userBubble);
+
+      input.value = '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳...';
+      }
+
+      // 2. Hiển thị bong bóng chờ phản hồi
+      const loadingBubble = document.createElement('div');
+      loadingBubble.id = 'ai-loading-bubble';
+      loadingBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
+      loadingBubble.innerHTML = `<span>🤖</span><div style="background: #fff; border: 1px solid #cbd5e1; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: #64748b; font-style: italic;">Đang tra cứu lịch trực...</div>`;
+      container.appendChild(loadingBubble);
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const res = await fetch('/api/ai-chat-schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: question })
+        });
+        const data = await res.json();
+
+        if (loadingBubble && loadingBubble.parentNode) {
+          loadingBubble.parentNode.removeChild(loadingBubble);
+        }
+
+        // 3. Hiển thị câu trả lời của AI
+        const aiBubble = document.createElement('div');
+        aiBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
+        aiBubble.innerHTML = `<span>🤖</span><div style="background: #fff; border: 1px solid #cbd5e1; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #1e293b; line-height: 1.5; box-shadow: 0 1px 3px rgba(0,0,0,0.04); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
+        container.appendChild(aiBubble);
+
+        if (badge && data.engine) {
+          badge.textContent = `✨ ${data.engine}`;
+        }
+      } catch (err) {
+        if (loadingBubble && loadingBubble.parentNode) {
+          loadingBubble.parentNode.removeChild(loadingBubble);
+        }
+        const errBubble = document.createElement('div');
+        errBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
+        errBubble.innerHTML = `<span>⚠️</span><div style="background: #fee2e2; border: 1px solid #fca5a5; padding: 8px 12px; border-radius: 10px; font-size: 0.86rem; color: #b91c1c;">Lỗi: ${err}</div>`;
+        container.appendChild(errBubble);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Gửi 💬</span>';
+        }
+        container.scrollTop = container.scrollHeight;
       }
     }
 

@@ -891,6 +891,173 @@ def api_ai_parse_leave():
         'engine': engine
     })
 
+def answer_schedule_query(query):
+    query_clean = query.strip()
+    if not query_clean:
+        return "Bạn muốn hỏi thông tin gì về lịch trực? (Ví dụ: 'Hôm nay ai trực?', 'Vinh trực ngày nào?', 'Thứ 2 tuần sau ai trực?')", "Trợ lý AI Tiếng Việt"
+        
+    cleanup_and_advance_checkpoint()
+    schedule = get_schedule(days_ahead=30)
+    weekday_vn_map = {
+        'Monday': 'Thứ Hai', 'Tuesday': 'Thứ Ba', 'Wednesday': 'Thứ Tư',
+        'Thursday': 'Thứ Năm', 'Friday': 'Thứ Sáu', 'Saturday': 'Thứ Bảy', 'Sunday': 'Chủ Nhật'
+    }
+    for item in schedule:
+        item['weekday_vn'] = weekday_vn_map.get(item['weekday'], item['weekday'])
+        
+    today = get_vn_today()
+    q_norm = remove_accents(query_clean.lower())
+
+    # 1. Thử gọi Ollama nếu server đang hoạt động
+    if is_ollama_online():
+        summary_lines = []
+        for s in schedule[:14]:
+            if s.get('is_holiday'):
+                summary_lines.append(f"- {s['display_date']} ({s['weekday_vn']}): Tiệm đóng cửa ({s.get('holiday_reason')})")
+            elif s.get('assigned'):
+                summary_lines.append(f"- {s['display_date']} ({s['weekday_vn']}): {s['assigned']} trực")
+        ctx = "\n".join(summary_lines)
+        prompt = f"""
+Bạn là trợ lý AI quản lý lịch trực nhật vệ sinh 7h30 sáng tại cửa hàng.
+Hôm nay là: {today.strftime('%d/%m/%Y')} ({weekday_vn_map.get(today.strftime('%A'))}).
+Danh sách 8 người trực nhật: {', '.join(DUTY_MEMBERS)}.
+Nhân sự không trực nhật: {', '.join(NON_DUTY_STAFF)}.
+Lịch phân công 14 ngày tới:
+{ctx}
+
+Câu hỏi của nhân viên: "{query_clean}"
+
+Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trên lịch trên. Sử dụng Tiếng Việt tự nhiên, in đậm tên người và ngày tháng.
+"""
+        try:
+            req_data = json.dumps({
+                "model": OLLAMA_MODEL,
+                "prompt": prompt,
+                "stream": False
+            }).encode('utf-8')
+            req = urllib.request.Request(
+                f"{OLLAMA_HOST}/api/generate",
+                data=req_data,
+                headers={'Content-Type': 'application/json'}
+            )
+            with urllib.request.urlopen(req, timeout=4.0) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+                ans = data.get('response', '').strip()
+                if ans:
+                    return ans.replace('\n', '<br>'), f"Ollama ({OLLAMA_MODEL})"
+        except Exception:
+            pass
+
+    # 2. Xử lý bằng Bộ não NLP Tiếng Việt tích hợp (0ms, siêu tốc, chạy tốt trên PythonAnywhere)
+    engine = "Trợ lý AI Tiếng Việt"
+    
+    # 2.1. Hỏi về 1 nhân viên cụ thể (VD: "Vinh trực ngày nào", "Lịch của Dĩ", "Bảo có trực không")
+    found_member = None
+    for staff in sorted(ALL_STAFF, key=lambda s: len(s), reverse=True):
+        staff_norm = remove_accents(staff.lower())
+        if re.search(r'\b' + re.escape(staff_norm) + r'\b', q_norm):
+            found_member = staff
+            break
+
+    if found_member:
+        if found_member in NON_DUTY_STAFF:
+            return f"ℹ️ <strong>{found_member}</strong> thuộc nhóm nhân sự không trực nhật vệ sinh 7h30 sáng tại cửa hàng.", engine
+
+        my_duties = [s for s in schedule if s.get('assigned') == found_member]
+        if not my_duties:
+            return f"Hiện trong 30 ngày tới không thấy ca trực nào của <strong>{found_member}</strong> (có thể do trùng ngày tiệm đóng cửa hoặc có đơn xin nghỉ).", engine
+
+        lines = [f"• 📅 <strong>{d['display_date']}</strong> ({d['weekday_vn']})" for d in my_duties[:4]]
+        res = f"👉 Các ca trực sắp tới của <strong>{found_member}</strong> (7h30 sáng):<br>" + "<br>".join(lines)
+        if len(my_duties) > 4:
+            res += f"<br><small style='color:#64748b;'>Và còn {len(my_duties)-4} ca nữa trong các tuần tiếp theo.</small>"
+        return res, engine
+
+    # 2.2. Hỏi hôm nay ai trực
+    if re.search(r'\b(hom nay|nay|hom ni)\b', q_norm):
+        s0 = schedule[0] if schedule else None
+        if s0:
+            if s0.get('is_holiday'):
+                return f"🏢 Hôm nay ({s0['display_date']}, {s0['weekday_vn']}): <strong>Tiệm đóng cửa nghỉ lễ</strong> ({s0.get('holiday_reason')}). Cả tiệm không phải trực!", engine
+            return f"🔔 Hôm nay (<strong>{s0['display_date']}</strong>, {s0['weekday_vn']}): Người trực chính 7h30 sáng là <strong>{s0['assigned']}</strong>.", engine
+
+    # 2.3. Hỏi ngày mai ai trực
+    if re.search(r'\b(ngay mai|mai)\b', q_norm):
+        s1 = schedule[1] if len(schedule) > 1 else None
+        if s1:
+            if s1.get('is_holiday'):
+                return f"🏢 Ngày mai ({s1['display_date']}, {s1['weekday_vn']}): <strong>Tiệm đóng cửa</strong> ({s1.get('holiday_reason')}).", engine
+            return f"🌱 Ngày mai (<strong>{s1['display_date']}</strong>, {s1['weekday_vn']}): Người trực là <strong>{s1['assigned']}</strong> (7h30 sáng).", engine
+
+    # 2.4. Hỏi ngày mốt / ngày kia
+    if re.search(r'\b(ngay mot|mot|ngay kia)\b', q_norm):
+        s2 = schedule[2] if len(schedule) > 2 else None
+        if s2:
+            return f"🌿 Ngày mốt (<strong>{s2['display_date']}</strong>, {s2['weekday_vn']}): Người trực là <strong>{s2['assigned']}</strong>.", engine
+
+    # 2.5. Hỏi theo ngày cụ thể (VD: 25/10 ai trực, ngày 20-10)
+    m = re.search(r'(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', q_norm)
+    if m:
+        day = int(m.group(1))
+        month = int(m.group(2))
+        for s in schedule:
+            d_parts = [int(p) for p in s['display_date'].split('/')]
+            if d_parts[0] == day and d_parts[1] == month:
+                if s.get('is_holiday'):
+                    return f"🏢 Ngày <strong>{s['display_date']}</strong> ({s['weekday_vn']}): Tiệm đóng cửa ({s.get('holiday_reason')}).", engine
+                return f"📅 Vào ngày <strong>{s['display_date']}</strong> ({s['weekday_vn']}): Người trực là <strong>{s['assigned']}</strong> (7h30 sáng).", engine
+        return f"Không tìm thấy lịch của ngày {day}/{month} trong danh sách 30 ngày tới.", engine
+
+    # 2.6. Hỏi theo thứ trong tuần (VD: thứ 2 tuần sau ai trực, chủ nhật ai trực)
+    weekdays_search = {
+        'thu 2': 'Thứ Hai', 'thu hai': 'Thứ Hai',
+        'thu 3': 'Thứ Ba', 'thu ba': 'Thứ Ba',
+        'thu 4': 'Thứ Tư', 'thu tu': 'Thứ Tư',
+        'thu 5': 'Thứ Năm', 'thu nam': 'Thứ Năm',
+        'thu 6': 'Thứ Sáu', 'thu sau': 'Thứ Sáu',
+        'thu 7': 'Thứ Bảy', 'thu bay': 'Thứ Bảy',
+        'chu nhat': 'Chủ Nhật', 'cn': 'Chủ Nhật'
+    }
+    for w_key, w_val in weekdays_search.items():
+        if re.search(r'\b' + re.escape(w_key) + r'\b', q_norm):
+            matches = [s for s in schedule if s['weekday_vn'] == w_val]
+            if matches:
+                target = matches[1] if ('tuan sau' in q_norm or 'toi' in q_norm) and len(matches) > 1 else matches[0]
+                if target.get('is_holiday'):
+                    return f"🏢 Vào <strong>{target['weekday_vn']}</strong> (ngày {target['display_date']}): Tiệm đóng cửa ({target.get('holiday_reason')}).", engine
+                return f"📅 Vào <strong>{target['weekday_vn']}</strong> (ngày {target['display_date']}): Người trực là <strong>{target['assigned']}</strong>.", engine
+
+    # 2.7. Hỏi ai nghỉ / có ai nghỉ không
+    if re.search(r'\b(nghi|xin nghi|ai nghi|co ai nghi)\b', q_norm):
+        leaves_summary = get_leaves_summary(schedule)
+        if not leaves_summary:
+            return "🌴 Hiện tại cả 10 anh em đều đang có lịch đi làm đầy đủ, <strong>không có ai xin nghỉ</strong> sắp tới!", engine
+        lines = [f"• <strong>{item['member_name']}</strong> nghỉ ngày {item['display_date']} ({item['weekday_vn']}) — Lý do: <em>{item['reason']}</em>" for item in leaves_summary[:5]]
+        return f"📋 Danh sách các ca xin nghỉ sắp tới:<br>" + "<br>".join(lines), engine
+
+    return ("🤖 Tôi có thể giúp bạn tra cứu nhanh các thông tin sau:<br>"
+            "• <em>\"Hôm nay ai trực?\"</em><br>"
+            "• <em>\"Ngày mai ai trực?\"</em><br>"
+            "• <em>\"Vinh trực ngày nào?\"</em> (hoặc tên bất kỳ ai)<br>"
+            "• <em>\"Thứ 2 tuần sau ai trực?\"</em><br>"
+            "• <em>\"Ngày 25/10 ai trực?\"</em><br>"
+            "• <em>\"Hôm nay có ai nghỉ không?\"</em>"), engine
+
+@app.route('/api/ai-chat-schedule', methods=['POST'])
+def api_ai_chat_schedule():
+    data = request.get_json(silent=True) or request.form
+    question = data.get('question', '').strip()
+    if not question:
+        return jsonify({'success': False, 'error': 'Vui lòng nhập câu hỏi'})
+        
+    answer, engine = answer_schedule_query(question)
+    return jsonify({
+        'success': True,
+        'question': question,
+        'answer': answer,
+        'engine': engine
+    })
+
 @app.route('/report-leave', methods=['POST'])
 def report_leave():
     cleanup_and_advance_checkpoint()
