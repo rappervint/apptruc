@@ -29,10 +29,16 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+    }
+
     body {
       background-color: var(--bg);
       color: var(--text);
-      padding: 16px;
+      padding: 12px 14px;
       max-width: 860px;
       margin: 0 auto;
       line-height: 1.5;
@@ -588,18 +594,18 @@
     /* Floating Chat Bubble & Popup Window (Tối ưu cho cả Di Động & Máy Tính) */
     .ai-fab-btn {
       position: fixed !important;
-      bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
-      right: calc(18px + env(safe-area-inset-right, 0px)) !important;
-      width: 58px !important;
-      height: 58px !important;
-      border-radius: 50% !important;
-      background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #4f46e5 100%) !important;
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+      right: calc(16px + env(safe-area-inset-right, 0px)) !important;
+      height: 52px !important;
+      padding: 0 16px 0 12px !important;
+      border-radius: 30px !important;
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #4338ca 100%) !important;
       color: #ffffff !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      font-size: 1.65rem !important;
-      box-shadow: 0 6px 20px rgba(29, 78, 216, 0.45), 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+      gap: 8px !important;
+      box-shadow: 0 6px 22px rgba(29, 78, 216, 0.48), 0 2px 8px rgba(0, 0, 0, 0.16) !important;
       cursor: pointer !important;
       z-index: 99999 !important;
       border: 2.5px solid #ffffff !important;
@@ -609,23 +615,35 @@
       touch-action: manipulation !important;
       animation: fabPulse 3s infinite ease-in-out;
     }
+    .ai-fab-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+      display: inline-block;
+    }
+    .ai-fab-text {
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      color: #ffffff;
+    }
     @keyframes fabPulse {
       0%, 100% { box-shadow: 0 6px 20px rgba(29, 78, 216, 0.45); }
       50% { box-shadow: 0 6px 26px rgba(59, 130, 246, 0.7), 0 0 0 6px rgba(59, 130, 246, 0.18); }
     }
     .ai-fab-btn:hover {
-      transform: scale(1.08);
+      transform: scale(1.06);
       box-shadow: 0 10px 28px rgba(37, 99, 235, 0.55) !important;
     }
     .ai-fab-btn:active {
-      transform: scale(0.92);
+      transform: scale(0.94);
     }
     .ai-fab-badge {
       position: absolute;
-      top: -1px;
-      right: -1px;
-      width: 14px;
-      height: 14px;
+      top: -2px;
+      right: 2px;
+      width: 13px;
+      height: 13px;
       background: #10b981;
       border-radius: 50%;
       border: 2px solid #fff;
@@ -634,12 +652,12 @@
     .ai-chat-popup {
       display: none;
       position: fixed !important;
-      bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
+      bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
       right: calc(16px + env(safe-area-inset-right, 0px)) !important;
       width: 350px !important;
       max-width: calc(100vw - 32px) !important;
       height: 480px !important;
-      max-height: calc(100vh - 110px) !important;
+      max-height: calc(100vh - 100px) !important;
       background: #ffffff !important;
       border-radius: 18px !important;
       box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28) !important;
@@ -648,6 +666,15 @@
       flex-direction: column !important;
       overflow: hidden !important;
       animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    @media (max-width: 480px) {
+      .ai-chat-popup {
+        right: 12px !important;
+        left: 12px !important;
+        width: auto !important;
+        max-width: none !important;
+        bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+      }
     }
     @keyframes popIn {
       from { opacity: 0; transform: scale(0.92) translateY(12px); }
@@ -695,6 +722,10 @@
         <span id="vn-live-date" style="color: #64748b; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
         <span class="clock-zone">Giờ VN</span>
       </div>
+
+      <button type="button" onclick="toggleAiChatPopup()" style="background: linear-gradient(135deg, #1d4ed8, #2563eb); border: none; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);">
+        🤖 Hỏi AI
+      </button>
 
       {% if is_admin %}
         <span style="background: #fef2f2; border: 1.5px solid #f87171; color: #b91c1c; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
@@ -1485,7 +1516,8 @@
 
   <!-- BONG BÓNG CHAT AI NỔI (FLOATING CHAT BUBBLE) -->
   <div class="ai-fab-btn" id="ai-fab-button" onclick="toggleAiChatPopup()" title="Hỏi nhanh trợ lý AI về lịch trực & ngày nghỉ">
-    <span>🤖</span>
+    <span class="ai-fab-icon">🤖</span>
+    <span class="ai-fab-text">Hỏi AI</span>
     <span class="ai-fab-badge"></span>
   </div>
 
