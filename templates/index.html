@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
   <title>Lịch Trực Vệ Sinh 7H30 & Quản Lý Nghỉ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1572,8 +1572,8 @@
 
     <!-- Thanh nhập câu hỏi -->
     <div class="ai-popup-footer">
-      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ (VD: Vinh xin nghỉ ngày 25/10)..." style="flex: 1; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
-      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 8px 14px; font-size: 0.86rem; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; white-space: nowrap;">
+      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ..." style="flex: 1; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 20px; font-size: 16px; outline: none; -webkit-text-size-adjust: 100%;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
+      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 20px; cursor: pointer; font-weight: 700; white-space: nowrap;">
         Gửi
       </button>
     </div>
@@ -1683,7 +1683,6 @@
 
     function toggleAiChatPopup() {
       const popup = document.getElementById('ai-chat-popup');
-      const input = document.getElementById('ai-chat-input');
       const messagesContainer = document.getElementById('ai-chat-messages');
       if (!popup) return;
 
@@ -1692,18 +1691,14 @@
         document.body.style.overflow = '';
       } else {
         popup.style.display = 'flex';
-        // Khóa cuộn trang nền khi mở chat trên di động để thao tác chat mượt mà
+        // Khóa cuộn trang nền khi mở chat trên di động để giữ khung nhìn ổn định
         if (window.innerWidth <= 600) {
           document.body.style.overflow = 'hidden';
+          window.scrollTo(0, 0);
         }
-        if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        // Chờ hiệu ứng hiển thị popup xong mới focus để tránh giật bàn phím
-        setTimeout(() => {
-          if (input) {
-            input.focus();
-            if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
-          }
-        }, 150);
+        if (messagesContainer) {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
       }
     }
 
@@ -1717,12 +1712,6 @@
           if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
           }
-        }
-      });
-      window.visualViewport.addEventListener('scroll', () => {
-        const popup = document.getElementById('ai-chat-popup');
-        if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
-          popup.style.top = `${window.visualViewport.offsetTop}px`;
         }
       });
     }
