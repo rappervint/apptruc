@@ -675,15 +675,14 @@
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: 100% !important;
+        max-width: 100% !important;
         height: 100% !important;
-        height: 100dvh !important;
-        max-height: 100dvh !important;
         border-radius: 0 !important;
         border: none !important;
         box-shadow: none !important;
         position: fixed !important;
+        z-index: 999999 !important;
       }
       .ai-popup-header {
         padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px !important;
@@ -1723,21 +1722,12 @@
       function syncVisualViewport() {
         const popup = document.getElementById('ai-chat-popup');
         const messagesContainer = document.getElementById('ai-chat-messages');
-        const input = document.getElementById('ai-chat-input');
         
         if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
-          // Tính chiều cao bàn phím đang chiếm dụng
-          const keyboardHeight = window.innerHeight - window.visualViewport.height;
-          
-          if (keyboardHeight > 100) {
-            // Khi bàn phím xuất hiện: Co popup lại đúng bằng visualViewport hoặc đẩy bottom lên
-            popup.style.bottom = `${keyboardHeight}px`;
-            popup.style.height = `${window.visualViewport.height}px`;
-          } else {
-            // Khi bàn phím ẩn đi
-            popup.style.bottom = '0px';
-            popup.style.height = '100dvh';
-          }
+          // Khóa chiều cao popup khớp 100% với vùng hiển thị (trừ bàn phím)
+          popup.style.height = `${window.visualViewport.height}px`;
+          popup.style.bottom = 'auto';
+          popup.style.top = `${window.visualViewport.offsetTop}px`;
 
           if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -1748,22 +1738,6 @@
       window.visualViewport.addEventListener('resize', syncVisualViewport);
       window.visualViewport.addEventListener('scroll', syncVisualViewport);
     }
-
-    // Khi người dùng bấm vào ô nhập trên iPhone: Đảm bảo ô nhập luôn nổi lên trên bàn phím
-    document.addEventListener('DOMContentLoaded', () => {
-      const chatInput = document.getElementById('ai-chat-input');
-      const messagesContainer = document.getElementById('ai-chat-messages');
-      if (chatInput) {
-        chatInput.addEventListener('focus', () => {
-          setTimeout(() => {
-            chatInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            if (messagesContainer) {
-              messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-          }, 300);
-        });
-      }
-    });
   </script>
 
 </body>
