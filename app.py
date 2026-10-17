@@ -1185,8 +1185,12 @@ def api_ai_chat_schedule():
             disp_date = d_obj.strftime('%d/%m/%Y')
             w_str = weekday_vn.get(d_obj.strftime('%A'), '')
 
-            # Kiểm tra xem có ai đã xin nghỉ vào ngày này chưa (cảnh báo trùng lịch)
+            # Kiểm tra xem chính người này hoặc ai khác đã xin nghỉ vào ngày này chưa
             with get_db() as conn:
+                my_existing = conn.execute(
+                    'SELECT reason, created_at FROM leaves WHERE leave_date = ? AND member_name = ?',
+                    (d_str, m_name)
+                ).fetchone()
                 existing_leaves = conn.execute(
                     'SELECT member_name, reason, created_at FROM leaves WHERE leave_date = ? AND member_name != ?',
                     (d_str, m_name)
@@ -1200,6 +1204,8 @@ def api_ai_chat_schedule():
             conflict_note = ""
             if holiday_match:
                 conflict_note = f"⚠️ Lưu ý: Ngày {disp_date} tiệm đang có lịch đóng cửa ({holiday_match['reason']})."
+            elif my_existing:
+                conflict_note = f"ℹ️ Bạn đã đăng ký nghỉ ngày {disp_date} trước đó (Lý do cũ: <em>\"{my_existing['reason']}\"</em>). Nếu xác nhận, hệ thống sẽ cập nhật lý do mới thành: <em>\"{reason}\"</em>."
             elif has_conflict:
                 first_p = existing_leaves[0]
                 conflict_note = f"⚠️ Lưu ý: Ngày {disp_date} đã có <strong>{first_p['member_name']}</strong> xin nghỉ trước! (Nếu nộp bạn sẽ là người nghỉ thứ {len(existing_leaves)+1})."
