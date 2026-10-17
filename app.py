@@ -697,12 +697,13 @@ def parse_with_rule_engine(text, today):
     # 2. Tìm ngày nghỉ (Trích xuất danh sách ngày: found_dates)
     found_dates = []
 
-    # 2.1. Dạng khoảng ngày liên tiếp: "từ DD/MM/YYYY đến DD/MM/YYYY" hoặc "từ DD/MM đến DD/MM"
-    range_match = re.search(r'(?:tu|từ)\s*(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?\s*(?:den|đến|toi|tới|-)\s*(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', norm_text)
+    # 2.1. Dạng khoảng ngày liên tiếp: "từ [ngày] D1 [tháng M1] đến [ngày] D2 tháng M2"
+    pat_range = r'(?:tu|từ)\s*(?:ngay\s*)?(\d{1,2})(?:\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2}))?(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?\s*(?:den|đến|toi|tới|-)\s*(?:ngay\s*)?(\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?'
+    range_match = re.search(pat_range, norm_text)
     if range_match:
         try:
             d1 = int(range_match.group(1))
-            m1 = int(range_match.group(2))
+            m1 = int(range_match.group(2)) if range_match.group(2) else int(range_match.group(5))
             y1 = int(range_match.group(3)) if range_match.group(3) else today.year
             
             d2 = int(range_match.group(4))
@@ -720,7 +721,7 @@ def parse_with_rule_engine(text, today):
         except Exception:
             pass
 
-    # 2.2. Dạng "nghỉ N ngày từ..." (VD: "nghỉ 3 ngày từ 20/10", "nghỉ 2 ngày từ ngày mai")
+    # 2.2. Dạng "nghỉ N ngày từ..." (VD: "nghỉ 3 ngày từ 20/10", "nghỉ 3 ngày từ 20 tháng 10", "nghỉ 2 ngày từ ngày mai")
     if not found_dates:
         n_days_match = re.search(r'ngh[i|y]\s*(\d{1,2})\s*ngay\s*(?:lien tiep)?\s*(?:tu|từ|bat dau tu)?\s*(.*)', norm_text)
         if n_days_match:
@@ -729,7 +730,7 @@ def parse_with_rule_engine(text, today):
                 tail = n_days_match.group(2)
                 base_d = None
                 
-                dm = re.search(r'(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', tail)
+                dm = re.search(r'(\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?', tail)
                 if dm:
                     d_val = int(dm.group(1))
                     m_val = int(dm.group(2))
@@ -747,10 +748,10 @@ def parse_with_rule_engine(text, today):
             except Exception:
                 pass
 
-    # 2.3. Dạng danh sách các ngày cách nhau (VD: "20/10, 22/10 và 25/10" hoặc "20, 22 và 25/10")
+    # 2.3. Dạng nhóm ngày chung tháng (VD: "ngày 25,26 tháng 10", "ngày 25, 26 tháng 10", "20, 22 và 25/10", "20-22-25/10")
     if not found_dates:
-        # Nhóm ngày chung tháng: "ngày 20, 22 và 25/10" hoặc "20, 22, 25/10"
-        m_group = re.search(r'((?:\d{1,2}(?:\s*,\s*|\s+va\s+|\s+voi\s+))+\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', norm_text)
+        pat_group = r'((?:\d{1,2}(?:\s*,\s*|\s+va\s+|\s+voi\s+|\s*-\s*))+\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?'
+        m_group = re.search(pat_group, norm_text)
         if m_group:
             try:
                 days = [int(x) for x in re.findall(r'\b\d{1,2}\b', m_group.group(1))]
@@ -763,55 +764,37 @@ def parse_with_rule_engine(text, today):
             except Exception:
                 pass
 
-        # Tìm tất cả các pattern ngày DD/MM hoặc DD/MM/YYYY đầy đủ
-        if not found_dates:
-            date_matches = list(re.finditer(r'(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', norm_text))
-            if len(date_matches) > 1:
-                for dm in date_matches:
-                    try:
-                        d = int(dm.group(1))
-                        m_val = int(dm.group(2))
-                        y = int(dm.group(3)) if dm.group(3) else today.year
-                        d_obj = date(y, m_val, d)
-                        if d_obj not in found_dates:
-                            found_dates.append(d_obj)
-                    except ValueError:
-                        pass
+    # 2.4. Nhiều ngày DD/MM hoặc DD tháng MM đầy đủ (VD: "20/10 và 25/10", "20 tháng 10 và 22 tháng 10")
+    if not found_dates:
+        date_matches = list(re.finditer(r'(\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?', norm_text))
+        if len(date_matches) > 1:
+            for dm in date_matches:
+                try:
+                    d = int(dm.group(1))
+                    m_val = int(dm.group(2))
+                    y = int(dm.group(3)) if dm.group(3) else today.year
+                    d_obj = date(y, m_val, d)
+                    if d_obj not in found_dates:
+                        found_dates.append(d_obj)
+                except ValueError:
+                    pass
 
-    # 2.4. Nếu vẫn chưa có danh sách, tìm ngày đơn lẻ (DD/MM/YYYY, DD/MM, ngày mai, thứ trong tuần)
+    # 2.5. Nếu vẫn chưa có danh sách, tìm ngày đơn lẻ (DD/MM, DD tháng MM, DD/MM/YYYY, ngày mai, thứ trong tuần)
     if not found_dates:
         single_date = None
-        # DD/MM/YYYY
-        m = re.search(r'(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})', norm_text)
+        # DD/MM hoặc DD tháng MM hoặc DD/MM/YYYY
+        m = re.search(r'(?:ngay\s*)?(\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?', norm_text)
         if m:
             try:
-                single_date = date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+                d = int(m.group(1))
+                m_val = int(m.group(2))
+                y = int(m.group(3)) if m.group(3) else today.year
+                d_obj = date(y, m_val, d)
+                if d_obj < today and m_val < today.month:
+                    d_obj = date(y + 1, m_val, d)
+                single_date = d_obj
             except ValueError:
                 pass
-                
-        # DD/MM
-        if not single_date:
-            m = re.search(r'(\d{1,2})[/\-](\d{1,2})', norm_text)
-            if m:
-                try:
-                    d = int(m.group(1))
-                    m_val = int(m.group(2))
-                    y = today.year
-                    d_obj = date(y, m_val, d)
-                    if d_obj < today and m_val < today.month:
-                        d_obj = date(y + 1, m_val, d)
-                    single_date = d_obj
-                except ValueError:
-                    pass
-                    
-        # 'ngày DD tháng MM'
-        if not single_date:
-            m = re.search(r'ngay\s*(\d{1,2})\s*thang\s*(\d{1,2})', norm_text)
-            if m:
-                try:
-                    single_date = date(today.year, int(m.group(2)), int(m.group(1)))
-                except ValueError:
-                    pass
                     
         # Từ ngữ tương đối: hôm nay, mai, ngày mốt
         if not single_date:
@@ -1342,6 +1325,21 @@ def api_ai_chat_schedule():
                 'reason': reason,
                 'has_conflict': has_any_conflict,
                 'conflict_note': summary_note,
+                'engine': engine
+            })
+        elif m_name and not found_dates:
+            return jsonify({
+                'success': True,
+                'is_leave_intent': False,
+                'answer': f"⚠️ Trợ lý nhận diện bạn đang xin nghỉ cho <strong>{m_name}</strong>, nhưng chưa rõ ngày xin nghỉ cụ thể (Ví dụ: <em>'{m_name} xin nghỉ ngày 25, 26 tháng 10'</em> hoặc <em>'{m_name} xin nghỉ từ 20/10 đến 25/10'</em>). Bạn vui lòng ghi kèm ngày nghỉ nhé!",
+                'engine': engine
+            })
+        elif not m_name and found_dates:
+            dates_disp = ', '.join([d.strftime('%d/%m') for d in found_dates])
+            return jsonify({
+                'success': True,
+                'is_leave_intent': False,
+                'answer': f"⚠️ Trợ lý đã nhận diện được ngày xin nghỉ ({dates_disp}), nhưng chưa nhận diện được tên nhân viên. Tên người xin nghỉ phải thuộc danh sách 10 anh em của tiệm ({', '.join(ALL_STAFF)}).",
                 'engine': engine
             })
 
