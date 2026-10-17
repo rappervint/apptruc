@@ -585,38 +585,45 @@
       animation: tabFadeIn 0.2s ease;
     }
 
-    /* Floating Chat Bubble & Popup Window */
+    /* Floating Chat Bubble & Popup Window (Tối ưu cho cả Di Động & Máy Tính) */
     .ai-fab-btn {
-      position: fixed;
-      bottom: 22px;
-      right: 22px;
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #2563eb, #4f46e5);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.55rem;
-      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
-      cursor: pointer;
-      z-index: 9998;
-      border: 2px solid rgba(255, 255, 255, 0.9);
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
-      user-select: none;
+      position: fixed !important;
+      bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+      right: calc(18px + env(safe-area-inset-right, 0px)) !important;
+      width: 58px !important;
+      height: 58px !important;
+      border-radius: 50% !important;
+      background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #4f46e5 100%) !important;
+      color: #ffffff !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 1.65rem !important;
+      box-shadow: 0 6px 20px rgba(29, 78, 216, 0.45), 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+      cursor: pointer !important;
+      z-index: 99999 !important;
+      border: 2.5px solid #ffffff !important;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease !important;
+      user-select: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      touch-action: manipulation !important;
+      animation: fabPulse 3s infinite ease-in-out;
+    }
+    @keyframes fabPulse {
+      0%, 100% { box-shadow: 0 6px 20px rgba(29, 78, 216, 0.45); }
+      50% { box-shadow: 0 6px 26px rgba(59, 130, 246, 0.7), 0 0 0 6px rgba(59, 130, 246, 0.18); }
     }
     .ai-fab-btn:hover {
       transform: scale(1.08);
-      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.45);
+      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.55) !important;
     }
     .ai-fab-btn:active {
-      transform: scale(0.94);
+      transform: scale(0.92);
     }
     .ai-fab-badge {
       position: absolute;
-      top: -2px;
-      right: -2px;
+      top: -1px;
+      right: -1px;
       width: 14px;
       height: 14px;
       background: #10b981;
@@ -626,21 +633,21 @@
 
     .ai-chat-popup {
       display: none;
-      position: fixed;
-      bottom: 84px;
-      right: 22px;
-      width: 350px;
-      max-width: calc(100vw - 32px);
-      height: 460px;
-      max-height: calc(100vh - 110px);
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.2);
-      border: 1px solid #cbd5e1;
-      z-index: 9999;
-      flex-direction: column;
-      overflow: hidden;
-      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      position: fixed !important;
+      bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
+      right: calc(16px + env(safe-area-inset-right, 0px)) !important;
+      width: 350px !important;
+      max-width: calc(100vw - 32px) !important;
+      height: 480px !important;
+      max-height: calc(100vh - 110px) !important;
+      background: #ffffff !important;
+      border-radius: 18px !important;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28) !important;
+      border: 1px solid #cbd5e1 !important;
+      z-index: 999999 !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
     @keyframes popIn {
       from { opacity: 0; transform: scale(0.92) translateY(12px); }
