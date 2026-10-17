@@ -1718,13 +1718,27 @@
       }
     }
 
-    // Tự động co giãn theo bàn phím ảo của Android/iOS Safari (Visual Viewport API)
+    // Tự động đẩy ô nhập lên trên bàn phím ảo của Safari iPhone & Android
     if (window.visualViewport) {
       function syncVisualViewport() {
         const popup = document.getElementById('ai-chat-popup');
         const messagesContainer = document.getElementById('ai-chat-messages');
+        const input = document.getElementById('ai-chat-input');
+        
         if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
-          popup.style.height = `${window.visualViewport.height}px`;
+          // Tính chiều cao bàn phím đang chiếm dụng
+          const keyboardHeight = window.innerHeight - window.visualViewport.height;
+          
+          if (keyboardHeight > 100) {
+            // Khi bàn phím xuất hiện: Co popup lại đúng bằng visualViewport hoặc đẩy bottom lên
+            popup.style.bottom = `${keyboardHeight}px`;
+            popup.style.height = `${window.visualViewport.height}px`;
+          } else {
+            // Khi bàn phím ẩn đi
+            popup.style.bottom = '0px';
+            popup.style.height = '100dvh';
+          }
+
           if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
           }
@@ -1732,15 +1746,22 @@
       }
 
       window.visualViewport.addEventListener('resize', syncVisualViewport);
+      window.visualViewport.addEventListener('scroll', syncVisualViewport);
     }
 
-    // Chặn Safari tự cuộn cửa sổ window khi focus vào input trong khung chat
-    window.addEventListener('scroll', () => {
-      const popup = document.getElementById('ai-chat-popup');
-      if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
-        if (window.scrollY !== 0) {
-          window.scrollTo(0, 0);
-        }
+    // Khi người dùng bấm vào ô nhập trên iPhone: Đảm bảo ô nhập luôn nổi lên trên bàn phím
+    document.addEventListener('DOMContentLoaded', () => {
+      const chatInput = document.getElementById('ai-chat-input');
+      const messagesContainer = document.getElementById('ai-chat-messages');
+      if (chatInput) {
+        chatInput.addEventListener('focus', () => {
+          setTimeout(() => {
+            chatInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (messagesContainer) {
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+          }, 300);
+        });
       }
     });
   </script>
