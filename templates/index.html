@@ -654,9 +654,9 @@
       position: fixed !important;
       bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
       right: calc(16px + env(safe-area-inset-right, 0px)) !important;
-      width: 350px !important;
+      width: 360px !important;
       max-width: calc(100vw - 32px) !important;
-      height: 480px !important;
+      height: 500px !important;
       max-height: calc(100vh - 100px) !important;
       background: #ffffff !important;
       border-radius: 18px !important;
@@ -667,13 +667,28 @@
       overflow: hidden !important;
       animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
-    @media (max-width: 480px) {
+    
+    /* Giao diện di động: Hiển thị dạng Sheet toàn màn hình thông minh chống bàn phím che */
+    @media (max-width: 600px) {
       .ai-chat-popup {
-        right: 12px !important;
-        left: 12px !important;
-        width: auto !important;
-        max-width: none !important;
-        bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .ai-popup-header {
+        padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px !important;
+      }
+      .ai-popup-footer {
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
       }
     }
     @keyframes popIn {
@@ -687,6 +702,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
     }
     .ai-popup-messages {
       flex: 1;
@@ -696,6 +712,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      -webkit-overflow-scrolling: touch;
     }
     .ai-popup-footer {
       padding: 10px 12px;
@@ -703,6 +720,7 @@
       border-top: 1px solid #e2e8f0;
       display: flex;
       gap: 6px;
+      flex-shrink: 0;
     }
   </style>
 </head>
@@ -1668,13 +1686,45 @@
       const input = document.getElementById('ai-chat-input');
       const messagesContainer = document.getElementById('ai-chat-messages');
       if (!popup) return;
+
       if (popup.style.display === 'flex') {
         popup.style.display = 'none';
+        document.body.style.overflow = '';
       } else {
         popup.style.display = 'flex';
-        if (input) input.focus();
+        // Khóa cuộn trang nền khi mở chat trên di động để thao tác chat mượt mà
+        if (window.innerWidth <= 600) {
+          document.body.style.overflow = 'hidden';
+        }
         if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        // Chờ hiệu ứng hiển thị popup xong mới focus để tránh giật bàn phím
+        setTimeout(() => {
+          if (input) {
+            input.focus();
+            if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        }, 150);
       }
+    }
+
+    // Tự động co giãn theo bàn phím ảo của Android/iOS (Visual Viewport API)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        const popup = document.getElementById('ai-chat-popup');
+        const messagesContainer = document.getElementById('ai-chat-messages');
+        if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
+          popup.style.height = `${window.visualViewport.height}px`;
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        }
+      });
+      window.visualViewport.addEventListener('scroll', () => {
+        const popup = document.getElementById('ai-chat-popup');
+        if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
+          popup.style.top = `${window.visualViewport.offsetTop}px`;
+        }
+      });
     }
   </script>
 
