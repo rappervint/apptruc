@@ -1686,6 +1686,8 @@
       if (modal) modal.style.display = 'none';
     }
 
+    let savedScrollY = 0;
+
     function toggleAiChatPopup() {
       const popup = document.getElementById('ai-chat-popup');
       const messagesContainer = document.getElementById('ai-chat-messages');
@@ -1693,13 +1695,22 @@
 
       if (popup.style.display === 'flex') {
         popup.style.display = 'none';
+        // Khôi phục trạng thái cuộn trang cho iOS & Android
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
         document.body.style.overflow = '';
+        window.scrollTo(0, savedScrollY);
       } else {
+        savedScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
         popup.style.display = 'flex';
-        // Khóa cuộn trang nền khi mở chat trên di động để giữ khung nhìn ổn định
+
+        // Khóa cứng màn hình nền trên iOS Safari chống tự cuộn trang (iOS Scroll Lock)
         if (window.innerWidth <= 600) {
+          document.body.style.position = 'fixed';
+          document.body.style.top = `-${savedScrollY}px`;
+          document.body.style.width = '100%';
           document.body.style.overflow = 'hidden';
-          window.scrollTo(0, 0);
         }
         if (messagesContainer) {
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -1713,10 +1724,7 @@
         const popup = document.getElementById('ai-chat-popup');
         const messagesContainer = document.getElementById('ai-chat-messages');
         if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
-          // Khóa chiều cao đúng bằng vùng hiển thị thực tế (loại bỏ phần bàn phím)
           popup.style.height = `${window.visualViewport.height}px`;
-          // Trên iOS Safari: di chuyển đỉnh popup khớp với visualViewport offset
-          popup.style.top = `${window.visualViewport.offsetTop}px`;
           if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
           }
@@ -1724,8 +1732,17 @@
       }
 
       window.visualViewport.addEventListener('resize', syncVisualViewport);
-      window.visualViewport.addEventListener('scroll', syncVisualViewport);
     }
+
+    // Chặn Safari tự cuộn cửa sổ window khi focus vào input trong khung chat
+    window.addEventListener('scroll', () => {
+      const popup = document.getElementById('ai-chat-popup');
+      if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
+        if (window.scrollY !== 0) {
+          window.scrollTo(0, 0);
+        }
+      }
+    });
   </script>
 
 </body>
