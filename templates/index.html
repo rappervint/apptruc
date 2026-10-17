@@ -1304,7 +1304,7 @@
       const loadingBubble = document.createElement('div');
       loadingBubble.id = 'ai-loading-bubble';
       loadingBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
-      loadingBubble.innerHTML = `<span>🤖</span><div style="background: #fff; border: 1px solid #cbd5e1; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: #64748b; font-style: italic;">Đang tra cứu lịch trực...</div>`;
+      loadingBubble.innerHTML = `<span>🤖</span><div style="background: #fff; border: 1px solid #cbd5e1; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: #64748b; font-style: italic;">Đang xử lý...</div>`;
       container.appendChild(loadingBubble);
       container.scrollTop = container.scrollHeight;
 
@@ -1320,10 +1320,39 @@
           loadingBubble.parentNode.removeChild(loadingBubble);
         }
 
-        // 3. Hiển thị câu trả lời của AI
+        // 3. Phân biệt: Báo nghỉ (Leave Intent) hay Trả lời tra cứu thông thường
         const aiBubble = document.createElement('div');
         aiBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
-        aiBubble.innerHTML = `<span>🤖</span><div style="background: #fff; border: 1px solid #cbd5e1; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #1e293b; line-height: 1.5; box-shadow: 0 1px 3px rgba(0,0,0,0.04); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
+
+        if (data.is_leave_intent) {
+          // Thẻ xác nhận tạo đơn xin nghỉ ngay trong khung chat
+          const conflictStyle = data.has_conflict ? 'background:#fffbeb; border:1px solid #fde68a;' : 'background:#ecfdf5; border:1px solid #a7f3d0;';
+          aiBubble.innerHTML = `
+            <span>🤖</span>
+            <div style="background: #ffffff; border: 1.5px solid #93c5fd; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #1e293b; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.06); max-width: 92%;">
+              <div style="font-weight: 800; color: #1e40af; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                <span>📝 XÁC NHẬN BÁO NGHỈ</span>
+                <span style="font-size: 0.7rem; background: #eff6ff; color: #2563eb; padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
+              </div>
+              <div style="margin-bottom: 6px;">
+                • Nhân viên: <strong style="color: #2563eb;">${data.member_name}</strong><br>
+                • Ngày nghỉ: <strong>${data.display_date}</strong> (${data.weekday_vn})<br>
+                • Lý do: <em>"${data.reason}"</em>
+              </div>
+              <div style="padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; font-size: 0.78rem; ${conflictStyle}">
+                ${data.conflict_note}
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" onclick="confirmLeaveFromChat('${data.member_name}', '${data.leave_date}', '${encodeURIComponent(data.reason)}', this)" style="flex: 1; padding: 7px 10px; font-size: 0.8rem; background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                  🚀 Xác Nhận Tạo Luôn
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          // Trả lời văn bản thông thường
+          aiBubble.innerHTML = `<span>🤖</span><div style="background: #fff; border: 1px solid #cbd5e1; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #1e293b; line-height: 1.5; box-shadow: 0 1px 3px rgba(0,0,0,0.04); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
+        }
         container.appendChild(aiBubble);
 
         if (badge && data.engine) {
@@ -1340,9 +1369,59 @@
       } finally {
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = '<span>Gửi 💬</span>';
+          btn.innerHTML = 'Gửi';
         }
         container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    async function confirmLeaveFromChat(member, leaveDate, reasonEncoded, btnEl) {
+      const reason = decodeURIComponent(reasonEncoded);
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = '⏳ Đang lưu...';
+      }
+
+      try {
+        const res = await fetch('/api/ai-confirm-leave', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            member_name: member,
+            leave_date: leaveDate,
+            reason: reason
+          })
+        });
+        const data = await res.json();
+        const container = document.getElementById('ai-chat-messages');
+
+        if (data.success) {
+          if (btnEl) {
+            btnEl.parentNode.innerHTML = `<span style="font-size: 0.8rem; color: #16a34a; font-weight: 700;">✅ Đã tạo đơn thành công!</span>`;
+          }
+          if (container) {
+            const successBubble = document.createElement('div');
+            successBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
+            successBubble.innerHTML = `<span>🎉</span><div style="background: #f0fdf4; border: 1px solid #86efac; padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; color: #166534;"><strong>Đã ghi nhận thành công!</strong> Ca nghỉ của <strong>${member}</strong> ngày <strong>${leaveDate}</strong> đã được thêm vào hệ thống.<br><small style="color: #15803d;">Đang tự động làm mới trang...</small></div>`;
+            container.appendChild(successBubble);
+            container.scrollTop = container.scrollHeight;
+          }
+          setTimeout(() => {
+            window.location.href = '/?tab=leaves';
+          }, 1200);
+        } else {
+          alert(data.error || 'Có lỗi xảy ra khi tạo đơn nghỉ.');
+          if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = '🚀 Xác Nhận Tạo Luôn';
+          }
+        }
+      } catch (err) {
+        alert('Lỗi kết nối khi tạo đơn: ' + err);
+        if (btnEl) {
+          btnEl.disabled = false;
+          btnEl.innerHTML = '🚀 Xác Nhận Tạo Luôn';
+        }
       }
     }
 
@@ -1536,15 +1615,18 @@
       <div style="display: flex; align-items: flex-start; gap: 8px;">
         <span style="font-size: 1.1rem;">🤖</span>
         <div style="background: #fff; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 12px; font-size: 0.86rem; color: #334155; line-height: 1.45; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-          Xin chào! Tôi có thể tra cứu nhanh lịch trực và danh sách ai xin nghỉ.<br>
-          <small style="color: #64748b; margin-top: 4px; display: block;">VD: <em>"Hôm nay ai trực?"</em>, <em>"Mai có ai nghỉ không?"</em>, <em>"Vinh trực ngày nào?"</em></small>
+          Xin chào! Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc <strong>tạo đơn xin nghỉ bằng tin nhắn</strong>.<br>
+          <small style="color: #64748b; margin-top: 4px; display: block;">
+            • Báo nghỉ: <em>"Vinh xin nghỉ ngày 25/10 việc gia đình"</em><br>
+            • Tra cứu: <em>"Hôm nay ai trực?"</em>, <em>"Mai có ai nghỉ không?"</em>
+          </small>
         </div>
       </div>
     </div>
 
     <!-- Thanh nhập câu hỏi -->
     <div class="ai-popup-footer">
-      <input type="text" id="ai-chat-input" placeholder="Hỏi AI (VD: Ai trực hôm nay?)..." style="flex: 1; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
+      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ (VD: Vinh xin nghỉ ngày 25/10)..." style="flex: 1; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
       <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 8px 14px; font-size: 0.86rem; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; white-space: nowrap;">
         Gửi
       </button>

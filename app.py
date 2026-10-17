@@ -1148,13 +1148,121 @@ def api_ai_chat_schedule():
     question = data.get('question', '').strip()
     if not question:
         return jsonify({'success': False, 'error': 'Vui lòng nhập câu hỏi'})
-        
+
+    q_norm = remove_accents(question.lower())
+
+    # Kiểm tra xem có phải là hành vi XIN NGHỈ / BÁO NGHỈ bằng tin nhắn hay không
+    # (Tránh nhầm với câu hỏi tra cứu như: "có ai nghỉ không", "ai nghỉ", "vinh có nghỉ không", "ngày nào nghỉ")
+    is_question = bool(re.search(r'\b(co\s+ai\s+nghi|ai\s+nghi|co\s+nghi\s+khong|nghi\s+khong|ngay\s+nao|may\s+gio|khi\s+nao|chua|\?)\b', q_norm))
+    leave_action_patterns = [
+        r'\bxin\s+ngh[i|y]\b',
+        r'\bcho\s+(?:em|anh|minh|toi|chau)?\s*xin\s+ngh[i|y]\b',
+        r'\bdang\s+ky\s+ngh[i|y]\b',
+        r'\bbao\s+ngh[i|y]\b',
+        r'\bngh[i|y]\s+phep\b',
+        r'\bban\s+.*(?:ngh[i|y]|cho\s+ngh[i|y])\b'
+    ]
+    is_leave_statement = any(re.search(pat, q_norm) for pat in leave_action_patterns)
+
+    # Nếu câu có dấu hiệu báo nghỉ và không phải là câu hỏi tra cứu thông thường
+    if is_leave_statement and not is_question:
+        m_name, d_obj, reason, engine = ai_parse_message(question)
+        if m_name and d_obj:
+            today = get_vn_today()
+            if d_obj < today:
+                return jsonify({
+                    'success': True,
+                    'is_leave_intent': False,
+                    'answer': f"⚠️ Ngày <strong>{d_obj.strftime('%d/%m/%Y')}</strong> đã ở trong quá khứ nên không thể đăng ký xin nghỉ được nữa.",
+                    'engine': engine
+                })
+
+            weekday_vn = {
+                'Monday': 'Thứ Hai', 'Tuesday': 'Thứ Ba', 'Wednesday': 'Thứ Tư',
+                'Thursday': 'Thứ Năm', 'Friday': 'Thứ Sáu', 'Saturday': 'Thứ Bảy', 'Sunday': 'Chủ Nhật'
+            }
+            d_str = d_obj.strftime('%Y-%m-%d')
+            disp_date = d_obj.strftime('%d/%m/%Y')
+            w_str = weekday_vn.get(d_obj.strftime('%A'), '')
+
+            # Kiểm tra xem có ai đã xin nghỉ vào ngày này chưa (cảnh báo trùng lịch)
+            with get_db() as conn:
+                existing_leaves = conn.execute(
+                    'SELECT member_name, reason, created_at FROM leaves WHERE leave_date = ? AND member_name != ?',
+                    (d_str, m_name)
+                ).fetchall()
+                holiday_match = conn.execute(
+                    'SELECT reason FROM shop_holidays WHERE holiday_date = ?',
+                    (d_str,)
+                ).fetchone()
+
+            has_conflict = len(existing_leaves) > 0
+            conflict_note = ""
+            if holiday_match:
+                conflict_note = f"⚠️ Lưu ý: Ngày {disp_date} tiệm đang có lịch đóng cửa ({holiday_match['reason']})."
+            elif has_conflict:
+                first_p = existing_leaves[0]
+                conflict_note = f"⚠️ Lưu ý: Ngày {disp_date} đã có <strong>{first_p['member_name']}</strong> xin nghỉ trước! (Nếu nộp bạn sẽ là người nghỉ thứ {len(existing_leaves)+1})."
+            else:
+                conflict_note = f"✅ Ngày {disp_date} hiện chưa có ai xin nghỉ (Tránh được trùng lịch)."
+
+            # Trả về kèm cấu trúc xác nhận tạo đơn ngay trong bong bóng chat
+            return jsonify({
+                'success': True,
+                'is_leave_intent': True,
+                'member_name': m_name,
+                'leave_date': d_str,
+                'display_date': disp_date,
+                'weekday_vn': w_str,
+                'reason': reason,
+                'has_conflict': has_conflict,
+                'conflict_note': conflict_note,
+                'engine': engine
+            })
+
+    # Nếu không phải báo nghỉ hoặc chỉ là câu hỏi tra cứu
     answer, engine = answer_schedule_query(question)
     return jsonify({
         'success': True,
         'question': question,
         'answer': answer,
         'engine': engine
+    })
+
+@app.route('/api/ai-confirm-leave', methods=['POST'])
+def api_ai_confirm_leave():
+    """Tạo đơn xin nghỉ trực tiếp từ bong bóng chat AI"""
+    cleanup_and_advance_checkpoint()
+    data = request.get_json(silent=True) or request.form
+    leave_date = (data.get('leave_date') or '').strip()
+    member_name = (data.get('member_name') or '').strip()
+    reason = (data.get('reason') or '').strip() or 'Việc cá nhân'
+    created_at = get_vn_now().strftime('%Y-%m-%d %H:%M:%S')
+
+    today_str = get_vn_today().strftime('%Y-%m-%d')
+    if not leave_date or leave_date < today_str:
+        return jsonify({'success': False, 'error': 'Ngày xin nghỉ không hợp lệ hoặc đã qua.'})
+    if member_name not in ALL_STAFF:
+        return jsonify({'success': False, 'error': f'Nhân viên "{member_name}" không thuộc danh sách nhân sự.'})
+
+    with get_db() as conn:
+        conn.execute('''
+            INSERT INTO leaves (leave_date, member_name, reason, created_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(leave_date, member_name) DO UPDATE SET
+                reason = excluded.reason
+        ''', (leave_date, member_name, reason, created_at))
+        conn.commit()
+
+    actor_name = f"Admin ({member_name})" if is_admin() else member_name
+    log_action('XIN NGHỈ (AI CHAT)', f"{member_name} đăng ký xin nghỉ ngày {leave_date} qua Trợ lý AI (Lý do: '{reason}')", actor=actor_name)
+
+    return jsonify({
+        'success': True,
+        'member_name': member_name,
+        'leave_date': leave_date,
+        'reason': reason,
+        'message': f"Đã ghi nhận thành công đơn xin nghỉ của {member_name}!"
     })
 
 @app.route('/report-leave', methods=['POST'])
