@@ -1,7 +1,11 @@
 import os
 import sqlite3
+import re
+import unicodedata
+import json
+import urllib.request
 from datetime import datetime, timedelta, date, timezone
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
 # Múi giờ Việt Nam (UTC+7)
 VN_TZ = timezone(timedelta(hours=7))
@@ -659,6 +663,233 @@ def delete_history():
                         pass
             
     return redirect(request.referrer or url_for('history'))
+
+# ═══════════════════════════════════════════════════════════════════
+# TRỢ LÝ ẢO AI (OLLAMA & NLP TIẾNG VIỆT TÍCH HỢP)
+# ═══════════════════════════════════════════════════════════════════
+OLLAMA_HOST = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3')
+
+def remove_accents(input_str):
+    if not input_str:
+        return ''
+    nfkd = unicodedata.normalize('NFKD', input_str)
+    return ''.join([c for c in nfkd if not unicodedata.combining(c)]).replace('đ', 'd').replace('Đ', 'D')
+
+def parse_with_rule_engine(text, today):
+    """Bộ phân tích ngôn ngữ tự nhiên Tiếng Việt tốc độ cao (0ms, không phụ thuộc server ngoài)"""
+    text_clean = text.strip()
+    norm_text = remove_accents(text_clean.lower())
+    
+    # 1. Tìm nhân viên (ưu tiên tên dài trước ví dụ Bảo Mập trước Bảo)
+    found_member = None
+    for staff in sorted(ALL_STAFF, key=lambda s: len(s), reverse=True):
+        staff_norm = remove_accents(staff.lower())
+        if re.search(r'\b' + re.escape(staff_norm) + r'\b', norm_text):
+            found_member = staff
+            break
+            
+    # 2. Tìm ngày nghỉ
+    found_date = None
+    # DD/MM/YYYY hoặc DD-MM-YYYY
+    m = re.search(r'(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})', norm_text)
+    if m:
+        try:
+            found_date = date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+        except ValueError:
+            pass
+            
+    # DD/MM hoặc DD-MM
+    if not found_date:
+        m = re.search(r'(\d{1,2})[/\-](\d{1,2})', norm_text)
+        if m:
+            try:
+                d = int(m.group(1))
+                m_val = int(m.group(2))
+                y = today.year
+                d_obj = date(y, m_val, d)
+                if d_obj < today and m_val < today.month:
+                    d_obj = date(y + 1, m_val, d)
+                found_date = d_obj
+            except ValueError:
+                pass
+                
+    # 'ngày DD tháng MM'
+    if not found_date:
+        m = re.search(r'ngay\s*(\d{1,2})\s*thang\s*(\d{1,2})', norm_text)
+        if m:
+            try:
+                found_date = date(today.year, int(m.group(2)), int(m.group(1)))
+            except ValueError:
+                pass
+                
+    # Từ ngữ tương đối: hôm nay, mai, ngày mốt
+    if not found_date:
+        if re.search(r'\b(hom nay|nay|hom ni)\b', norm_text):
+            found_date = today
+        elif re.search(r'\b(ngay mai|mai)\b', norm_text):
+            found_date = today + timedelta(days=1)
+        elif re.search(r'\b(ngay mot|mot|ngay kia)\b', norm_text):
+            found_date = today + timedelta(days=2)
+            
+    # Thứ trong tuần
+    if not found_date:
+        weekdays = {
+            'thu 2': 0, 'thu hai': 0,
+            'thu 3': 1, 'thu ba': 1,
+            'thu 4': 2, 'thu tu': 2,
+            'thu 5': 3, 'thu nam': 3,
+            'thu 6': 4, 'thu sau': 4,
+            'thu 7': 5, 'thu bay': 5,
+            'chu nhat': 6, 'cn': 6
+        }
+        for w_str, w_num in weekdays.items():
+            if re.search(r'\b' + re.escape(w_str) + r'\b', norm_text):
+                days_ahead = (w_num - today.weekday()) % 7
+                if days_ahead == 0 or 'tuan sau' in norm_text:
+                    days_ahead += 7
+                found_date = today + timedelta(days=days_ahead)
+                break
+                
+    # 3. Trích xuất lý do
+    found_reason = 'Việc cá nhân'
+    kw_map = [
+        ('ve que', 'Về quê'),
+        ('dam cuoi', 'Đám cưới'),
+        ('dam tiec', 'Đám tiệc'),
+        ('kham benh', 'Khám bệnh'),
+        ('di vien', 'Khám bệnh / Nằm viện'),
+        ('gia dinh', 'Việc gia đình'),
+        ('du lich', 'Đi du lịch'),
+        ('ban viec', 'Bận việc riêng'),
+    ]
+    for k, v in kw_map:
+        if k in norm_text:
+            found_reason = v
+            break
+    else:
+        m = re.search(r'(?:ly\s*do|lý\s*do|vì|do|bận|di|đi|nghi\s*de|nghỉ\s*để)\s*[:=]?\s*(.*)', text_clean, re.I)
+        if m and m.group(1).strip():
+            val = m.group(1).strip(' ,.:;-!?')
+            found_reason = val[0].upper() + val[1:]
+
+    return found_member, found_date, found_reason
+
+_ollama_checked_time = 0
+_ollama_available = False
+
+def is_ollama_online():
+    """Kiểm tra nhanh xem server Ollama có đang chạy không (cache 30s để tối ưu tốc độ)"""
+    global _ollama_checked_time, _ollama_available
+    import time
+    now = time.time()
+    if now - _ollama_checked_time < 30:
+        return _ollama_available
+    
+    _ollama_checked_time = now
+    try:
+        req = urllib.request.Request(f"{OLLAMA_HOST}/api/tags")
+        with urllib.request.urlopen(req, timeout=0.3):
+            _ollama_available = True
+            return True
+    except Exception:
+        _ollama_available = False
+        return False
+
+def parse_with_ollama(text, today):
+    """Gửi yêu cầu tới Ollama nếu service đang hoạt động"""
+    if not is_ollama_online():
+        return None, None, None
+
+    prompt = f"""
+Bạn là trợ lý AI trích xuất thông tin xin nghỉ việc cho cửa hàng.
+Hôm nay là: {today.strftime('%Y-%m-%d')} ({today.strftime('%A')}).
+Danh sách 10 nhân sự hợp lệ: {', '.join(ALL_STAFF)}.
+Tin nhắn của nhân viên: "{text}"
+
+Yêu cầu: Hãy phân tích và trả về DUY NHẤT một đối tượng JSON:
+{{
+  "member_name": "Tên chính xác trong danh sách 10 nhân sự",
+  "leave_date": "YYYY-MM-DD",
+  "reason": "Lý do xin nghỉ"
+}}
+Nếu không có tên hợp lệ hoặc ngày hợp lệ, trả về null.
+"""
+    try:
+        req_data = json.dumps({
+            "model": OLLAMA_MODEL,
+            "prompt": prompt,
+            "stream": False,
+            "format": "json"
+        }).encode('utf-8')
+        req = urllib.request.Request(
+            f"{OLLAMA_HOST}/api/generate",
+            data=req_data,
+            headers={'Content-Type': 'application/json'}
+        )
+        with urllib.request.urlopen(req, timeout=3.5) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            res_json = json.loads(data.get('response', '{}'))
+            m_name = res_json.get('member_name')
+            l_date = res_json.get('leave_date')
+            reason = res_json.get('reason') or 'Việc cá nhân'
+            if m_name in ALL_STAFF and l_date:
+                d_obj = datetime.strptime(l_date, '%Y-%m-%d').date()
+                return m_name, d_obj, reason
+    except Exception:
+        pass
+    return None, None, None
+
+def ai_parse_message(text):
+    """
+    Hệ thống kết hợp (Hybrid):
+    1. Thử gọi Ollama nếu có server LLM đang chạy.
+    2. Nếu Ollama không khả dụng (ví dụ trên PythonAnywhere), tự động dùng bộ NLP Tiếng Việt tích hợp sẵn.
+    """
+    today = get_vn_today()
+    # 1. Thử Ollama trước
+    m_name, d_obj, reason = parse_with_ollama(text, today)
+    engine = f"Ollama ({OLLAMA_MODEL})"
+    
+    # 2. Fallback sang Rule-based NLP nếu Ollama không phản hồi
+    if not m_name or not d_obj:
+        m_name, d_obj, reason = parse_with_rule_engine(text, today)
+        engine = "Trợ lý AI Tiếng Việt"
+        
+    return m_name, d_obj, reason, engine
+
+@app.route('/api/ai-parse-leave', methods=['POST'])
+def api_ai_parse_leave():
+    data = request.get_json(silent=True) or request.form
+    message = data.get('message', '').strip()
+    if not message:
+        return jsonify({'success': False, 'error': 'Vui lòng nhập tin nhắn xin nghỉ'})
+
+    m_name, d_obj, reason, engine = ai_parse_message(message)
+    if not m_name:
+        return jsonify({'success': False, 'error': 'Chưa nhận diện được tên nhân viên trong tin nhắn (Phải thuộc 10 nhân sự của cửa hàng)'})
+    if not d_obj:
+        return jsonify({'success': False, 'error': 'Chưa nhận diện được ngày xin nghỉ (Ví dụ: 25/10/2026, ngày mai, thứ hai tuần sau)'})
+
+    today = get_vn_today()
+    if d_obj < today:
+        return jsonify({'success': False, 'error': f'Ngày xin nghỉ ({d_obj.strftime("%d/%m/%Y")}) đã ở trong quá khứ'})
+
+    weekday_vn = {
+        'Monday': 'Thứ Hai', 'Tuesday': 'Thứ Ba', 'Wednesday': 'Thứ Tư',
+        'Thursday': 'Thứ Năm', 'Friday': 'Thứ Sáu', 'Saturday': 'Thứ Bảy', 'Sunday': 'Chủ Nhật'
+    }
+    weekday_str = weekday_vn.get(d_obj.strftime('%A'), d_obj.strftime('%A'))
+
+    return jsonify({
+        'success': True,
+        'member_name': m_name,
+        'leave_date': d_obj.strftime('%Y-%m-%d'),
+        'display_date': d_obj.strftime('%d/%m/%Y'),
+        'weekday_vn': weekday_str,
+        'reason': reason,
+        'engine': engine
+    })
 
 @app.route('/report-leave', methods=['POST'])
 def report_leave():

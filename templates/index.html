@@ -861,9 +861,62 @@
 
     <!-- FORM XIN NGHỈ -->
     <div class="action-box">
-      <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 16px; color: #b91c1c; display: flex; align-items: center; gap: 8px;">
-        <span>📝</span> ĐĂNG KÝ XIN NGHỈ
-      </h2>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+        <h2 style="font-size: 1.15rem; font-weight: 800; color: #b91c1c; display: flex; align-items: center; gap: 8px; margin: 0;">
+          <span>📝</span> ĐĂNG KÝ XIN NGHỈ
+        </h2>
+        <span style="font-size: 0.76rem; background: #eff6ff; color: #1d4ed8; padding: 4px 10px; border-radius: 20px; font-weight: 700; border: 1px solid #bfdbfe;">
+          🤖 Trợ lý AI Ollama & NLP
+        </span>
+      </div>
+
+      <!-- KHUNG TRỢ LÝ AI NHẬN DIỆN TIN NHẮN TỰ NHIÊN -->
+      <div class="ai-assistant-card" style="background: linear-gradient(135deg, #f0f7ff, #f8fafc); border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(37,99,235,0.06);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <div style="font-weight: 800; font-size: 0.92rem; color: #1e40af; display: flex; align-items: center; gap: 6px;">
+            <span>🤖</span>
+            <span>Báo Nghỉ Bằng Tin Nhắn Tự Nhiên (AI Tự Hiểu)</span>
+          </div>
+          <span id="ai-engine-badge" style="font-size: 0.72rem; color: #2563eb; font-weight: 700; background: #dbeafe; padding: 2px 8px; border-radius: 10px;">
+            ⚡ AI Ready
+          </span>
+        </div>
+        
+        <p style="font-size: 0.82rem; color: #475569; margin-bottom: 10px; margin-top: 0;">
+          Dán hoặc nhập tin nhắn của anh em, AI sẽ tự phân tích tên, ngày và lý do để điền vào form:
+        </p>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <input type="text" id="ai-prompt-input" placeholder="Ví dụ: vinh xin nghĩ ngày 25/10/2026 có việc gia đình..." style="flex: 1; min-width: 240px; padding: 11px 14px; border: 1.5px solid #93c5fd; border-radius: 8px; font-size: 0.92rem; outline: none; background: #fff;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); runAiParse(); }">
+          <button type="button" onclick="runAiParse()" id="ai-parse-btn" style="padding: 10px 18px; font-size: 0.88rem; width: auto; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.25); transition: all 0.2s ease;">
+            <span>✨ Phân Tích & Điền Đơn</span>
+          </button>
+        </div>
+
+        <div class="quick-chips" style="margin-top: 8px;">
+          <span style="font-size: 0.74rem; color: #64748b; margin-right: 4px; display: flex; align-items: center;">Mẫu thử:</span>
+          <span class="chip" onclick="setAiSample('vinh xin nghĩ ngày 25/10/2026 có việc gia đình')">Vinh xin nghỉ 25/10</span>
+          <span class="chip" onclick="setAiSample('mai anh bảo mập bận đám tiệc')">Mai Bảo Mập bận đám tiệc</span>
+          <span class="chip" onclick="setAiSample('nguyên xin nghỉ ngày mốt đi khám bệnh')">Nguyên nghỉ mốt khám bệnh</span>
+          <span class="chip" onclick="setAiSample('thứ 2 tuần sau lợi bận về quê')">Thứ 2 tuần sau Lợi về quê</span>
+        </div>
+
+        <!-- HỘP THÔNG BÁO KẾT QUẢ AI -->
+        <div id="ai-result-box" style="display: none; margin-top: 14px; padding: 12px 14px; background: #ecfdf5; border: 1.5px solid #86efac; border-radius: 8px; animation: tabFadeIn 0.2s ease;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div id="ai-result-text" style="font-size: 0.88rem; color: #166534; line-height: 1.4;"></div>
+            <button type="button" onclick="document.getElementById('leave-form').submit()" style="padding: 6px 14px; font-size: 0.82rem; width: auto; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(22,163,74,0.3); display: inline-flex; align-items: center; gap: 4px;">
+              🚀 Xác Nhận Tạo Đơn Luôn
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px; margin: 16px 0 18px;">
+        <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+        <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">HOẶC CHỌN THỦ CÔNG TỪ DANH SÁCH BÊN DƯỚI</span>
+        <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+      </div>
 
       <form action="/report-leave" method="POST" id="leave-form">
         <div class="form-group">
@@ -1073,6 +1126,79 @@
       if (input) {
         input.value = text;
         input.focus();
+      }
+    }
+
+    function setAiSample(sampleText) {
+      const input = document.getElementById('ai-prompt-input');
+      if (input) {
+        input.value = sampleText;
+        runAiParse();
+      }
+    }
+
+    async function runAiParse() {
+      const input = document.getElementById('ai-prompt-input');
+      const btn = document.getElementById('ai-parse-btn');
+      const resultBox = document.getElementById('ai-result-box');
+      const resultText = document.getElementById('ai-result-text');
+      const badge = document.getElementById('ai-engine-badge');
+      const msg = input ? input.value.trim() : '';
+
+      if (!msg) {
+        alert('Vui lòng nhập hoặc dán tin nhắn xin nghỉ (Ví dụ: vinh xin nghĩ ngày 25/10/2026 có việc gia đình)');
+        if (input) input.focus();
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Đang phân tích...';
+      }
+
+      try {
+        const res = await fetch('/api/ai-parse-leave', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // 1. Tự động điền dữ liệu vào form
+          const memberSelect = document.getElementById('member_select');
+          const dateInput = document.getElementById('leave_date_input');
+          const reasonInput = document.getElementById('leave_reason_input');
+
+          if (memberSelect && data.member_name) memberSelect.value = data.member_name;
+          if (dateInput && data.leave_date) dateInput.value = data.leave_date;
+          if (reasonInput && data.reason) reasonInput.value = data.reason;
+
+          // Kích hoạt kiểm tra trùng lịch tức thì
+          if (typeof checkLiveConflict === 'function') {
+            checkLiveConflict();
+          }
+
+          // 2. Cập nhật nhãn động cơ AI & thông báo thành công
+          if (badge && data.engine) {
+            badge.textContent = `✨ ${data.engine}`;
+          }
+          if (resultText) {
+            resultText.innerHTML = `🎉 <strong>AI đã nhận diện:</strong> <span style="color:#1d4ed8; font-weight:800;">${data.member_name}</span> xin nghỉ ngày <strong>${data.display_date} (${data.weekday_vn})</strong> — Lý do: <em>${data.reason}</em>.<br><small style="color:#15803d;">👉 Đã tự động điền form bên dưới. Bạn có thể kiểm tra hoặc bấm nút bên phải để xác nhận lưu luôn!</small>`;
+          }
+          if (resultBox) {
+            resultBox.style.display = 'block';
+          }
+        } else {
+          alert(data.error || 'Trợ lý AI chưa nhận diện được tên nhân viên hoặc ngày xin nghỉ. Vui lòng kiểm tra lại!');
+        }
+      } catch (err) {
+        alert('Lỗi kết nối tới trợ lý AI: ' + err);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>✨ Phân Tích & Điền Đơn</span>';
+        }
       }
     }
 
