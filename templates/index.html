@@ -675,9 +675,11 @@
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        height: 100% !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        min-height: 100% !important;
         border-radius: 0 !important;
         border: none !important;
         box-shadow: none !important;
@@ -688,7 +690,7 @@
         padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px !important;
       }
       .ai-popup-footer {
-        padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+        padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
       }
       /* Triệt tiêu 100% hành vi auto-zoom của Safari iPhone */
       input, select, textarea {
@@ -1724,10 +1726,17 @@
         const messagesContainer = document.getElementById('ai-chat-messages');
         
         if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
-          // Khóa chiều cao popup khớp 100% với vùng hiển thị (trừ bàn phím)
-          popup.style.height = `${window.visualViewport.height}px`;
-          popup.style.bottom = 'auto';
-          popup.style.top = `${window.visualViewport.offsetTop}px`;
+          const isKeyboardOpen = window.innerHeight - window.visualViewport.height > 120;
+          
+          if (isKeyboardOpen) {
+            // Khi bàn phím bật lên: co chiều cao lại bằng đúng vùng nhìn thấy
+            popup.style.height = `${window.visualViewport.height}px`;
+            popup.style.top = `${window.visualViewport.offsetTop}px`;
+          } else {
+            // Khi bàn phím đóng: Giữ full toàn màn hình 100%
+            popup.style.height = '100dvh';
+            popup.style.top = '0px';
+          }
 
           if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
