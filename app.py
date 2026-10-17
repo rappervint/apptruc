@@ -748,23 +748,7 @@ def parse_with_rule_engine(text, today):
             except Exception:
                 pass
 
-    # 2.3. Dạng nhóm ngày chung tháng (VD: "ngày 25 26 tháng 10", "25,26 tháng 10", "25, 26 tháng 10", "20, 22 và 25/10", "20-22-25/10")
-    if not found_dates:
-        pat_group = r'((?:\b\d{1,2}\b(?:\s*,\s*|\s+va\s+|\s+voi\s+|\s*-\s*|\s+))+\b\d{1,2}\b)\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?'
-        m_group = re.search(pat_group, norm_text)
-        if m_group:
-            try:
-                days = [int(x) for x in re.findall(r'\b\d{1,2}\b', m_group.group(1)) if 1 <= int(x) <= 31]
-                m_val = int(m_group.group(2))
-                y = int(m_group.group(3)) if m_group.group(3) else today.year
-                for d in days:
-                    d_obj = date(y, m_val, d)
-                    if d_obj not in found_dates:
-                        found_dates.append(d_obj)
-            except Exception:
-                pass
-
-    # 2.4. Nhiều ngày DD/MM hoặc DD tháng MM đầy đủ (VD: "20/10 và 25/10", "20 tháng 10 và 22 tháng 10")
+    # 2.3. Nhiều ngày DD/MM hoặc DD tháng MM đầy đủ (VD: "20/10 và 25/10", "23/10, 28/10", "20 tháng 10 và 22 tháng 10")
     if not found_dates:
         date_matches = list(re.finditer(r'(\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?', norm_text))
         if len(date_matches) > 1:
@@ -773,11 +757,35 @@ def parse_with_rule_engine(text, today):
                     d = int(dm.group(1))
                     m_val = int(dm.group(2))
                     y = int(dm.group(3)) if dm.group(3) else today.year
-                    d_obj = date(y, m_val, d)
-                    if d_obj not in found_dates:
-                        found_dates.append(d_obj)
+                    if 1 <= d <= 31 and 1 <= m_val <= 12:
+                        d_obj = date(y, m_val, d)
+                        if d_obj not in found_dates:
+                            found_dates.append(d_obj)
                 except ValueError:
                     pass
+
+    # 2.4. Dạng nhóm ngày chung tháng (VD: "ngày 28 23 tháng 10", "25 26 tháng 10", "25, 26 tháng 10", "20, 22 và 25/10", "28 và ngày 23/10")
+    if not found_dates:
+        pat_group = r'((?:\b\d{1,2}\b(?:\s*,\s*|\s+(?:va|voi|va\s+ngay|voi\s+ngay|ngay)?\s*|\s*-\s*))+\b\d{1,2}\b)\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})(?:\s*[/\-]\s*|\s*nam\s*)?(\d{4})?'
+        m_group = re.search(pat_group, norm_text)
+        if m_group:
+            try:
+                days = [int(x) for x in re.findall(r'\b\d{1,2}\b', m_group.group(1)) if 1 <= int(x) <= 31]
+                m_val = int(m_group.group(2))
+                y = int(m_group.group(3)) if m_group.group(3) else today.year
+                if 1 <= m_val <= 12:
+                    for d in days:
+                        try:
+                            d_obj = date(y, m_val, d)
+                            if d_obj not in found_dates:
+                                found_dates.append(d_obj)
+                        except ValueError:
+                            pass
+            except Exception:
+                pass
+
+    if found_dates:
+        found_dates = sorted(list(set(found_dates)))
 
     # 2.5. Nếu vẫn chưa có danh sách, tìm ngày đơn lẻ (DD/MM, DD tháng MM, DD/MM/YYYY, ngày mai, thứ trong tuần)
     if not found_dates:
@@ -1337,26 +1345,27 @@ def api_ai_chat_schedule():
 
     q_norm = remove_accents(question.lower())
 
-    # Kiểm tra xem có phải là hành vi XIN NGHỈ / BÁO NGHỈ bằng tin nhắn hay không
-    # (Tránh nhầm với câu hỏi tra cứu như: "có ai nghỉ không", "ai nghỉ", "vinh có nghỉ không", "ngày nào nghỉ")
-    is_question = bool(re.search(r'\b(co\s+ai\s+nghi|ai\s+nghi|co\s+nghi\s+khong|nghi\s+khong|ngay\s+nao|may\s+gio|khi\s+nao|chua|\?)\b', q_norm))
-    leave_action_patterns = [
-        r'\bxin\s+ngh[i|y]\b',
-        r'\bcho\s+(?:em|anh|minh|toi|chau)?\s*xin\s+ngh[i|y]\b',
-        r'\bdang\s+ky\s+ngh[i|y]\b',
-        r'\bbao\s+ngh[i|y]\b',
-        r'\bngh[i|y]\s+phep\b',
-        r'\bban\s+.*(?:ngh[i|y]|cho\s+ngh[i|y])\b'
-    ]
-    is_leave_statement = any(re.search(pat, q_norm) for pat in leave_action_patterns)
+    # 1. Kiểm tra các động từ / cụm từ thể hiện hành động XIN NGHỈ / BÁO NGHỈ:
+    has_leave_intent_verbs = bool(re.search(r'\b(xin\s+ngh[i|y]|muon\s+ngh[i|y]|can\s+ngh[i|y]|dinh\s+ngh[i|y]|tinh\s+ngh[i|y]|bao\s+ngh[i|y]|dang\s+ky\s+ngh[i|y]|ngh[i|y]\s+phep|cho\s+(?:toi|em|anh|minh|chau|tui)?\s*ngh[i|y]|xin\s+off|muon\s+off|bao\s+off)\b', q_norm))
+    first_person_leave = bool(re.search(r'\b(toi|em|minh|chau|tui)\s+(muon|xin|can|dinh|tinh|se)?\s*ngh[i|y]\b', q_norm))
 
-    # Nếu câu có dấu hiệu báo nghỉ và không phải là câu hỏi tra cứu thông thường
-    if is_leave_statement and not is_question:
+    # 2. Nhận diện câu HỎI TRA CỨU thông thường về người nghỉ (Inquiry):
+    is_inquiry = bool(re.search(r'\b(co\s+ai\s+nghi|ai\s+nghi|ai\s+xin\s+nghi|co\s+nguoi\s+nghi|co\s+ai\s+off|ai\s+off|danh\s+sach\s+nghi|xem\s+nghi|khi\s+nao\s+nghi|ngay\s+nao\s+nghi|nghi\s+ngay\s+nao)\b', q_norm))
+    is_asking_if_someone_leave = bool(re.search(r'\b(co\s+.*ngh[i|y]|ngh[i|y]\s+.*(?:khong|chua|\?))\b', q_norm)) and not (has_leave_intent_verbs or first_person_leave)
+
+    is_pure_question = is_inquiry or is_asking_if_someone_leave
+
+    # 3. Kết luận: Có phải ý định BÁO NGHỈ / XIN NGHỈ không?
+    has_staff_and_leave = bool(re.search(r'\bngh[i|y]\b', q_norm)) and any(remove_accents(s.lower()) in q_norm for s in ALL_STAFF)
+    is_leave_statement = (has_leave_intent_verbs or first_person_leave or has_staff_and_leave) and not is_pure_question
+
+    # Nếu câu có dấu hiệu báo nghỉ
+    if is_leave_statement:
         m_name, first_d, found_dates, reason, engine = ai_parse_message(question)
         if m_name and found_dates:
             today = get_vn_today()
-            # Lọc các ngày từ hôm nay trở đi
-            valid_dates = [d for d in found_dates if d >= today]
+            # Lọc và sắp xếp các ngày theo trình tự thời gian
+            valid_dates = sorted(list(set([d for d in found_dates if d >= today])))
             if not valid_dates:
                 chips = make_ai_chips([
                     (f"📅 {m_name} nghỉ ngày mai", f"{m_name} xin nghỉ ngày mai"),
@@ -1415,8 +1424,14 @@ def api_ai_chat_schedule():
                 display_date = valid_dates[0].strftime('%d/%m/%Y')
                 weekday_info = weekday_vn.get(valid_dates[0].strftime('%A'), '')
             else:
-                display_date = f"Từ {valid_dates[0].strftime('%d/%m/%Y')} đến {valid_dates[-1].strftime('%d/%m/%Y')}"
-                weekday_info = f"{len(valid_dates)} ngày liên tiếp"
+                is_consecutive = all((valid_dates[i] - valid_dates[i-1]).days == 1 for i in range(1, len(valid_dates)))
+                if is_consecutive:
+                    display_date = f"Từ {valid_dates[0].strftime('%d/%m/%Y')} đến {valid_dates[-1].strftime('%d/%m/%Y')}"
+                    weekday_info = f"{len(valid_dates)} ngày liên tiếp"
+                else:
+                    dates_str_list = [d.strftime('%d/%m/%Y') for d in valid_dates]
+                    display_date = " & ".join(dates_str_list)
+                    weekday_info = f"{len(valid_dates)} ngày"
 
             return jsonify({
                 'success': True,
@@ -1448,19 +1463,35 @@ def api_ai_chat_schedule():
                 'engine': engine
             })
         elif not m_name and found_dates:
-            if len(found_dates) > 1:
-                dates_disp = ', '.join([d.strftime('%d/%m') for d in found_dates])
-                lbl = f"các ngày {dates_disp} ({len(found_dates)} ngày)"
+            today = get_vn_today()
+            valid_dates = sorted(list(set([d for d in found_dates if d >= today])))
+            if not valid_dates:
+                chips = make_ai_chips([
+                    ("📅 Nghỉ hôm nay", "Tôi xin nghỉ hôm nay"),
+                    ("📅 Nghỉ ngày mai", "Tôi xin nghỉ ngày mai"),
+                    ("📅 Nghỉ 2 ngày từ mai", "Tôi xin nghỉ 2 ngày từ ngày mai")
+                ])
+                return jsonify({
+                    'success': True,
+                    'is_leave_intent': False,
+                    'answer': f"⚠️ Các ngày bạn yêu cầu đều đã ở trong quá khứ nên hệ thống không nhận đơn được nữa.<br>👉 Bạn có muốn đổi sang ngày sắp tới không?{chips}",
+                    'engine': engine
+                })
+
+            if len(valid_dates) > 1:
+                dates_disp = ' và '.join([d.strftime('%d/%m') for d in valid_dates])
+                lbl = f"các ngày <strong>{dates_disp}</strong> ({len(valid_dates)} ngày)"
             else:
-                dates_disp = found_dates[0].strftime('%d/%m')
-                lbl = f"ngày {dates_disp}"
+                dates_disp = valid_dates[0].strftime('%d/%m')
+                lbl = f"ngày <strong>{dates_disp}</strong>"
+
             chips = make_ai_chips([(f"👤 {m}", f"{m} xin nghỉ ngày {dates_disp}") for m in ALL_STAFF])
             return jsonify({
                 'success': True,
                 'is_leave_intent': False,
                 'answer': (
-                    f"❓ Bạn muốn đăng ký xin nghỉ vào <strong>{lbl}</strong> cho ai vậy bạn?<br>"
-                    f"👉 Vui lòng bấm chọn tên nhân viên bên dưới:{chips}"
+                    f"📝 Trợ lý đã ghi nhận bạn muốn đăng ký xin nghỉ vào {lbl}.<br>"
+                    f"❓ Bạn là ai trong 10 anh em cửa hàng? Vui lòng bấm chọn tên của bạn bên dưới để tạo đơn ngay nhé:{chips}"
                 ),
                 'engine': engine
             })
