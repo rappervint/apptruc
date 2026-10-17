@@ -909,6 +909,12 @@ def answer_schedule_query(query):
     q_norm = remove_accents(query_clean.lower())
 
     # 1. Thử gọi Ollama nếu server đang hoạt động
+    leaves_summary = get_leaves_summary(schedule)
+    today_str = today.strftime('%Y-%m-%d')
+    
+    with get_db() as conn:
+        shop_holidays_rows = conn.execute('SELECT holiday_date, reason FROM shop_holidays WHERE holiday_date >= ? ORDER BY holiday_date ASC LIMIT 10', (today_str,)).fetchall()
+
     if is_ollama_online():
         summary_lines = []
         for s in schedule[:14]:
@@ -917,17 +923,24 @@ def answer_schedule_query(query):
             elif s.get('assigned'):
                 summary_lines.append(f"- {s['display_date']} ({s['weekday_vn']}): {s['assigned']} trực")
         ctx = "\n".join(summary_lines)
+
+        leaves_lines = [f"- {l['member_name']} nghỉ ngày {l['display_date']} ({l['weekday_vn']}), lý do: {l['reason']}" for l in leaves_summary[:10]]
+        leaves_ctx = "\n".join(leaves_lines) if leaves_lines else "Hiện không có ai xin nghỉ."
+
         prompt = f"""
-Bạn là trợ lý AI quản lý lịch trực nhật vệ sinh 7h30 sáng tại cửa hàng.
+Bạn là trợ lý AI quản lý lịch trực nhật vệ sinh 7h30 sáng và theo dõi ngày nghỉ tại cửa hàng.
 Hôm nay là: {today.strftime('%d/%m/%Y')} ({weekday_vn_map.get(today.strftime('%A'))}).
 Danh sách 8 người trực nhật: {', '.join(DUTY_MEMBERS)}.
 Nhân sự không trực nhật: {', '.join(NON_DUTY_STAFF)}.
-Lịch phân công 14 ngày tới:
+Lịch phân công trực 14 ngày tới:
 {ctx}
+
+Danh sách các ca xin nghỉ hiện tại:
+{leaves_ctx}
 
 Câu hỏi của nhân viên: "{query_clean}"
 
-Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trên lịch trên. Sử dụng Tiếng Việt tự nhiên, in đậm tên người và ngày tháng.
+Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trên dữ liệu lịch trực và ngày nghỉ ở trên. Sử dụng Tiếng Việt tự nhiên, in đậm tên người và ngày tháng.
 """
         try:
             req_data = json.dumps({
@@ -950,8 +963,8 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
 
     # 2. Xử lý bằng Bộ não NLP Tiếng Việt tích hợp (0ms, siêu tốc, chạy tốt trên PythonAnywhere)
     engine = "Trợ lý AI Tiếng Việt"
-    
-    # 2.1. Hỏi về 1 nhân viên cụ thể (VD: "Vinh trực ngày nào", "Lịch của Dĩ", "Bảo có trực không")
+
+    # Kiểm tra xem có nhắc tới tên nhân viên nào không
     found_member = None
     for staff in sorted(ALL_STAFF, key=lambda s: len(s), reverse=True):
         staff_norm = remove_accents(staff.lower())
@@ -959,6 +972,100 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
             found_member = staff
             break
 
+    # Kiểm tra xem câu hỏi có đang hỏi về NGHỈ (ai nghỉ, ngày nghỉ, có nghỉ không) hay không
+    is_asking_leave = bool(re.search(r'\b(nghi|xin nghi|nghi phep|ai nghi|co ai nghi|co nghi khong|nghi khong|ai xin nghi|ngay nghi|lich nghi)\b', q_norm))
+
+    # ═══════════════════════════════════════════════════════════════════
+    # NHÓM 1: CÂU HỎI VỀ NGÀY NGHỈ / AI NGHỈ
+    # ═══════════════════════════════════════════════════════════════════
+    if is_asking_leave:
+        # A. Hỏi về ngày tiệm đóng cửa / nghỉ lễ
+        if re.search(r'\b(tiem|cua hang|dong cua|le|tet)\b', q_norm):
+            if not shop_holidays_rows:
+                return "🏢 Hiện tại tiệm <strong>không có lịch đóng cửa / nghỉ lễ nào</strong> sắp tới (mở cửa hoạt động đầy đủ tất cả các ngày).", engine
+            lines = [f"• 📅 <strong>{h['holiday_date']}</strong> — {h['reason']}" for h in shop_holidays_rows]
+            return f"🏢 Các ngày tiệm đã cài đặt đóng cửa / nghỉ lễ sắp tới:<br>" + "<br>".join(lines), engine
+
+        # B. Hỏi về 1 nhân viên cụ thể có xin nghỉ không (VD: Vinh có xin nghỉ không?, Dĩ nghỉ ngày nào?)
+        if found_member:
+            m_leaves = [l for l in leaves_summary if l['member_name'] == found_member]
+            if m_leaves:
+                lines = [f"• 📅 <strong>{l['display_date']}</strong> ({l['weekday_vn']}) — Lý do: <em>{l['reason']}</em>" for l in m_leaves]
+                return f"📝 <strong>{found_member}</strong> có đăng ký xin nghỉ vào:<br>" + "<br>".join(lines), engine
+            else:
+                return f"✅ <strong>{found_member}</strong> hiện tại <strong>không có đơn xin nghỉ nào</strong> sắp tới (vẫn đi làm bình thường).", engine
+
+        # C. Hỏi theo mốc thời gian cụ thể (hôm nay, ngày mai, ngày mốt, ngày DD/MM, thứ X)
+        target_date = None
+        target_label = ''
+        if re.search(r'\b(hom nay|nay|hom ni)\b', q_norm):
+            target_date = today
+            target_label = 'Hôm nay'
+        elif re.search(r'\b(ngay mai|mai)\b', q_norm):
+            target_date = today + timedelta(days=1)
+            target_label = 'Ngày mai'
+        elif re.search(r'\b(ngay mot|mot|ngay kia)\b', q_norm):
+            target_date = today + timedelta(days=2)
+            target_label = 'Ngày mốt'
+        else:
+            # Tìm ngày DD/MM
+            m_date = re.search(r'(\d{1,2})[/\-](\d{1,2})', q_norm)
+            if m_date:
+                day_val, month_val = int(m_date.group(1)), int(m_date.group(2))
+                try:
+                    target_date = date(today.year, month_val, day_val)
+                    if target_date < today and month_val < today.month:
+                        target_date = date(today.year + 1, month_val, day_val)
+                    target_label = f"Ngày {day_val:02d}/{month_val:02d}"
+                except ValueError:
+                    pass
+            else:
+                # Tìm thứ trong tuần
+                weekdays_search = {
+                    'thu 2': 'Thứ Hai', 'thu hai': 'Thứ Hai', 'thu 3': 'Thứ Ba', 'thu ba': 'Thứ Ba',
+                    'thu 4': 'Thứ Tư', 'thu tu': 'Thứ Tư', 'thu 5': 'Thứ Năm', 'thu nam': 'Thứ Năm',
+                    'thu 6': 'Thứ Sáu', 'thu sau': 'Thứ Sáu', 'thu 7': 'Thứ Bảy', 'thu bay': 'Thứ Bảy',
+                    'chu nhat': 'Chủ Nhật', 'cn': 'Chủ Nhật'
+                }
+                for w_key, w_val in weekdays_search.items():
+                    if re.search(r'\b' + re.escape(w_key) + r'\b', q_norm):
+                        matches = [s for s in schedule if s['weekday_vn'] == w_val]
+                        if matches:
+                            target_s = matches[1] if ('tuan sau' in q_norm or 'toi' in q_norm) and len(matches) > 1 else matches[0]
+                            try:
+                                target_date = datetime.strptime(target_s['date_str'], '%Y-%m-%d').date()
+                                target_label = f"{target_s['weekday_vn']}"
+                            except Exception:
+                                pass
+                        break
+
+        if target_date:
+            d_str = target_date.strftime('%Y-%m-%d')
+            disp_d = target_date.strftime('%d/%m/%Y')
+            w_vn = weekday_vn_map.get(target_date.strftime('%A'), '')
+            
+            # Kiểm tra xem ngày đó tiệm có đóng cửa không
+            holiday_match = next((h for h in shop_holidays_rows if h['holiday_date'] == d_str), None)
+            if holiday_match:
+                return f"🏢 Vào <strong>{target_label}</strong> ({disp_d}, {w_vn}): <strong>Tiệm đóng cửa nghỉ lễ</strong> ({holiday_match['reason']}). Toàn bộ 10 anh em đều được nghỉ!", engine
+
+            on_date_leaves = [l for l in leaves_summary if l['leave_date'] == d_str]
+            if not on_date_leaves:
+                return f"🌴 Vào <strong>{target_label}</strong> (ngày {disp_d}, {w_vn}): <strong>Không có ai xin nghỉ!</strong> Cả 10 anh em đều đi làm đầy đủ.", engine
+            
+            lines = [f"• 👤 <strong>{l['member_name']}</strong> — Lý do: <em>{l['reason']}</em>" for l in on_date_leaves]
+            return f"📋 Vào <strong>{target_label}</strong> (ngày {disp_d}, {w_vn}) có <strong>{len(on_date_leaves)} người xin nghỉ</strong>:<br>" + "<br>".join(lines), engine
+
+        # D. Hỏi tổng quát chung (VD: "Có ai xin nghỉ không?", "Dạo này ai nghỉ?", "Danh sách xin nghỉ")
+        if not leaves_summary:
+            return "🌴 Hiện tại cả 10 anh em đều đang có lịch đi làm đầy đủ, <strong>không có ai xin nghỉ</strong> sắp tới!", engine
+        lines = [f"• 👤 <strong>{item['member_name']}</strong> nghỉ ngày <strong>{item['display_date']}</strong> ({item['weekday_vn']}) — Lý do: <em>{item['reason']}</em>" for item in leaves_summary[:6]]
+        return f"📋 Danh sách các ca xin nghỉ sắp tới tại cửa hàng ({len(leaves_summary)} ca):<br>" + "<br>".join(lines), engine
+
+    # ═══════════════════════════════════════════════════════════════════
+    # NHÓM 2: CÂU HỎI VỀ TRỰC NHẬT (AI TRỰC, NGÀY TRỰC)
+    # ═══════════════════════════════════════════════════════════════════
+    # 2.1. Hỏi về 1 nhân viên cụ thể trực ngày nào
     if found_member:
         if found_member in NON_DUTY_STAFF:
             return f"ℹ️ <strong>{found_member}</strong> thuộc nhóm nhân sự không trực nhật vệ sinh 7h30 sáng tại cửa hàng.", engine
@@ -1027,21 +1134,13 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
                     return f"🏢 Vào <strong>{target['weekday_vn']}</strong> (ngày {target['display_date']}): Tiệm đóng cửa ({target.get('holiday_reason')}).", engine
                 return f"📅 Vào <strong>{target['weekday_vn']}</strong> (ngày {target['display_date']}): Người trực là <strong>{target['assigned']}</strong>.", engine
 
-    # 2.7. Hỏi ai nghỉ / có ai nghỉ không
-    if re.search(r'\b(nghi|xin nghi|ai nghi|co ai nghi)\b', q_norm):
-        leaves_summary = get_leaves_summary(schedule)
-        if not leaves_summary:
-            return "🌴 Hiện tại cả 10 anh em đều đang có lịch đi làm đầy đủ, <strong>không có ai xin nghỉ</strong> sắp tới!", engine
-        lines = [f"• <strong>{item['member_name']}</strong> nghỉ ngày {item['display_date']} ({item['weekday_vn']}) — Lý do: <em>{item['reason']}</em>" for item in leaves_summary[:5]]
-        return f"📋 Danh sách các ca xin nghỉ sắp tới:<br>" + "<br>".join(lines), engine
-
     return ("🤖 Tôi có thể giúp bạn tra cứu nhanh các thông tin sau:<br>"
-            "• <em>\"Hôm nay ai trực?\"</em><br>"
-            "• <em>\"Ngày mai ai trực?\"</em><br>"
-            "• <em>\"Vinh trực ngày nào?\"</em> (hoặc tên bất kỳ ai)<br>"
+            "• <em>\"Hôm nay có ai nghỉ không?\"</em> hoặc <em>\"Mai ai nghỉ?\"</em><br>"
+            "• <em>\"Vinh có xin nghỉ không?\"</em> (hoặc hỏi về bất kỳ ai)<br>"
+            "• <em>\"Hôm nay ai trực?\"</em> hoặc <em>\"Ngày mai ai trực?\"</em><br>"
+            "• <em>\"Vinh trực ngày nào?\"</em><br>"
             "• <em>\"Thứ 2 tuần sau ai trực?\"</em><br>"
-            "• <em>\"Ngày 25/10 ai trực?\"</em><br>"
-            "• <em>\"Hôm nay có ai nghỉ không?\"</em>"), engine
+            "• <em>\"Khi nào tiệm nghỉ lễ?\"</em>"), engine
 
 @app.route('/api/ai-chat-schedule', methods=['POST'])
 def api_ai_chat_schedule():
