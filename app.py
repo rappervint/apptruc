@@ -977,6 +977,24 @@ def api_ai_parse_leave():
         'engine': engine
     })
 
+def make_ai_chips(items, is_fill=False):
+    """Tạo các nút bấm/chip nhanh trong khung chat AI để người dùng bấm 1 chạm"""
+    fn_name = 'fillAiInput' if is_fill else 'askAiDuty'
+    chips = []
+    for label, query in items:
+        esc_query = query.replace("'", "\\'").replace('"', '&quot;')
+        bg = "#f0fdf4" if is_fill else "#eff6ff"
+        border = "#bbf7d0" if is_fill else "#bfdbfe"
+        color = "#15803d" if is_fill else "#1d4ed8"
+        chips.append(
+            f'<button type="button" onclick="{fn_name}(\'{esc_query}\')" '
+            f'style="display:inline-flex; align-items:center; margin:3px 2px; padding:4px 10px; '
+            f'background:{bg}; border:1px solid {border}; color:{color}; border-radius:12px; '
+            f'font-size:0.78rem; font-weight:600; cursor:pointer; text-decoration:none; box-shadow:0 1px 2px rgba(0,0,0,0.04);">'
+            f'{label}</button>'
+        )
+    return '<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:3px;">' + "".join(chips) + '</div>'
+
 def answer_schedule_query(query):
     query_clean = query.strip()
     if not query_clean:
@@ -1058,12 +1076,81 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
             found_member = staff
             break
 
-    # Kiểm tra xem câu hỏi có đang hỏi về NGHỈ (ai nghỉ, ngày nghỉ, có nghỉ không) hay không
-    is_asking_leave = bool(re.search(r'\b(nghi|xin nghi|nghi phep|ai nghi|co ai nghi|co nghi khong|nghi khong|ai xin nghi|ngay nghi|lich nghi)\b', q_norm))
+    # 1. Chào hỏi & Xã giao (Greetings & Chit-chat)
+    if re.search(r'^(chao|xin chao|hello|hi|alo|ad|admin|bot|oi|hey)\b', q_norm):
+        chips = make_ai_chips([
+            ("🔔 Hôm nay ai trực?", "Hôm nay ai trực?"),
+            ("🌱 Ngày mai ai trực?", "Ngày mai ai trực?"),
+            ("🌴 Mai có ai nghỉ không?", "Mai có ai nghỉ không?"),
+            ("📋 Lịch trực 7 ngày", "Lịch trực tuần này"),
+            ("📝 Báo xin nghỉ", "Tôi muốn xin nghỉ"),
+        ])
+        return (
+            "👋 <strong>Xin chào bạn!</strong> Mình là Trợ lý AI quản lý lịch trực nhật 7h30 sáng và theo dõi nghỉ của tiệm.<br>"
+            f"Bạn cần mình hỗ trợ gì nè? 👇{chips}"
+        ), engine
+
+    # 2. Cảm ơn & Tạm biệt
+    if re.search(r'\b(cam on|cảm ơn|thank|thanks|ok em|ok b|ok ad|tuyet voi)\b', q_norm):
+        return "😊 Dạ không có chi ạ! Chúc bạn một ngày làm việc thật vui vẻ và nhiều may mắn nhé! Cần gì bạn cứ nhắn mình nha.", engine
+
+    # 3. Quy định giờ giấc trực nhật
+    if re.search(r'\b(may gio|quy dinh|luat|gio truc|ve sinh luc may gio|truc may gio)\b', q_norm):
+        chips = make_ai_chips([
+            ("🔔 Hôm nay ai trực?", "Hôm nay ai trực?"),
+            ("🌱 Ngày mai ai trực?", "Ngày mai ai trực?"),
+            ("📋 Lịch trực tuần này", "Lịch trực tuần này"),
+        ])
+        return (
+            "⏰ <strong>Quy định trực nhật vệ sinh tại tiệm:</strong><br>"
+            "• <strong>Giờ bắt đầu:</strong> Đúng <strong>7h30 sáng</strong> mỗi ngày.<br>"
+            "• <strong>Đội trực chính (8 người luân phiên):</strong> Vinh, Dĩ, Ân, Bảo, Nguyên, Lợi, Thái, Duy.<br>"
+            "• <strong>2 nhân sự không trực nhật:</strong> Bảo Mập, Phát.<br>"
+            "• <strong>Cơ chế tự động:</strong> Nếu đến lượt ai mà người đó xin nghỉ hoặc tiệm đóng cửa, hệ thống sẽ <strong>tự động đôn người kế tiếp</strong> lên trực thay.<br>"
+            f"👇 Bạn có thể tra cứu nhanh:{chips}"
+        ), engine
+
+    # 4. Hỏi xem hôm nay ai đi làm / ai có mặt
+    if re.search(r'\b(co mat|di lam|ai di lam|ai lam hom nay|co ai lam)\b', q_norm):
+        today_leaves = [l for l in leaves_summary if l['leave_date'] == today_str]
+        if not today_leaves:
+            chips = make_ai_chips([("🔔 Ai trực 7h30 sáng?", "Hôm nay ai trực?")])
+            return f"🏢 Hôm nay ({today.strftime('%d/%m/%Y')}): Cả <strong>10 anh em</strong> đều đi làm đầy đủ, không có ai xin nghỉ!{chips}", engine
+        else:
+            leave_names = ", ".join([f"<strong>{l['member_name']}</strong>" for l in today_leaves])
+            work_count = 10 - len(today_leaves)
+            return f"🏢 Hôm nay ({today.strftime('%d/%m/%Y')}): Có {leave_names} xin nghỉ ({len(today_leaves)} người). Còn lại <strong>{work_count} anh em</strong> đi làm bình thường.", engine
+
+    # 5. Hỏi về lịch trực của bản thân (Người dùng xưng tôi, em, mình... mà không nêu tên)
+    is_asking_self = bool(re.search(r'\b(toi|em|minh|anh|chau|tui)\b', q_norm)) and bool(re.search(r'\b(truc|lich truc|ve sinh|khi nao|luot)\b', q_norm))
+    if not found_member and is_asking_self:
+        chips = make_ai_chips([(f"👤 {m}", f"{m} trực ngày nào?") for m in DUTY_MEMBERS])
+        return (
+            "❓ Bạn tên gì để mình xem lịch trực chính xác cho bạn nè?<br>"
+            f"👉 Bạn bấm chọn tên mình bên dưới nhé:{chips}"
+        ), engine
+
+    # 6. Hỏi tổng hợp tuần này / tuần sau ("tuần này ai trực", "lịch trực tuần này", "lịch trực 7 ngày")
+    if re.search(r'\b(tuan nay|tuan sau|tuan toi|7 ngay|ca tuan|lich truc tuan)\b', q_norm):
+        if 'tuan sau' in q_norm or 'toi' in q_norm:
+            start_idx = 7
+            title = "Lịch trực 7 ngày tuần sau"
+        else:
+            start_idx = 0
+            title = "Lịch trực 7 ngày sắp tới"
+        
+        lines = []
+        for s in schedule[start_idx:start_idx+7]:
+            if s.get('is_holiday'):
+                lines.append(f"• 📅 <strong>{s['display_date']}</strong> ({s['weekday_vn']}): 🏢 Tiệm đóng cửa ({s.get('holiday_reason')})")
+            else:
+                lines.append(f"• 📅 <strong>{s['display_date']}</strong> ({s['weekday_vn']}): 👤 <strong>{s['assigned']}</strong> (7h30 sáng)")
+        return f"📋 <strong>{title}:</strong><br>" + "<br>".join(lines), engine
 
     # ═══════════════════════════════════════════════════════════════════
-    # NHÓM 1: CÂU HỎI VỀ NGÀY NGHỈ / AI NGHỈ
+    # NHÓM 1: CÂU HỎI VỀ NGÀY NGHỈ / AI NGHỈ (LEAVE INQUIRY)
     # ═══════════════════════════════════════════════════════════════════
+    is_asking_leave = bool(re.search(r'\b(nghi|xin nghi|nghi phep|ai nghi|co ai nghi|co nghi khong|nghi khong|ai xin nghi|ngay nghi|lich nghi)\b', q_norm))
     if is_asking_leave:
         # A. Hỏi về ngày tiệm đóng cửa / nghỉ lễ
         if re.search(r'\b(tiem|cua hang|dong cua|le|tet)\b', q_norm):
@@ -1079,9 +1166,13 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
                 lines = [f"• 📅 <strong>{l['display_date']}</strong> ({l['weekday_vn']}) — Lý do: <em>{l['reason']}</em>" for l in m_leaves]
                 return f"📝 <strong>{found_member}</strong> có đăng ký xin nghỉ vào:<br>" + "<br>".join(lines), engine
             else:
-                return f"✅ <strong>{found_member}</strong> hiện tại <strong>không có đơn xin nghỉ nào</strong> sắp tới (vẫn đi làm bình thường).", engine
+                chips = make_ai_chips([
+                    (f"📅 Xem lịch trực {found_member}", f"{found_member} trực ngày nào?"),
+                    (f"📝 Báo nghỉ cho {found_member}", f"{found_member} xin nghỉ"),
+                ])
+                return f"✅ <strong>{found_member}</strong> hiện tại <strong>không có đơn xin nghỉ nào</strong> sắp tới (vẫn đi làm bình thường).{chips}", engine
 
-        # C. Hỏi theo mốc thời gian cụ thể (hôm nay, ngày mai, ngày mốt, ngày DD/MM, thứ X)
+        # C. Hỏi theo mốc thời gian cụ thể (hôm nay, ngày mai, ngày mốt, ngày DD/MM hoặc DD tháng MM, thứ X)
         target_date = None
         target_label = ''
         if re.search(r'\b(hom nay|nay|hom ni)\b', q_norm):
@@ -1094,8 +1185,8 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
             target_date = today + timedelta(days=2)
             target_label = 'Ngày mốt'
         else:
-            # Tìm ngày DD/MM
-            m_date = re.search(r'(\d{1,2})[/\-](\d{1,2})', q_norm)
+            # Tìm ngày DD/MM hoặc DD tháng MM
+            m_date = re.search(r'(\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})', q_norm)
             if m_date:
                 day_val, month_val = int(m_date.group(1)), int(m_date.group(2))
                 try:
@@ -1149,7 +1240,7 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
         return f"📋 Danh sách các ca xin nghỉ sắp tới tại cửa hàng ({len(leaves_summary)} ca):<br>" + "<br>".join(lines), engine
 
     # ═══════════════════════════════════════════════════════════════════
-    # NHÓM 2: CÂU HỎI VỀ TRỰC NHẬT (AI TRỰC, NGÀY TRỰC)
+    # NHÓM 2: CÂU HỎI VỀ TRỰC NHẬT (DUTY INQUIRY)
     # ═══════════════════════════════════════════════════════════════════
     # 2.1. Hỏi về 1 nhân viên cụ thể trực ngày nào
     if found_member:
@@ -1172,7 +1263,8 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
         if s0:
             if s0.get('is_holiday'):
                 return f"🏢 Hôm nay ({s0['display_date']}, {s0['weekday_vn']}): <strong>Tiệm đóng cửa nghỉ lễ</strong> ({s0.get('holiday_reason')}). Cả tiệm không phải trực!", engine
-            return f"🔔 Hôm nay (<strong>{s0['display_date']}</strong>, {s0['weekday_vn']}): Người trực chính 7h30 sáng là <strong>{s0['assigned']}</strong>.", engine
+            chips = make_ai_chips([("🌱 Ngày mai ai trực?", "Ngày mai ai trực?"), ("🌴 Hôm nay ai nghỉ?", "Hôm nay có ai nghỉ không?")])
+            return f"🔔 Hôm nay (<strong>{s0['display_date']}</strong>, {s0['weekday_vn']}): Người trực chính 7h30 sáng là <strong>{s0['assigned']}</strong>.{chips}", engine
 
     # 2.3. Hỏi ngày mai ai trực
     if re.search(r'\b(ngay mai|mai)\b', q_norm):
@@ -1180,16 +1272,17 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
         if s1:
             if s1.get('is_holiday'):
                 return f"🏢 Ngày mai ({s1['display_date']}, {s1['weekday_vn']}): <strong>Tiệm đóng cửa</strong> ({s1.get('holiday_reason')}).", engine
-            return f"🌱 Ngày mai (<strong>{s1['display_date']}</strong>, {s1['weekday_vn']}): Người trực là <strong>{s1['assigned']}</strong> (7h30 sáng).", engine
+            chips = make_ai_chips([("🌿 Ngày mốt ai trực?", "Ngày mốt ai trực?"), ("🌴 Mai có ai nghỉ không?", "Mai có ai nghỉ không?")])
+            return f"🌱 Ngày mai (<strong>{s1['display_date']}</strong>, {s1['weekday_vn']}): Người trực là <strong>{s1['assigned']}</strong> (7h30 sáng).{chips}", engine
 
     # 2.4. Hỏi ngày mốt / ngày kia
     if re.search(r'\b(ngay mot|mot|ngay kia)\b', q_norm):
         s2 = schedule[2] if len(schedule) > 2 else None
         if s2:
-            return f"🌿 Ngày mốt (<strong>{s2['display_date']}</strong>, {s2['weekday_vn']}): Người trực là <strong>{s2['assigned']}</strong>.", engine
+            return f"🌿 Ngày mốt (<strong>{s2['display_date']}</strong>, {s2['weekday_vn']}): Người trực là <strong>{s2['assigned']}</strong> (7h30 sáng).", engine
 
-    # 2.5. Hỏi theo ngày cụ thể (VD: 25/10 ai trực, ngày 20-10)
-    m = re.search(r'(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{4}))?', q_norm)
+    # 2.5. Hỏi theo ngày cụ thể (VD: 25/10 ai trực, ngày 20-10, 25 tháng 10 ai trực)
+    m = re.search(r'(\d{1,2})\s*(?:[/\-]|thang\s*|t\s*)(\d{1,2})', q_norm)
     if m:
         day = int(m.group(1))
         month = int(m.group(2))
@@ -1218,15 +1311,22 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
                 target = matches[1] if ('tuan sau' in q_norm or 'toi' in q_norm) and len(matches) > 1 else matches[0]
                 if target.get('is_holiday'):
                     return f"🏢 Vào <strong>{target['weekday_vn']}</strong> (ngày {target['display_date']}): Tiệm đóng cửa ({target.get('holiday_reason')}).", engine
-                return f"📅 Vào <strong>{target['weekday_vn']}</strong> (ngày {target['display_date']}): Người trực là <strong>{target['assigned']}</strong>.", engine
+                return f"📅 Vào <strong>{target['weekday_vn']}</strong> (ngày {target['display_date']}): Người trực là <strong>{target['assigned']}</strong> (7h30 sáng).", engine
 
-    return ("🤖 Tôi có thể giúp bạn tra cứu nhanh các thông tin sau:<br>"
-            "• <em>\"Hôm nay có ai nghỉ không?\"</em> hoặc <em>\"Mai ai nghỉ?\"</em><br>"
-            "• <em>\"Vinh có xin nghỉ không?\"</em> (hoặc hỏi về bất kỳ ai)<br>"
-            "• <em>\"Hôm nay ai trực?\"</em> hoặc <em>\"Ngày mai ai trực?\"</em><br>"
-            "• <em>\"Vinh trực ngày nào?\"</em><br>"
-            "• <em>\"Thứ 2 tuần sau ai trực?\"</em><br>"
-            "• <em>\"Khi nào tiệm nghỉ lễ?\"</em>"), engine
+    # ═══════════════════════════════════════════════════════════════════
+    # NHÓM 3: KHÔNG HIỂU RÕ Ý -> HỎI LẠI NGƯỜI DÙNG KÈM NÚT BẤM GỢI Ý
+    # ═══════════════════════════════════════════════════════════════════
+    chips = make_ai_chips([
+        ("🔔 Hôm nay ai trực?", "Hôm nay ai trực?"),
+        ("🌱 Ngày mai ai trực?", "Ngày mai ai trực?"),
+        ("🌴 Mai có ai nghỉ không?", "Mai có ai nghỉ không?"),
+        ("📋 Lịch trực 7 ngày", "Lịch trực tuần này"),
+        ("📝 Báo xin nghỉ", "Tôi muốn xin nghỉ"),
+    ])
+    return (
+        f"🤔 Trợ lý chưa hiểu rõ ý của bạn: <em>\"{query_clean}\"</em>.<br>"
+        f"👉 Bạn có thể nói rõ hơn hoặc bấm chọn nhanh câu hỏi bên dưới nhé:{chips}"
+    ), engine
 
 @app.route('/api/ai-chat-schedule', methods=['POST'])
 def api_ai_chat_schedule():
@@ -1258,10 +1358,14 @@ def api_ai_chat_schedule():
             # Lọc các ngày từ hôm nay trở đi
             valid_dates = [d for d in found_dates if d >= today]
             if not valid_dates:
+                chips = make_ai_chips([
+                    (f"📅 {m_name} nghỉ ngày mai", f"{m_name} xin nghỉ ngày mai"),
+                    (f"📅 {m_name} nghỉ 2 ngày từ mai", f"{m_name} xin nghỉ 2 ngày từ ngày mai"),
+                ])
                 return jsonify({
                     'success': True,
                     'is_leave_intent': False,
-                    'answer': f"⚠️ Các ngày bạn yêu cầu đều đã ở trong quá khứ nên không thể đăng ký xin nghỉ được nữa.",
+                    'answer': f"⚠️ Các ngày bạn yêu cầu đều đã ở trong quá khứ nên hệ thống không nhận đơn được nữa.<br>👉 Bạn có muốn đổi sang ngày sắp tới không?{chips}",
                     'engine': engine
                 })
 
@@ -1328,18 +1432,46 @@ def api_ai_chat_schedule():
                 'engine': engine
             })
         elif m_name and not found_dates:
+            chips = make_ai_chips([
+                ("📅 Nghỉ hôm nay", f"{m_name} xin nghỉ hôm nay"),
+                ("📅 Nghỉ ngày mai", f"{m_name} xin nghỉ ngày mai"),
+                ("📅 Nghỉ 2 ngày từ mai", f"{m_name} xin nghỉ 2 ngày từ ngày mai"),
+                ("📅 Nghỉ 3 ngày từ mai", f"{m_name} xin nghỉ 3 ngày từ ngày mai"),
+            ])
             return jsonify({
                 'success': True,
                 'is_leave_intent': False,
-                'answer': f"⚠️ Trợ lý nhận diện bạn đang xin nghỉ cho <strong>{m_name}</strong>, nhưng chưa rõ ngày xin nghỉ cụ thể (Ví dụ: <em>'{m_name} xin nghỉ ngày 25, 26 tháng 10'</em> hoặc <em>'{m_name} xin nghỉ từ 20/10 đến 25/10'</em>). Bạn vui lòng ghi kèm ngày nghỉ nhé!",
+                'answer': (
+                    f"❓ Bạn muốn đăng ký cho <strong>{m_name}</strong> xin nghỉ vào ngày nào vậy bạn?<br>"
+                    f"👉 Bạn có thể nhắn ngày (ví dụ: <em>'{m_name} xin nghỉ ngày 25, 26 tháng 10'</em> hoặc <em>'từ 20/10 đến 25/10'</em>), hoặc bấm chọn nhanh bên dưới:{chips}"
+                ),
                 'engine': engine
             })
         elif not m_name and found_dates:
             dates_disp = ', '.join([d.strftime('%d/%m') for d in found_dates])
+            chips = make_ai_chips([(f"👤 {m}", f"{m} xin nghỉ ngày {dates_disp}") for m in ALL_STAFF])
             return jsonify({
                 'success': True,
                 'is_leave_intent': False,
-                'answer': f"⚠️ Trợ lý đã nhận diện được ngày xin nghỉ ({dates_disp}), nhưng chưa nhận diện được tên nhân viên. Tên người xin nghỉ phải thuộc danh sách 10 anh em của tiệm ({', '.join(ALL_STAFF)}).",
+                'answer': (
+                    f"❓ Bạn muốn đăng ký xin nghỉ vào <strong>ngày {dates_disp}</strong> cho ai vậy bạn?<br>"
+                    f"👉 Vui lòng bấm chọn tên nhân viên bên dưới:{chips}"
+                ),
+                'engine': engine
+            })
+        elif not m_name and not found_dates:
+            chips = make_ai_chips([
+                ("👤 Vinh nghỉ ngày mai", "Vinh xin nghỉ ngày mai việc bận"),
+                ("👤 Bảo Mập nghỉ 2 ngày", "Bảo Mập xin nghỉ 2 ngày từ ngày mai khám bệnh"),
+                ("👤 Thái nghỉ 25, 26/10", "Thái xin nghỉ ngày 25, 26 tháng 10 việc riêng"),
+            ])
+            return jsonify({
+                'success': True,
+                'is_leave_intent': False,
+                'answer': (
+                    "❓ Bạn muốn đăng ký xin nghỉ cho ai và vào ngày nào vậy bạn?<br>"
+                    f"👉 Bạn có thể nhắn theo mẫu đầy đủ hoặc bấm chọn gợi ý bên dưới:{chips}"
+                ),
                 'engine': engine
             })
 

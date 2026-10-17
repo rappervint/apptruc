@@ -1242,6 +1242,14 @@
       }
     }
 
+    function fillAiInput(text) {
+      const input = document.getElementById('ai-chat-input');
+      if (input) {
+        input.value = text;
+        input.focus();
+      }
+    }
+
     async function sendAiChat() {
       const input = document.getElementById('ai-chat-input');
       const btn = document.getElementById('ai-chat-btn');
