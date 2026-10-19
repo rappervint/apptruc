@@ -442,12 +442,23 @@
   <div class="filter-card">
     <form action="/history" method="GET" class="filter-grid">
       <div class="form-group">
-        <label>Lọc theo Tháng:</label>
-        <select name="month">
-          <option value="">-- Tất cả các tháng --</option>
-          {% for m in available_months %}
-            <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>Tháng {{ m }}</option>
-          {% endfor %}
+        <label>Lọc theo Kỳ (Hết tháng ngày 7):</label>
+        <select name="cycle">
+          <option value="{{ curr_cycle_key }}" {% if selected_cycle == curr_cycle_key %}selected{% endif %}>
+            🌟 Kỳ Hiện Tại ({{ curr_cycle_label }})
+          </option>
+          <option value="all" {% if selected_cycle == 'all' %}selected{% endif %}>
+            📜 Toàn Bộ Lịch Sử (Tất Cả Thời Gian)
+          </option>
+          {% if past_cycles %}
+          <optgroup label="Các kỳ trước đó">
+            {% for c in past_cycles %}
+              <option value="{{ c.key }}" {% if selected_cycle == c.key %}selected{% endif %}>
+                📁 {{ c.label }}
+              </option>
+            {% endfor %}
+          </optgroup>
+          {% endif %}
         </select>
       </div>
 
@@ -473,18 +484,29 @@
       </div>
 
       <div>
-        <a href="/history" class="btn btn-light" style="width: 100%;">🔄 Đặt lại</a>
+        <a href="/history" class="btn btn-light" style="width: 100%;">🔄 Kỳ này</a>
       </div>
     </form>
+  </div>
+
+  <!-- THÔNG BÁO QUY TẮC RESET KỲ -->
+  <div style="margin-bottom: 18px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; padding: 10px 16px; font-size: 0.82rem; color: #fed7aa; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 1.15rem;">📅</span>
+      <span><strong>Quy định chu kỳ tháng:</strong> Đến <strong>hết ngày 7</strong> là chốt tháng. Từ <strong>ngày 8</strong> trở đi hệ thống tự động làm mới (reset) bảng về 0 ca nghỉ cho kỳ mới!</span>
+    </div>
+    {% if selected_cycle != curr_cycle_key %}
+      <a href="/history" style="color: #fb923c; font-weight: 800; text-decoration: underline; font-size: 0.8rem;">⬅️ Về Kỳ Hiện Tại</a>
+    {% endif %}
   </div>
 
   <!-- THỐNG KÊ SỐ NGÀY NGHỈ THEO TỪNG NHÂN SỰ -->
   <div class="stats-card">
     <div class="stats-title">
       <div>
-        <span>📊 Thống Kê Số Lần Xin Nghỉ ({% if selected_month %}Tháng {{ selected_month }}{% else %}Tất Cả Thời Gian{% endif %})</span>
+        <span>📊 Thống Kê Số Lần Xin Nghỉ ({{ active_cycle_label }})</span>
         <div style="font-size: 0.8rem; color: #fb923c; font-weight: normal; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
-          <span>👉</span> <em>Nhấp vào thẻ của ai để xem chi tiết các ngày người đó đã nghỉ</em>
+          <span>👉</span> <em>Nhấp vào thẻ của ai để xem chi tiết các ngày người đó đã nghỉ trong kỳ này</em>
         </div>
       </div>
       <span style="font-size: 0.82rem; font-weight: 700; color: #fed7aa; background: #1c1538; border: 1px solid #3d3368; padding: 4px 10px; border-radius: 14px;">

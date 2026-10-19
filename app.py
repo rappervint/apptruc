@@ -456,17 +456,53 @@ def index():
                            holidays_list=holidays_list,
                            is_admin=is_admin())
 
+def get_leave_cycle(d):
+    """
+    Quy định chu kỳ tháng của cửa hàng:
+    - Ngày 7 hàng tháng là hết tháng.
+    - Chu kỳ tháng: từ ngày 8 tháng trước đến hết ngày 7 tháng này.
+    - Sau ngày 7 (từ ngày 8 trở đi): Tự động bắt đầu chu kỳ mới (reset lại số ngày nghỉ).
+    Trả về: (cycle_key, cycle_label, start_date, end_date)
+    """
+    if d.day >= 8:
+        start_d = date(d.year, d.month, 8)
+        if d.month == 12:
+            end_d = date(d.year + 1, 1, 7)
+            cycle_key = f"{d.year}-12"
+        else:
+            end_d = date(d.year, d.month + 1, 7)
+            cycle_key = f"{d.year}-{d.month:02d}"
+    else:
+        if d.month == 1:
+            start_d = date(d.year - 1, 12, 8)
+            end_d = date(d.year, 1, 7)
+            cycle_key = f"{d.year-1}-12"
+        else:
+            start_d = date(d.year, d.month - 1, 8)
+            end_d = date(d.year, d.month, 7)
+            cycle_key = f"{d.year}-{d.month-1:02d}"
+
+    cycle_label = f"Kỳ {start_d.strftime('%d/%m')} - {end_d.strftime('%d/%m/%Y')}"
+    return cycle_key, cycle_label, start_d, end_d
+
 @app.route('/history')
 def history():
-    """Trang tra cứu toàn bộ lịch sử xin nghỉ của cửa hàng"""
+    """Trang tra cứu lịch sử xin nghỉ theo chu kỳ cửa hàng (hết tháng vào ngày 7)"""
     cleanup_and_advance_checkpoint()
     
-    selected_month = request.args.get('month', '')  # Định dạng YYYY-MM
-    selected_member = request.args.get('member', '')
-    today_str = get_vn_today().strftime('%Y-%m-%d')
+    today = get_vn_today()
+    today_str = today.strftime('%Y-%m-%d')
+    curr_cycle_key, curr_cycle_label, curr_start_d, curr_end_d = get_leave_cycle(today)
+
+    # Mặc định: Lọc theo Kỳ hiện tại (từ ngày 8 gần nhất đến ngày 7 tiếp theo)
+    # Nếu người dùng chọn 'all': Xem toàn bộ lịch sử
+    selected_cycle = request.args.get('cycle')
+    if selected_cycle is None:
+        selected_cycle = curr_cycle_key
+
+    selected_member = request.args.get('member', '').strip()
     
     with get_db() as conn:
-        # Lấy từ cả bảng lịch sử và bảng hiện hành
         rows = conn.execute('''
             SELECT id, leave_date, member_name, reason, created_at, 'history' as source
             FROM leaves_history
@@ -481,28 +517,48 @@ def history():
         'Thursday': 'Thứ Năm', 'Friday': 'Thứ Sáu', 'Saturday': 'Thứ Bảy', 'Sunday': 'Chủ Nhật'
     }
     
-    available_months = set()
+    cycles_dict = {
+        curr_cycle_key: {
+            'key': curr_cycle_key,
+            'label': curr_cycle_label,
+            'start_date': curr_start_d,
+            'end_date': curr_end_d,
+            'is_current': True
+        }
+    }
     history_list = []
     
     for r in rows:
         d_str = r['leave_date']
-        m_str = d_str[:7]
-        available_months.add(m_str)
-        
-        if selected_month and m_str != selected_month:
-            continue
-        if selected_member and r['member_name'] != selected_member:
-            continue
-            
         try:
             d_obj = datetime.strptime(d_str, '%Y-%m-%d').date()
             display_date = d_obj.strftime('%d/%m/%Y')
             weekday_str = weekday_vn.get(d_obj.strftime('%A'), d_obj.strftime('%A'))
             is_past = (d_str < today_str)
+            c_key, c_label, c_start, c_end = get_leave_cycle(d_obj)
         except Exception:
+            d_obj = today
             display_date = d_str
             weekday_str = ''
             is_past = False
+            c_key, c_label, c_start, c_end = curr_cycle_key, curr_cycle_label, curr_start_d, curr_end_d
+
+        if c_key not in cycles_dict:
+            cycles_dict[c_key] = {
+                'key': c_key,
+                'label': c_label,
+                'start_date': c_start,
+                'end_date': c_end,
+                'is_current': (c_key == curr_cycle_key)
+            }
+        
+        # Lọc theo kỳ
+        if selected_cycle != 'all' and c_key != selected_cycle:
+            continue
+            
+        # Lọc theo nhân viên
+        if selected_member and r['member_name'] != selected_member:
+            continue
             
         raw_created = r['created_at'] or ''
         created_display = raw_created
@@ -535,7 +591,8 @@ def history():
             'leave_date': d_str,
             'display_date': display_date,
             'weekday_vn': weekday_str,
-            'month_str': m_str,
+            'cycle_key': c_key,
+            'cycle_label': c_label,
             'member_name': r['member_name'],
             'reason': r['reason'] or 'Việc cá nhân',
             'created_at': created_display,
@@ -546,11 +603,19 @@ def history():
             'minutes_left': minutes_left
         })
         
-    sorted_months = sorted(list(available_months), reverse=True)
-    if not sorted_months:
-        sorted_months = [get_vn_today().strftime('%Y-%m')]
+    # Sắp xếp các chu kỳ theo ngày bắt đầu giảm dần (mới nhất lên đầu)
+    sorted_cycles = sorted(cycles_dict.values(), key=lambda c: c['start_date'], reverse=True)
+    past_cycles = [c for c in sorted_cycles if not c['is_current']]
 
-    # Thống kê số ngày nghỉ theo từng nhân sự trong kết quả đã lọc
+    # Xác định nhãn kỳ đang hiển thị
+    if selected_cycle == 'all':
+        active_cycle_label = "Toàn Bộ Lịch Sử (Tất cả thời gian)"
+    elif selected_cycle in cycles_dict:
+        active_cycle_label = cycles_dict[selected_cycle]['label']
+    else:
+        active_cycle_label = curr_cycle_label
+
+    # Thống kê số ngày nghỉ theo từng nhân sự trong chu kỳ / khoảng thời gian đã chọn
     stats_by_member = {}
     for staff in ALL_STAFF:
         count = sum(1 for item in history_list if item['member_name'] == staff)
@@ -568,9 +633,12 @@ def history():
 
     return render_template('history.html',
                            history_list=history_list,
-                           selected_month=selected_month,
+                           selected_cycle=selected_cycle,
                            selected_member=selected_member,
-                           available_months=sorted_months,
+                           curr_cycle_key=curr_cycle_key,
+                           curr_cycle_label=curr_cycle_label,
+                           active_cycle_label=active_cycle_label,
+                           past_cycles=past_cycles,
                            all_staff=ALL_STAFF,
                            duty_members=DUTY_MEMBERS,
                            non_duty_staff=NON_DUTY_STAFF,
