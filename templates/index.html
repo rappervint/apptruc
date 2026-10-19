@@ -61,8 +61,8 @@
       animation: floralFloat 3.2s ease-in-out infinite;
     }
     @keyframes floralGlow {
-      0%, 100% { text-shadow: 0 0 10px rgba(244, 63, 94, 0.6), 0 0 24px rgba(236, 72, 153, 0.35); }
-      50% { text-shadow: 0 0 18px rgba(244, 63, 94, 0.95), 0 0 36px rgba(236, 72, 153, 0.65); }
+      0%, 100% { text-shadow: 0 0 10px {{ theme.colors.primary_glow }}, 0 0 24px {{ theme.colors.primary_glow }}; }
+      50% { text-shadow: 0 0 18px {{ theme.colors.highlight }}, 0 0 36px {{ theme.colors.primary_glow }}; }
     }
     .floral-glow-text {
       animation: floralGlow 3s ease-in-out infinite;
@@ -209,12 +209,12 @@
     /* Tab Navigation */
     .tab-container {
       display: flex;
-      background: #14081e;
+      background: {{ theme.colors.card_bg }};
       padding: 5px;
       border-radius: 14px;
       margin-bottom: 22px;
       gap: 5px;
-      border: 1px solid #3b1740;
+      border: 1px solid {{ theme.colors.border }};
       box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
     }
     .tab-btn {
@@ -222,7 +222,7 @@
       padding: 12px 14px;
       border: none;
       background: transparent;
-      color: #fda4af;
+      color: {{ theme.colors.text_muted }};
       font-size: 0.92rem;
       font-weight: 700;
       border-radius: 10px;
@@ -235,12 +235,13 @@
       text-decoration: none;
     }
     .tab-btn:hover {
-      color: #fff1f2;
+      color: {{ theme.colors.text }};
     }
     .tab-btn.active {
-      background: linear-gradient(135deg, #e11d48 0%, #db2777 100%);
+      background: {{ theme.colors.primary_gradient }};
       color: #ffffff;
-      box-shadow: 0 4px 15px rgba(225, 29, 72, 0.45);
+      box-shadow: 0 4px 15px {{ theme.colors.primary_glow }};
+      border: 1px solid {{ theme.colors.border_focus }};
       transform: translateY(-1px);
       text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     }
@@ -248,12 +249,13 @@
       font-size: 0.72rem;
       padding: 2px 7px;
       border-radius: 12px;
-      background: #881337;
-      color: #ffe4e6;
+      background: {{ theme.colors.bg }};
+      color: {{ theme.colors.text }};
+      border: 1px solid {{ theme.colors.border }};
       font-weight: 700;
     }
     .tab-badge.badge-alert {
-      background: #e11d48;
+      background: {{ theme.colors.primary }};
       color: #fff;
       animation: pulseAlert 2s infinite;
     }
@@ -304,17 +306,17 @@
     }
     .hero-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(244, 63, 94, 0.35);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6), 0 0 25px {{ theme.colors.primary_glow }};
     }
     .hero-today {
-      background: linear-gradient(135deg, #be123c 0%, #e11d48 55%, #881337 100%);
-      border: 1px solid rgba(253, 164, 175, 0.45);
-      box-shadow: 0 10px 30px rgba(225, 29, 72, 0.4), 0 0 20px rgba(244, 63, 94, 0.25);
+      background: {{ theme.colors.primary_gradient }};
+      border: 1.5px solid {{ theme.colors.border_focus }};
+      box-shadow: 0 10px 30px {{ theme.colors.primary_glow }}, 0 0 20px {{ theme.colors.primary_glow }};
     }
     .hero-tomorrow {
-      background: linear-gradient(135deg, #701a75 0%, #a21caf 55%, #4a044e 100%);
-      border: 1px solid rgba(244, 114, 182, 0.4);
-      box-shadow: 0 10px 30px rgba(162, 28, 175, 0.4), 0 0 20px rgba(236, 72, 153, 0.25);
+      background: linear-gradient(135deg, {{ theme.colors.card_bg }} 0%, rgba(0, 0, 0, 0.65) 100%);
+      border: 1.5px solid {{ theme.colors.border }};
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.05);
     }
     .hero-label {
       font-size: 0.76rem;
@@ -326,10 +328,10 @@
       align-items: center;
       gap: 6px;
       margin-bottom: 8px;
-      color: #ffe4e6;
+      color: #ffffff;
     }
     .hero-tomorrow .hero-label {
-      color: #fce7f3;
+      color: {{ theme.colors.text_muted }};
     }
     .hero-name {
       font-size: 2.1rem;
@@ -343,10 +345,10 @@
       font-size: 0.88rem;
       opacity: 0.92;
       font-weight: 600;
-      color: #ffedd5;
+      color: #ffffff;
     }
     .hero-tomorrow .hero-meta {
-      color: #f3e8ff;
+      color: {{ theme.colors.text_muted }};
     }
     .hero-alert {
       margin-top: 10px;
@@ -383,11 +385,11 @@
       font-size: 1.08rem;
       font-weight: 800;
       margin: 24px 0 12px;
-      color: #ffe4e6;
+      color: {{ theme.colors.text }};
       display: flex;
       align-items: center;
       justify-content: space-between;
-      text-shadow: 0 0 8px rgba(244, 63, 94, 0.3);
+      text-shadow: 0 0 8px {{ theme.colors.primary_glow }};
     }
 
     /* Cards & Action Box */
@@ -401,7 +403,7 @@
       transition: box-shadow 0.2s ease;
     }
     .action-box:hover {
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(244, 63, 94, 0.15);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 15px {{ theme.colors.primary_glow }};
     }
 
     .form-group {
@@ -413,7 +415,7 @@
     label {
       font-size: 0.86rem;
       font-weight: 700;
-      color: #ffe4e6;
+      color: {{ theme.colors.text }};
     }
     select, input[type="date"], input[type="text"] {
       width: 100%;
@@ -426,22 +428,22 @@
       font-size: 0.95rem;
       outline: none;
       transition: all 0.2s ease;
-      background: #12071a;
+      background: {{ theme.colors.bg }};
       color: var(--text);
     }
     select:focus, input[type="date"]:focus, input[type="text"]:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.28);
+      box-shadow: 0 0 0 3px {{ theme.colors.primary_glow }};
     }
     select option, optgroup {
-      background: #1a0c24;
-      color: #fff1f2;
+      background: {{ theme.colors.card_bg }};
+      color: {{ theme.colors.text }};
     }
 
     /* Date Picker Card & Range Grid */
     .date-picker-card {
-      background: #14081e;
-      border: 1.5px solid #3b1740;
+      background: {{ theme.colors.card_bg }};
+      border: 1.5px solid {{ theme.colors.border }};
       border-radius: 12px;
       padding: 14px 14px 12px;
       margin-bottom: 16px;
@@ -462,7 +464,7 @@
     .date-range-grid label {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #ffe4e6;
+      color: {{ theme.colors.text }};
       margin-bottom: 5px;
       display: flex;
       align-items: center;
@@ -475,9 +477,9 @@
       box-sizing: border-box !important;
       height: 44px;
       padding: 10px 12px;
-      border: 1.5px solid #4a1f4e;
+      border: 1.5px solid {{ theme.colors.border }};
       border-radius: var(--radius-sm);
-      background: #12071a;
+      background: {{ theme.colors.bg }};
       color: var(--text);
     }
     .date-range-grid input[type="date"]::-webkit-date-and-time-value {
@@ -496,12 +498,12 @@
     .chip {
       font-size: 0.8rem;
       font-weight: 600;
-      background: #200d29;
-      border: 1px solid #4a1f4e;
+      background: {{ theme.colors.bg }};
+      border: 1px solid {{ theme.colors.border }};
       padding: 5px 11px;
       border-radius: 18px;
       cursor: pointer;
-      color: #ffe4e6;
+      color: {{ theme.colors.text }};
       transition: all 0.15s ease;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
@@ -510,15 +512,15 @@
       gap: 4px;
     }
     .chip:hover {
-      background: #e11d48;
+      background: {{ theme.colors.primary }};
       color: #ffffff;
-      border-color: #f43f5e;
-      box-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+      border-color: {{ theme.colors.border_focus }};
+      box-shadow: 0 0 12px {{ theme.colors.primary_glow }};
       transform: translateY(-1px);
     }
     .chip:active {
       transform: scale(0.96);
-      background: #be123c;
+      background: {{ theme.colors.primary_hover }};
     }
 
     /* Buttons */
@@ -545,33 +547,30 @@
       transform: scale(0.99);
     }
     .btn-danger {
-      background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: #fff;
-      box-shadow: 0 4px 15px rgba(225, 29, 72, 0.45);
-      border: 1px solid rgba(253, 164, 175, 0.4);
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.45);
+      border: 1px solid rgba(254, 202, 202, 0.4);
     }
     .btn-primary {
       background: var(--primary-gradient);
       color: #fff;
-      box-shadow: 0 4px 16px rgba(225, 29, 72, 0.45);
-      border: 1px solid rgba(253, 164, 175, 0.4);
+      box-shadow: 0 4px 16px {{ theme.colors.primary_glow }};
+      border: 1px solid {{ theme.colors.border_focus }};
     }
     .btn-dark {
-      background: #200d29;
-      color: #fff1f2;
-      border: 1px solid #4a1f4e;
+      background: {{ theme.colors.card_bg }};
+      color: {{ theme.colors.text }};
+      border: 1px solid {{ theme.colors.border }};
     }
     .btn-light {
-      background: #1a0c24;
-      color: #ffe4e6;
-      border: 1.5px solid #4a1f4e;
+      background: {{ theme.colors.card_bg }};
+      color: {{ theme.colors.text }};
+      border: 1.5px solid {{ theme.colors.border }};
     }
     .btn-light:hover {
-      background: #281238;
-      border-color: #f43f5e;
-    }
-      background: #251d46;
-      border-color: #ea580c;
+      background: {{ theme.colors.bg }};
+      border-color: {{ theme.colors.primary }};
     }
     .cancel-btn {
       background: rgba(220, 38, 38, 0.25);
@@ -647,37 +646,37 @@
       vertical-align: middle;
     }
     th {
-      background: #160822;
-      color: #fb7185;
+      background: {{ theme.colors.card_bg }};
+      color: {{ theme.colors.highlight }};
       font-weight: 800;
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.6px;
-      text-shadow: 0 0 6px rgba(244, 63, 94, 0.35);
+      text-shadow: 0 0 6px {{ theme.colors.primary_glow }};
     }
     tr {
       transition: background-color 0.15s ease;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover { background-color: rgba(244, 63, 94, 0.08); }
+    tr:hover { background-color: {{ theme.colors.primary_glow }}; }
     tr.tr-conflict { background-color: rgba(180, 83, 9, 0.22) !important; }
 
     /* Tags & Badges */
     .tag-duty {
-      background: rgba(225, 29, 72, 0.2);
-      color: #fda4af;
-      border: 1px solid rgba(244, 63, 94, 0.5);
+      background: {{ theme.colors.primary_glow }};
+      color: {{ theme.colors.text }};
+      border: 1px solid {{ theme.colors.border_focus }};
       padding: 5px 12px;
       border-radius: 20px;
       font-weight: 800;
       display: inline-block;
       font-size: 0.92rem;
-      box-shadow: 0 0 8px rgba(244, 63, 94, 0.25);
+      box-shadow: 0 0 8px {{ theme.colors.primary_glow }};
     }
     .tag-leave {
-      background: rgba(225, 29, 72, 0.25);
+      background: rgba(239, 68, 68, 0.2);
       color: #fca5a5;
-      border: 1px solid rgba(225, 29, 72, 0.5);
+      border: 1px solid rgba(239, 68, 68, 0.4);
       padding: 4px 10px;
       border-radius: 8px;
       font-size: 0.82rem;
@@ -781,74 +780,76 @@
       position: fixed !important;
       bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
       right: calc(16px + env(safe-area-inset-right, 0px)) !important;
-      height: 52px !important;
-      padding: 0 16px 0 12px !important;
-      border-radius: 30px !important;
-      background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #7c2d12 100%) !important;
+      height: 42px !important;
+      padding: 0 13px !important;
+      border-radius: 24px !important;
+      background: {{ theme.colors.primary_gradient }} !important;
       color: #ffffff !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      gap: 8px !important;
-      box-shadow: 0 6px 24px rgba(234, 88, 12, 0.65), 0 0 20px rgba(249, 115, 22, 0.4) !important;
+      gap: 6px !important;
+      box-shadow: 0 4px 18px {{ theme.colors.primary_glow }}, 0 2px 6px rgba(0,0,0,0.4) !important;
       cursor: pointer !important;
       z-index: 99999 !important;
-      border: 2.5px solid #fed7aa !important;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+      backdrop-filter: blur(8px) !important;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
       user-select: none !important;
       -webkit-tap-highlight-color: transparent !important;
       touch-action: manipulation !important;
-      animation: fabPulse 3s infinite ease-in-out;
-    }
-    .ai-fab-icon {
-      font-size: 1.5rem;
-      line-height: 1;
-      display: inline-block;
-      animation: eerieFloat 3s ease-in-out infinite;
-    }
-    .ai-fab-text {
-      font-size: 0.88rem;
-      font-weight: 800;
-      letter-spacing: 0.3px;
-      white-space: nowrap;
-      color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    }
-    @keyframes fabPulse {
-      0%, 100% { box-shadow: 0 6px 20px rgba(234, 88, 12, 0.55), 0 0 15px rgba(249, 115, 22, 0.3); }
-      50% { box-shadow: 0 8px 30px rgba(249, 115, 22, 0.8), 0 0 0 7px rgba(249, 115, 22, 0.22); }
+      animation: fabPulse 3.5s infinite ease-in-out;
     }
     .ai-fab-btn:hover {
-      transform: scale(1.06);
-      box-shadow: 0 10px 32px rgba(249, 115, 22, 0.85) !important;
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 8px 24px {{ theme.colors.primary_glow }} !important;
+      border-color: #ffffff !important;
     }
     .ai-fab-btn:active {
-      transform: scale(0.94);
+      transform: scale(0.96);
+    }
+    .ai-fab-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      display: inline-block;
+    }
+    .ai-fab-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+    @keyframes fabPulse {
+      0%, 100% { box-shadow: 0 4px 18px {{ theme.colors.primary_glow }}, 0 2px 6px rgba(0,0,0,0.4); }
+      50% { box-shadow: 0 6px 24px {{ theme.colors.primary_glow }}, 0 0 0 5px {{ theme.colors.primary_glow }}; }
     }
     .ai-fab-badge {
       position: absolute;
-      top: -2px;
-      right: 2px;
-      width: 13px;
-      height: 13px;
+      top: 1px;
+      right: 1px;
+      width: 9px;
+      height: 9px;
       background: #22c55e;
       border-radius: 50%;
-      border: 2px solid #151128;
+      border: 1.5px solid {{ theme.colors.card_bg }};
+      box-shadow: 0 0 6px #22c55e;
     }
 
     .ai-chat-popup {
       display: none;
       position: fixed !important;
-      bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+      bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
       right: calc(16px + env(safe-area-inset-right, 0px)) !important;
       width: 360px !important;
       max-width: calc(100vw - 32px) !important;
-      height: 500px !important;
-      max-height: calc(100vh - 100px) !important;
-      background: #140f28 !important;
+      height: 480px !important;
+      max-height: calc(100vh - 90px) !important;
+      background: {{ theme.colors.card_bg }} !important;
       border-radius: 18px !important;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(249, 115, 22, 0.25) !important;
-      border: 1.5px solid #433672 !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px {{ theme.colors.primary_glow }} !important;
+      border: 1.5px solid {{ theme.colors.border_focus }} !important;
       z-index: 999999 !important;
       flex-direction: column !important;
       overflow: hidden !important;
@@ -1046,6 +1047,20 @@
         font-size: 0.65rem !important;
       }
 
+      .ai-fab-btn {
+        height: 38px !important;
+        padding: 0 11px !important;
+        bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+        right: calc(12px + env(safe-area-inset-right, 0px)) !important;
+        gap: 5px !important;
+      }
+      .ai-fab-icon {
+        font-size: 1.15rem !important;
+      }
+      .ai-fab-text {
+        font-size: 0.74rem !important;
+      }
+
       .ai-chat-popup {
         top: 0 !important;
         left: 0 !important;
@@ -1093,20 +1108,20 @@
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
     .ai-popup-header {
-      background: linear-gradient(135deg, #c2410c 0%, #ea580c 55%, #7c2d12 100%);
+      background: {{ theme.colors.primary_gradient }};
       color: #fff;
       padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
-      border-bottom: 1px solid rgba(253, 186, 116, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     }
     .ai-popup-messages {
       flex: 1;
       padding: 12px 14px;
       overflow-y: auto;
-      background: #0d0a1b;
+      background: {{ theme.colors.bg }};
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -1114,8 +1129,8 @@
     }
     .ai-popup-footer {
       padding: 10px 12px;
-      background: #140f28;
-      border-top: 1px solid #332a5a;
+      background: {{ theme.colors.card_bg }};
+      border-top: 1px solid {{ theme.colors.border }};
       display: flex;
       gap: 6px;
       flex-shrink: 0;
@@ -1150,10 +1165,10 @@
         <button type="button" class="top-btn" onclick="openThemePickerModal()" style="background: rgba(255,255,255,0.12); border: 1.5px solid var(--border-focus); color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
           🎨 Đổi Giao Diện
         </button>
-        <span class="admin-badge" style="background: rgba(225, 29, 72, 0.25); border: 1.5px solid var(--border-focus); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+        <span class="admin-badge" style="background: {{ theme.colors.primary_glow }}; border: 1.5px solid var(--border-focus); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
           👑 Admin
         </span>
-        <a href="/admin-logout" class="top-btn" style="background: rgba(225, 29, 72, 0.2); color: {{ theme.colors.highlight }}; border: 1px solid var(--border-focus); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+        <a href="/admin-logout" class="top-btn" style="background: {{ theme.colors.primary_glow }}; color: {{ theme.colors.highlight }}; border: 1px solid var(--border-focus); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
           Thoát
         </a>
       {% else %}
@@ -1434,7 +1449,7 @@
         <h2 style="font-size: 1.15rem; font-weight: 800; color: {{ theme.colors.accent }}; display: flex; align-items: center; gap: 8px; margin: 0; text-shadow: 0 0 10px {{ theme.colors.primary_glow }};">
           <span>{{ theme.icons.main }}</span> ĐĂNG KÝ XIN NGHỈ
         </h2>
-        <div style="font-size: 0.78rem; font-weight: 700; color: #ffe4e6; background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(244, 63, 94, 0.45); padding: 4px 10px; border-radius: 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: {{ theme.colors.text }}; background: {{ theme.colors.primary_glow }}; border: 1px solid {{ theme.colors.border_focus }}; padding: 4px 10px; border-radius: 20px;">
           ⚠️ Không nhận xin nghỉ Hôm nay, Ngày mai & Ngày mốt
         </div>
       </div>
@@ -1694,7 +1709,7 @@
       // 1. Hiển thị tin nhắn người dùng
       const userBubble = document.createElement('div');
       userBubble.style.cssText = 'display: flex; justify-content: flex-end; margin-bottom: 4px;';
-      userBubble.innerHTML = `<div style="background: linear-gradient(135deg, #e11d48, #db2777); color: #fff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; max-width: 82%; line-height: 1.4; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-weight: 600;">${question}</div>`;
+      userBubble.innerHTML = `<div style="background: {{ theme.colors.primary_gradient }}; color: #fff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; max-width: 82%; line-height: 1.4; box-shadow: 0 2px 8px {{ theme.colors.primary_glow }}; font-weight: 600;">${question}</div>`;
       container.appendChild(userBubble);
 
       input.value = '';
@@ -1740,11 +1755,11 @@
             <div style="background: {{ theme.colors.card_bg }}; border: 1.5px solid {{ theme.colors.border_focus }}; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #fff1f2; line-height: 1.45; box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 10px {{ theme.colors.primary_glow }}; max-width: 92%;">
               <div style="font-weight: 800; color: {{ theme.colors.accent }}; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
                 <span>{{ theme.icons.main }} XÁC NHẬN BÁO NGHỈ</span>
-                <span style="font-size: 0.7rem; background: rgba(225,29,72,0.25); color: #ffe4e6; border: 1px solid rgba(244,63,94,0.4); padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
+                <span style="font-size: 0.7rem; background: {{ theme.colors.primary_glow }}; color: {{ theme.colors.text }}; border: 1px solid {{ theme.colors.border }}; padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
               </div>
               <div style="margin-bottom: 6px;">
                 • Nhân viên: <strong style="color: {{ theme.colors.accent }};">${data.member_name}</strong><br>
-                • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: #fbcfe8;">(${data.weekday_vn})</span><br>
+                • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: {{ theme.colors.highlight }};">(${data.weekday_vn})</span><br>
                 • Lý do: <em>"${data.reason}"</em>
               </div>
               <div style="padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; font-size: 0.78rem; ${conflictStyle}">
@@ -2179,7 +2194,7 @@
   <!-- BONG BÓNG CHAT AI NỔI (FLOATING CHAT BUBBLE) -->
   <div class="ai-fab-btn" id="ai-fab-button" onclick="toggleAiChatPopup()" title="Hỏi nhanh trợ lý AI về lịch trực & ngày nghỉ">
     <span class="ai-fab-icon">{{ theme.icons.bot }}</span>
-    <span class="ai-fab-text">{{ theme.tag }}</span>
+    <span class="ai-fab-text">Hỏi AI</span>
     <span class="ai-fab-badge"></span>
   </div>
 
@@ -2248,9 +2263,9 @@
 
   <!-- MODAL CHỈNH SỬA LỊCH NGHỈ CHO ADMIN -->
   <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:440px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(244,63,94,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+    <div style="background:{{ theme.colors.card_bg }}; border:1.5px solid {{ theme.colors.border }}; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:440px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px {{ theme.colors.primary_glow }}; animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:{{ theme.colors.highlight }}; font-weight:800; display:flex; align-items:center; gap:6px;">
           ✏️ Sửa Thông Tin Lịch Nghỉ
         </h3>
         <button type="button" onclick="closeEditModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>

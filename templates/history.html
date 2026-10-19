@@ -55,8 +55,8 @@
       animation: floralFloat 3.2s ease-in-out infinite;
     }
     @keyframes floralGlow {
-      0%, 100% { text-shadow: 0 0 10px rgba(244, 63, 94, 0.6), 0 0 24px rgba(236, 72, 153, 0.35); }
-      50% { text-shadow: 0 0 18px rgba(244, 63, 94, 0.95), 0 0 36px rgba(236, 72, 153, 0.65); }
+      0%, 100% { text-shadow: 0 0 10px {{ theme.colors.primary_glow }}, 0 0 24px {{ theme.colors.primary_glow }}; }
+      50% { text-shadow: 0 0 18px {{ theme.colors.highlight }}, 0 0 36px {{ theme.colors.primary_glow }}; }
     }
     .floral-glow-text {
       animation: floralGlow 3s ease-in-out infinite;
@@ -214,14 +214,14 @@
     }
     h1 {
       font-size: 1.65rem;
-      color: #ffe4e6;
+      color: {{ theme.colors.text }};
       font-weight: 800;
       margin-bottom: 4px;
       letter-spacing: -0.5px;
     }
     .subtitle {
       font-size: 0.9rem;
-      color: #fbcfe8;
+      color: {{ theme.colors.highlight }};
       font-weight: 500;
     }
 
@@ -411,11 +411,11 @@
       transition: all 0.2s ease;
     }
     select:focus {
-      border-color: #f43f5e;
-      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.3);
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--primary-glow);
     }
     select option, optgroup {
-      background: #190c24;
+      background: {{ theme.colors.card_bg }};
       color: #f8fafc;
     }
     .btn {
@@ -437,16 +437,16 @@
     .btn-primary {
       background: var(--primary-gradient);
       color: #fff;
-      box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4);
+      box-shadow: 0 2px 8px var(--primary-glow);
     }
     .btn-light {
-      background: #1b1028;
-      color: #fbcfe8;
-      border: 1px solid #4a1d48;
+      background: {{ theme.colors.card_bg }};
+      color: {{ theme.colors.text }};
+      border: 1px solid {{ theme.colors.border }};
     }
     .btn-light:hover {
-      background: #281438;
-      border-color: #f43f5e;
+      background: {{ theme.colors.bg }};
+      border-color: {{ theme.colors.primary }};
     }
 
     /* Attendance summary stats */
@@ -461,7 +461,7 @@
     .stats-title {
       font-size: 0.96rem;
       font-weight: 800;
-      color: #fbcfe8;
+      color: {{ theme.colors.text }};
       margin-bottom: 14px;
       display: flex;
       align-items: center;
@@ -473,7 +473,7 @@
       gap: 10px;
     }
     .stat-item {
-      background: #190c24;
+      background: {{ theme.colors.bg }};
       border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 12px 10px;
@@ -485,10 +485,10 @@
       position: relative;
     }
     .stat-item:hover {
-      background: #241033;
-      border-color: #f43f5e;
+      background: {{ theme.colors.card_bg }};
+      border-color: var(--border-focus);
       transform: translateY(-3px);
-      box-shadow: 0 6px 18px rgba(244, 63, 94, 0.35);
+      box-shadow: 0 6px 18px var(--primary-glow);
     }
     .stat-item:active {
       transform: scale(0.96);
@@ -501,9 +501,9 @@
     .stat-count {
       font-size: 1.5rem;
       font-weight: 800;
-      color: #fb7185;
+      color: {{ theme.colors.highlight }};
       margin-top: 2px;
-      text-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
+      text-shadow: 0 0 8px var(--primary-glow);
     }
     .stat-role {
       font-size: 0.72rem;
@@ -532,8 +532,8 @@
       vertical-align: middle;
     }
     th {
-      background: #190c24;
-      color: #fda4af;
+      background: {{ theme.colors.card_bg }};
+      color: {{ theme.colors.highlight }};
       font-weight: 800;
       font-size: 0.8rem;
       text-transform: uppercase;
@@ -543,13 +543,13 @@
       transition: background-color 0.15s ease;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover { background-color: rgba(244, 63, 94, 0.08); }
+    tr:hover { background-color: var(--primary-glow); }
 
     /* Tags */
     .tag-duty-member {
-      background: rgba(244, 63, 94, 0.18);
-      color: #fda4af;
-      border: 1px solid rgba(244, 63, 94, 0.45);
+      background: var(--primary-glow);
+      color: {{ theme.colors.text }};
+      border: 1px solid var(--border-focus);
       padding: 3px 8px;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -641,10 +641,10 @@
         <button type="button" class="top-btn" onclick="openThemePickerModal()" style="background: rgba(255,255,255,0.12); border: 1.5px solid var(--primary); color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
           🎨 Đổi Giao Diện
         </button>
-        <span class="admin-badge" style="background: rgba(244, 63, 94, 0.25); border: 1.5px solid var(--primary); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px;">
+        <span class="admin-badge" style="background: {{ theme.colors.primary_glow }}; border: 1.5px solid var(--border-focus); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px;">
           👑 Admin
         </span>
-        <a href="/admin-logout" class="top-btn" style="background: rgba(244, 63, 94, 0.2); color: {{ theme.colors.highlight }}; border: 1px solid var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+        <a href="/admin-logout" class="top-btn" style="background: {{ theme.colors.primary_glow }}; color: {{ theme.colors.highlight }}; border: 1px solid var(--border-focus); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
           Thoát
         </a>
       {% else %}
@@ -857,9 +857,9 @@
 
   <!-- MODAL ĐĂNG NHẬP ADMIN -->
   <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:16px; padding:24px; max-width:360px; width:90%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(244,63,94,0.25);">
+    <div style="background:{{ theme.colors.card_bg }}; border:1.5px solid {{ theme.colors.border }}; color:#f8fafc; border-radius:16px; padding:24px; max-width:360px; width:90%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px {{ theme.colors.primary_glow }}; animation:fadeIn 0.2s ease;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:{{ theme.colors.highlight }}; font-weight:800; display:flex; align-items:center; gap:6px;">
           🔐 Quyền Quản Trị Admin
         </h3>
         <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
@@ -868,7 +868,7 @@
       <form action="/admin-login" method="POST">
         <input type="hidden" name="next_url" value="{{ request.url }}">
         <div class="form-group">
-          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; background:#0f0614; color:#f8fafc; border:1.5px solid #4a1d48; border-radius:10px; width:100%; box-sizing:border-box;">
+          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; background:{{ theme.colors.bg }}; color:#f8fafc; border:1.5px solid {{ theme.colors.border }}; border-radius:10px; width:100%; box-sizing:border-box;">
         </div>
         <div style="display:flex; gap:8px; margin-top:16px;">
           <button type="button" class="btn btn-light" style="flex:1;" onclick="closeAdminModal()">Hủy</button>
@@ -880,9 +880,9 @@
 
   <!-- MODAL CHỈNH SỬA LỊCH NGHỈ CHO ADMIN -->
   <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:16px; padding:24px; max-width:440px; width:90%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(244,63,94,0.25);">
+    <div style="background:{{ theme.colors.card_bg }}; border:1.5px solid {{ theme.colors.border }}; color:#f8fafc; border-radius:16px; padding:24px; max-width:440px; width:90%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px {{ theme.colors.primary_glow }}; animation:fadeIn 0.2s ease;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:{{ theme.colors.highlight }}; font-weight:800; display:flex; align-items:center; gap:6px;">
           ✏️ Sửa Thông Tin Lịch Nghỉ
         </h3>
         <button type="button" onclick="closeEditModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
@@ -929,10 +929,10 @@
 
   <!-- MODAL CHI TIẾT CÁC NGÀY NGHỈ CỦA NHÂN VIÊN -->
   <div id="member-leaves-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:18px; padding:20px; max-width:520px; width:100%; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 45px rgba(0,0,0,0.85), 0 0 25px rgba(244,63,94,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid #38163c; padding-bottom:10px;">
+    <div style="background:{{ theme.colors.card_bg }}; border:1.5px solid {{ theme.colors.border }}; color:#f8fafc; border-radius:18px; padding:20px; max-width:520px; width:100%; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 45px rgba(0,0,0,0.85), 0 0 25px {{ theme.colors.primary_glow }}; animation:fadeIn 0.2s ease; box-sizing:border-box;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid {{ theme.colors.border }}; padding-bottom:10px;">
         <div>
-          <h3 id="modal-member-title" style="font-size:1.15rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
+          <h3 id="modal-member-title" style="font-size:1.15rem; color:{{ theme.colors.highlight }}; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
             {{ theme.icons.main }} Lịch Nghỉ Của ...
           </h3>
           <span id="modal-member-count" style="font-size:0.8rem; color:#cbd5e1; margin-top:3px; display:block;"></span>
@@ -944,7 +944,7 @@
         <!-- Danh sách chi tiết các ngày nghỉ được điền qua JS -->
       </div>
 
-      <div style="margin-top:14px; border-top:1px solid #38163c; padding-top:12px; display:flex; justify-content:flex-end;">
+      <div style="margin-top:14px; border-top:1px solid {{ theme.colors.border }}; padding-top:12px; display:flex; justify-content:flex-end;">
         <button type="button" class="btn btn-light" style="width:auto; padding:8px 20px;" onclick="closeMemberLeavesModal()">Đóng</button>
       </div>
     </div>
@@ -990,17 +990,17 @@
         bodyEl.innerHTML = `
           <div style="text-align:center; padding:32px 14px; color:#cbd5e1;">
             <div style="font-size:2.2rem; margin-bottom:8px;">{{ theme.icons.main }}</div>
-            <strong style="color:#fbcfe8; font-size:1rem;">${staffName} chưa xin nghỉ ngày nào!</strong>
+            <strong style="color:{{ theme.colors.highlight }}; font-size:1rem;">${staffName} chưa xin nghỉ ngày nào!</strong>
             <p style="font-size:0.85rem; color:#94a3b8; margin-top:4px;">Chăm chỉ đi làm đầy đủ 100% trong khoảng thời gian này.</p>
           </div>
         `;
       } else {
         currentActiveMemberLeaves.forEach((item, index) => {
           const card = document.createElement('div');
-          card.style.cssText = 'background:#110c22; border:1px solid #332a5a; border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:6px;';
+          card.style.cssText = 'background:{{ theme.colors.bg }}; border:1px solid {{ theme.colors.border }}; border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:6px;';
 
           const statusBadge = item.is_past
-            ? `<span style="font-size:0.74rem; background:#1c1538; color:#cbd5e1; border:1px solid #3d3368; padding:2px 7px; border-radius:6px; font-weight:600;">Đã qua</span>`
+            ? `<span style="font-size:0.74rem; background:{{ theme.colors.card_bg }}; color:#cbd5e1; border:1px solid {{ theme.colors.border }}; padding:2px 7px; border-radius:6px; font-weight:600;">Đã qua</span>`
             : `<span style="font-size:0.74rem; background:rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.5); padding:2px 7px; border-radius:6px; font-weight:700;">Sắp tới</span>`;
 
           let actionHtml = '';
