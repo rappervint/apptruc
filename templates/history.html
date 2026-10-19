@@ -9,15 +9,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #f97316;
-      --primary-gradient: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-      --secondary: #a855f7;
-      --accent: #dc2626;
-      --bg: #0b0914;
-      --card-bg: #151128;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #2e2652;
+      --primary: #f43f5e;
+      --primary-gradient: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #ec4899 100%);
+      --secondary: #ec4899;
+      --accent: #e11d48;
+      --bg: #0d0614;
+      --card-bg: #190c24;
+      --text: #fff1f2;
+      --text-muted: #f472b6;
+      --border: #3b1740;
       --success: #22c55e;
       --shadow-sm: 0 2px 4px rgba(0,0,0,0.4);
       --shadow-md: 0 6px 18px rgba(0,0,0,0.5);
@@ -27,9 +27,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
     body {
-      background: radial-gradient(circle at 15% 15%, rgba(126, 34, 206, 0.2) 0%, transparent 40%),
-                  radial-gradient(circle at 85% 85%, rgba(234, 88, 12, 0.18) 0%, transparent 45%),
-                  #0b0914;
+      background: radial-gradient(circle at 15% 15%, rgba(225, 29, 72, 0.2) 0%, transparent 45%),
+                  radial-gradient(circle at 85% 85%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
+                  #0d0614;
       background-attachment: fixed;
       color: var(--text);
       padding: 16px;
@@ -39,20 +39,21 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    @keyframes eerieFloat {
+    /* 20/10 Floral Animations */
+    @keyframes floralFloat {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-5px) rotate(2deg); }
+      50% { transform: translateY(-5px) rotate(3deg); }
     }
-    .spooky-float {
+    .floral-float {
       display: inline-block;
-      animation: eerieFloat 3.5s ease-in-out infinite;
+      animation: floralFloat 3.2s ease-in-out infinite;
     }
-    @keyframes spookyGlow {
-      0%, 100% { text-shadow: 0 0 10px rgba(249, 115, 22, 0.5), 0 0 24px rgba(249, 115, 22, 0.25); }
-      50% { text-shadow: 0 0 18px rgba(249, 115, 22, 0.85), 0 0 36px rgba(249, 115, 22, 0.45); }
+    @keyframes floralGlow {
+      0%, 100% { text-shadow: 0 0 10px rgba(244, 63, 94, 0.6), 0 0 24px rgba(236, 72, 153, 0.35); }
+      50% { text-shadow: 0 0 18px rgba(244, 63, 94, 0.95), 0 0 36px rgba(236, 72, 153, 0.65); }
     }
-    .halloween-glow-text {
-      animation: spookyGlow 3s ease-in-out infinite;
+    .floral-glow-text {
+      animation: floralGlow 3s ease-in-out infinite;
     }
 
     /* Top bar */
@@ -68,11 +69,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #1b1534;
-      color: #fed7aa;
+      background: #1e0d28;
+      color: #ffe4e6;
       padding: 9px 16px;
       border-radius: 20px;
-      border: 1px solid #3d3368;
+      border: 1px solid #4a1f4e;
       text-decoration: none;
       font-weight: 700;
       font-size: 0.88rem;
@@ -80,19 +81,19 @@
       transition: all 0.2s ease;
     }
     .back-btn:hover {
-      background: #251d46;
-      border-color: #ea580c;
+      background: #2a1238;
+      border-color: #f43f5e;
       transform: translateX(-2px);
     }
     .print-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #251d46;
-      color: #fed7aa;
+      background: #1e0d28;
+      color: #ffe4e6;
       padding: 9px 16px;
       border-radius: 20px;
-      border: 1px solid #433872;
+      border: 1px solid #4a1f4e;
       font-weight: 700;
       font-size: 0.88rem;
       cursor: pointer;
@@ -100,7 +101,7 @@
       transition: all 0.2s ease;
     }
     .print-btn:hover {
-      background: #ea580c;
+      background: #e11d48;
       color: #fff;
       transform: translateY(-1px);
     }
@@ -109,23 +110,23 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #120e24;
-      border: 1px solid #3d3368;
+      background: #14081e;
+      border: 1px solid #4a1f4e;
       padding: 5px 12px;
       border-radius: 20px;
       font-size: 0.82rem;
-      color: #fed7aa;
+      color: #ffe4e6;
     }
     .clock-badge .clock-time {
       font-size: 0.95rem;
       font-weight: 800;
-      color: #fb923c;
+      color: #fb7185;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.5px;
     }
     .clock-badge .clock-zone {
       font-size: 0.68rem;
-      background: linear-gradient(135deg, #ea580c, #c2410c);
+      background: linear-gradient(135deg, #e11d48, #be123c);
       color: #fff;
       font-weight: 700;
       padding: 2px 6px;
@@ -139,14 +140,14 @@
     }
     h1 {
       font-size: 1.65rem;
-      color: #ffedd5;
+      color: #ffe4e6;
       font-weight: 800;
       margin-bottom: 4px;
       letter-spacing: -0.5px;
     }
     .subtitle {
       font-size: 0.9rem;
-      color: #cbd5e1;
+      color: #fbcfe8;
       font-weight: 500;
     }
 
@@ -195,11 +196,11 @@
       transition: all 0.2s ease;
     }
     select:focus {
-      border-color: #ea580c;
-      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.3);
+      border-color: #f43f5e;
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.3);
     }
     select option, optgroup {
-      background: #151128;
+      background: #190c24;
       color: #f8fafc;
     }
     .btn {
@@ -221,16 +222,16 @@
     .btn-primary {
       background: var(--primary-gradient);
       color: #fff;
-      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);
+      box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4);
     }
     .btn-light {
-      background: #1b1534;
-      color: #fed7aa;
-      border: 1px solid #3d3368;
+      background: #1b1028;
+      color: #fbcfe8;
+      border: 1px solid #4a1d48;
     }
     .btn-light:hover {
-      background: #251d46;
-      border-color: #ea580c;
+      background: #281438;
+      border-color: #f43f5e;
     }
 
     /* Attendance summary stats */
@@ -245,7 +246,7 @@
     .stats-title {
       font-size: 0.96rem;
       font-weight: 800;
-      color: #fed7aa;
+      color: #fbcfe8;
       margin-bottom: 14px;
       display: flex;
       align-items: center;
@@ -257,7 +258,7 @@
       gap: 10px;
     }
     .stat-item {
-      background: #100c22;
+      background: #190c24;
       border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 12px 10px;
@@ -269,10 +270,10 @@
       position: relative;
     }
     .stat-item:hover {
-      background: #1c1538;
-      border-color: #ea580c;
+      background: #241033;
+      border-color: #f43f5e;
       transform: translateY(-3px);
-      box-shadow: 0 6px 18px rgba(234, 88, 12, 0.35);
+      box-shadow: 0 6px 18px rgba(244, 63, 94, 0.35);
     }
     .stat-item:active {
       transform: scale(0.96);
@@ -285,9 +286,9 @@
     .stat-count {
       font-size: 1.5rem;
       font-weight: 800;
-      color: #fb923c;
+      color: #fb7185;
       margin-top: 2px;
-      text-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
+      text-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
     }
     .stat-role {
       font-size: 0.72rem;
@@ -316,8 +317,8 @@
       vertical-align: middle;
     }
     th {
-      background: #100c22;
-      color: #fb923c;
+      background: #190c24;
+      color: #fda4af;
       font-weight: 800;
       font-size: 0.8rem;
       text-transform: uppercase;
@@ -327,13 +328,13 @@
       transition: background-color 0.15s ease;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover { background-color: rgba(249, 115, 22, 0.08); }
+    tr:hover { background-color: rgba(244, 63, 94, 0.08); }
 
     /* Tags */
     .tag-duty-member {
-      background: rgba(234, 88, 12, 0.2);
-      color: #fdba74;
-      border: 1px solid rgba(234, 88, 12, 0.45);
+      background: rgba(244, 63, 94, 0.18);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.45);
       padding: 3px 8px;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -341,9 +342,9 @@
       display: inline-block;
     }
     .tag-nonduty-member {
-      background: rgba(168, 85, 247, 0.2);
-      color: #d8b4fe;
-      border: 1px solid rgba(168, 85, 247, 0.45);
+      background: rgba(217, 70, 239, 0.18);
+      color: #f0abfc;
+      border: 1px solid rgba(217, 70, 239, 0.45);
       padding: 3px 8px;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -406,25 +407,25 @@
 <body>
 
   <div class="top-bar">
-    <a href="/?tab=leaves" class="back-btn">⬅️ Quay lại Lịch Trực & Lịch Nghỉ 🎃</a>
+    <a href="/?tab=leaves" class="back-btn">⬅️ Quay lại Lịch Trực & Lịch Nghỉ 🌸</a>
     
     <div style="display: flex; align-items: center; gap: 8px;">
       <div class="clock-badge">
-        <span style="font-size: 0.95rem;">🕯️</span>
+        <span style="font-size: 0.95rem;">🌷</span>
         <span id="vn-live-clock" class="clock-time">--:--:--</span>
         <span id="vn-live-date" style="color: #cbd5e1; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
         <span class="clock-zone">Giờ VN</span>
       </div>
 
       {% if is_admin %}
-        <span style="background: rgba(220, 38, 38, 0.25); border: 1.5px solid #ef4444; color: #fca5a5; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px;">
+        <span style="background: rgba(244, 63, 94, 0.25); border: 1.5px solid #f43f5e; color: #fecdd3; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px;">
           👑 Admin
         </span>
-        <a href="/admin-logout" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+        <a href="/admin-logout" style="background: rgba(244, 63, 94, 0.2); color: #fecdd3; border: 1px solid #f43f5e; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
           Thoát
         </a>
       {% else %}
-        <button type="button" onclick="openAdminModal()" style="background: #1b1534; border: 1px solid #3d3368; color: #fed7aa; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+        <button type="button" onclick="openAdminModal()" style="background: #210d2c; border: 1px solid #5c2456; color: #fbcfe8; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
           🔐 Quản Trị
         </button>
       {% endif %}
@@ -434,8 +435,8 @@
   </div>
 
   <header>
-    <h1 class="halloween-glow-text">📜 LỊCH SỬ XIN NGHỈ 🎃</h1>
-    <p class="subtitle">Tra cứu toàn diện các ca xin nghỉ của anh em cửa hàng (Halloween 2026)</p>
+    <h1 class="floral-glow-text">📜 LỊCH SỬ XIN NGHỈ 🌸</h1>
+    <p class="subtitle">Tra cứu toàn diện các ca xin nghỉ của anh em cửa hàng (Mừng Ngày Phụ Nữ VN 20/10 💐)</p>
   </header>
 
   <!-- BỘ LỌC TÌM KIẾM -->
@@ -633,9 +634,9 @@
 
   <!-- MODAL ĐĂNG NHẬP ADMIN -->
   <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:16px; padding:24px; max-width:360px; width:90%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(249,115,22,0.25);">
+    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:16px; padding:24px; max-width:360px; width:90%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(244,63,94,0.25);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:6px;">
           🔐 Quyền Quản Trị Admin
         </h3>
         <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
@@ -644,7 +645,7 @@
       <form action="/admin-login" method="POST">
         <input type="hidden" name="next_url" value="{{ request.url }}">
         <div class="form-group">
-          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; background:#0f0c1e; color:#f8fafc; border:1.5px solid #3d3368; border-radius:10px; width:100%; box-sizing:border-box;">
+          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; background:#0f0614; color:#f8fafc; border:1.5px solid #4a1d48; border-radius:10px; width:100%; box-sizing:border-box;">
         </div>
         <div style="display:flex; gap:8px; margin-top:16px;">
           <button type="button" class="btn btn-light" style="flex:1;" onclick="closeAdminModal()">Hủy</button>
@@ -656,9 +657,9 @@
 
   <!-- MODAL CHỈNH SỬA LỊCH NGHỈ CHO ADMIN -->
   <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:16px; padding:24px; max-width:440px; width:90%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(249,115,22,0.25);">
+    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:16px; padding:24px; max-width:440px; width:90%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(244,63,94,0.25);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:6px;">
           ✏️ Sửa Thông Tin Lịch Nghỉ
         </h3>
         <button type="button" onclick="closeEditModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
@@ -705,11 +706,11 @@
 
   <!-- MODAL CHI TIẾT CÁC NGÀY NGHỈ CỦA NHÂN VIÊN -->
   <div id="member-leaves-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:18px; padding:20px; max-width:520px; width:100%; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 45px rgba(0,0,0,0.85), 0 0 25px rgba(249,115,22,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid #332a5a; padding-bottom:10px;">
+    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:18px; padding:20px; max-width:520px; width:100%; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 45px rgba(0,0,0,0.85), 0 0 25px rgba(244,63,94,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid #38163c; padding-bottom:10px;">
         <div>
-          <h3 id="modal-member-title" style="font-size:1.15rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
-            🎃 Lịch Nghỉ Của ...
+          <h3 id="modal-member-title" style="font-size:1.15rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
+            🌸 Lịch Nghỉ Của ...
           </h3>
           <span id="modal-member-count" style="font-size:0.8rem; color:#cbd5e1; margin-top:3px; display:block;"></span>
         </div>
@@ -720,7 +721,7 @@
         <!-- Danh sách chi tiết các ngày nghỉ được điền qua JS -->
       </div>
 
-      <div style="margin-top:14px; border-top:1px solid #332a5a; padding-top:12px; display:flex; justify-content:flex-end;">
+      <div style="margin-top:14px; border-top:1px solid #38163c; padding-top:12px; display:flex; justify-content:flex-end;">
         <button type="button" class="btn btn-light" style="width:auto; padding:8px 20px;" onclick="closeMemberLeavesModal()">Đóng</button>
       </div>
     </div>
@@ -757,7 +758,7 @@
 
       currentActiveMemberLeaves = allLeavesHistory.filter(item => item.member_name === staffName);
 
-      if (titleEl) titleEl.innerHTML = `<span>🎃</span> Lịch Nghỉ: <span style="color:#fb923c;">${staffName}</span>`;
+      if (titleEl) titleEl.innerHTML = `<span>🌸</span> Lịch Nghỉ: <span style="color:#fb7185;">${staffName}</span>`;
       if (countEl) countEl.textContent = `Tổng cộng: ${currentActiveMemberLeaves.length} ngày nghỉ đã ghi nhận`;
 
       bodyEl.innerHTML = '';
@@ -765,8 +766,8 @@
       if (currentActiveMemberLeaves.length === 0) {
         bodyEl.innerHTML = `
           <div style="text-align:center; padding:32px 14px; color:#cbd5e1;">
-            <div style="font-size:2.2rem; margin-bottom:8px;">🍬</div>
-            <strong style="color:#fed7aa; font-size:1rem;">${staffName} chưa xin nghỉ ngày nào!</strong>
+            <div style="font-size:2.2rem; margin-bottom:8px;">💐</div>
+            <strong style="color:#fbcfe8; font-size:1rem;">${staffName} chưa xin nghỉ ngày nào!</strong>
             <p style="font-size:0.85rem; color:#94a3b8; margin-top:4px;">Chăm chỉ đi làm đầy đủ 100% trong khoảng thời gian này.</p>
           </div>
         `;

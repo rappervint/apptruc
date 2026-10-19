@@ -9,20 +9,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #f97316;
-      --primary-gradient: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-      --accent-gradient: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
-      --today-gradient: linear-gradient(135deg, #c2410c 0%, #ea580c 55%, #7c2d12 100%);
-      --tomorrow-gradient: linear-gradient(135deg, #581c87 0%, #7e22ce 55%, #3b0764 100%);
-      --bg: #0b0914;
-      --card-bg: #151128;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #2e2652;
-      --border-focus: #f97316;
+      --primary: #f43f5e;
+      --primary-gradient: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #ec4899 100%);
+      --accent-gradient: linear-gradient(135deg, #ec4899 0%, #f472b6 50%, #fb7185 100%);
+      --today-gradient: linear-gradient(135deg, #be123c 0%, #e11d48 55%, #881337 100%);
+      --tomorrow-gradient: linear-gradient(135deg, #701a75 0%, #a21caf 55%, #4a044e 100%);
+      --bg: #0d0614;
+      --card-bg: #190c24;
+      --text: #fff1f2;
+      --text-muted: #f472b6;
+      --border: #3b1740;
+      --border-focus: #f43f5e;
       --shadow-sm: 0 2px 4px rgba(0,0,0,0.4);
       --shadow-md: 0 6px 18px rgba(0,0,0,0.5);
-      --shadow-lg: 0 12px 32px rgba(0,0,0,0.7), 0 0 20px rgba(249, 115, 22, 0.2);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.7), 0 0 20px rgba(244, 63, 94, 0.25);
       --radius: 16px;
       --radius-sm: 10px;
     }
@@ -36,10 +36,10 @@
     }
 
     body {
-      background: radial-gradient(circle at 15% 15%, rgba(126, 34, 206, 0.2) 0%, transparent 40%),
-                  radial-gradient(circle at 85% 85%, rgba(234, 88, 12, 0.18) 0%, transparent 45%),
-                  radial-gradient(circle at 50% 50%, rgba(88, 28, 135, 0.12) 0%, transparent 60%),
-                  #0b0914;
+      background: radial-gradient(circle at 15% 15%, rgba(225, 29, 72, 0.2) 0%, transparent 45%),
+                  radial-gradient(circle at 85% 85%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 50%, rgba(162, 28, 175, 0.12) 0%, transparent 60%),
+                  #0d0614;
       background-attachment: fixed;
       color: var(--text);
       padding: 12px 14px;
@@ -49,21 +49,21 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Halloween Animations */
-    @keyframes eerieFloat {
+    /* 20/10 Vietnamese Women's Day Animations */
+    @keyframes floralFloat {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-5px) rotate(2deg); }
+      50% { transform: translateY(-5px) rotate(3deg); }
     }
-    .spooky-float {
+    .floral-float {
       display: inline-block;
-      animation: eerieFloat 3.5s ease-in-out infinite;
+      animation: floralFloat 3.2s ease-in-out infinite;
     }
-    @keyframes spookyGlow {
-      0%, 100% { text-shadow: 0 0 10px rgba(249, 115, 22, 0.5), 0 0 24px rgba(249, 115, 22, 0.25); }
-      50% { text-shadow: 0 0 18px rgba(249, 115, 22, 0.85), 0 0 36px rgba(249, 115, 22, 0.45); }
+    @keyframes floralGlow {
+      0%, 100% { text-shadow: 0 0 10px rgba(244, 63, 94, 0.6), 0 0 24px rgba(236, 72, 153, 0.35); }
+      50% { text-shadow: 0 0 18px rgba(244, 63, 94, 0.95), 0 0 36px rgba(236, 72, 153, 0.65); }
     }
-    .halloween-glow-text {
-      animation: spookyGlow 3s ease-in-out infinite;
+    .floral-glow-text {
+      animation: floralGlow 3s ease-in-out infinite;
     }
 
     /* Top Bar Header */
@@ -72,46 +72,46 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       padding: 10px 16px;
-      background: rgba(21, 17, 40, 0.92);
+      background: rgba(26, 12, 36, 0.92);
       backdrop-filter: blur(10px);
       border-radius: 30px;
-      border: 1px solid rgba(249, 115, 22, 0.35);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 15px rgba(249, 115, 22, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 16px rgba(244, 63, 94, 0.2);
     }
     .brand-title {
       font-size: 0.92rem;
       font-weight: 800;
-      color: #fb923c;
+      color: #fda4af;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       display: flex;
       align-items: center;
       gap: 6px;
-      text-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+      text-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
     }
     .clock-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #120e24;
-      border: 1px solid #3d3368;
+      background: #14081e;
+      border: 1px solid #4a1f4e;
       padding: 5px 12px;
       border-radius: 20px;
       font-size: 0.82rem;
-      color: #fed7aa;
+      color: #ffe4e6;
     }
     .clock-badge .clock-time {
       font-size: 0.95rem;
       font-weight: 800;
-      color: #fb923c;
+      color: #fb7185;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.5px;
     }
     .clock-badge .clock-zone {
       font-size: 0.68rem;
-      background: linear-gradient(135deg, #ea580c, #c2410c);
+      background: linear-gradient(135deg, #e11d48, #be123c);
       color: #fff;
       font-weight: 700;
       padding: 2px 6px;
@@ -126,7 +126,7 @@
     }
     h1 {
       font-size: 1.65rem;
-      color: #ffedd5;
+      color: #ffe4e6;
       margin-bottom: 4px;
       font-weight: 800;
       letter-spacing: -0.5px;
@@ -140,12 +140,12 @@
     /* Tab Navigation */
     .tab-container {
       display: flex;
-      background: #110d22;
+      background: #14081e;
       padding: 5px;
       border-radius: 14px;
       margin-bottom: 22px;
       gap: 5px;
-      border: 1px solid #2d254f;
+      border: 1px solid #3b1740;
       box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
     }
     .tab-btn {
@@ -153,7 +153,7 @@
       padding: 12px 14px;
       border: none;
       background: transparent;
-      color: #94a3b8;
+      color: #fda4af;
       font-size: 0.92rem;
       font-weight: 700;
       border-radius: 10px;
@@ -166,12 +166,12 @@
       text-decoration: none;
     }
     .tab-btn:hover {
-      color: #fed7aa;
+      color: #fff1f2;
     }
     .tab-btn.active {
-      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+      background: linear-gradient(135deg, #e11d48 0%, #db2777 100%);
       color: #ffffff;
-      box-shadow: 0 4px 15px rgba(234, 88, 12, 0.45);
+      box-shadow: 0 4px 15px rgba(225, 29, 72, 0.45);
       transform: translateY(-1px);
       text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     }
@@ -179,12 +179,12 @@
       font-size: 0.72rem;
       padding: 2px 7px;
       border-radius: 12px;
-      background: #7c2d12;
-      color: #fed7aa;
+      background: #881337;
+      color: #ffe4e6;
       font-weight: 700;
     }
     .tab-badge.badge-alert {
-      background: #dc2626;
+      background: #e11d48;
       color: #fff;
       animation: pulseAlert 2s infinite;
     }
@@ -235,17 +235,17 @@
     }
     .hero-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(249, 115, 22, 0.35);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(244, 63, 94, 0.35);
     }
     .hero-today {
-      background: linear-gradient(135deg, #c2410c 0%, #ea580c 55%, #7c2d12 100%);
-      border: 1px solid rgba(253, 186, 116, 0.45);
-      box-shadow: 0 10px 30px rgba(234, 88, 12, 0.4), 0 0 20px rgba(249, 115, 22, 0.25);
+      background: linear-gradient(135deg, #be123c 0%, #e11d48 55%, #881337 100%);
+      border: 1px solid rgba(253, 164, 175, 0.45);
+      box-shadow: 0 10px 30px rgba(225, 29, 72, 0.4), 0 0 20px rgba(244, 63, 94, 0.25);
     }
     .hero-tomorrow {
-      background: linear-gradient(135deg, #581c87 0%, #7e22ce 55%, #3b0764 100%);
-      border: 1px solid rgba(216, 180, 254, 0.4);
-      box-shadow: 0 10px 30px rgba(126, 34, 206, 0.4), 0 0 20px rgba(168, 85, 247, 0.25);
+      background: linear-gradient(135deg, #701a75 0%, #a21caf 55%, #4a044e 100%);
+      border: 1px solid rgba(244, 114, 182, 0.4);
+      box-shadow: 0 10px 30px rgba(162, 28, 175, 0.4), 0 0 20px rgba(236, 72, 153, 0.25);
     }
     .hero-label {
       font-size: 0.76rem;
@@ -257,10 +257,10 @@
       align-items: center;
       gap: 6px;
       margin-bottom: 8px;
-      color: #fed7aa;
+      color: #ffe4e6;
     }
     .hero-tomorrow .hero-label {
-      color: #e9d5ff;
+      color: #fce7f3;
     }
     .hero-name {
       font-size: 2.1rem;
@@ -314,11 +314,11 @@
       font-size: 1.08rem;
       font-weight: 800;
       margin: 24px 0 12px;
-      color: #fed7aa;
+      color: #ffe4e6;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      text-shadow: 0 0 8px rgba(249, 115, 22, 0.25);
+      text-shadow: 0 0 8px rgba(244, 63, 94, 0.3);
     }
 
     /* Cards & Action Box */
@@ -332,7 +332,7 @@
       transition: box-shadow 0.2s ease;
     }
     .action-box:hover {
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(249, 115, 22, 0.1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(244, 63, 94, 0.15);
     }
 
     .form-group {
@@ -344,7 +344,7 @@
     label {
       font-size: 0.86rem;
       font-weight: 700;
-      color: #e2e8f0;
+      color: #ffe4e6;
     }
     select, input[type="date"], input[type="text"] {
       width: 100%;
@@ -357,22 +357,22 @@
       font-size: 0.95rem;
       outline: none;
       transition: all 0.2s ease;
-      background: #0f0c1e;
+      background: #12071a;
       color: var(--text);
     }
     select:focus, input[type="date"]:focus, input[type="text"]:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.28);
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.28);
     }
     select option, optgroup {
-      background: #151128;
-      color: #f8fafc;
+      background: #1a0c24;
+      color: #fff1f2;
     }
 
     /* Date Picker Card & Range Grid */
     .date-picker-card {
-      background: #110d22;
-      border: 1.5px solid #332a5a;
+      background: #14081e;
+      border: 1.5px solid #3b1740;
       border-radius: 12px;
       padding: 14px 14px 12px;
       margin-bottom: 16px;
@@ -393,7 +393,7 @@
     .date-range-grid label {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #e2e8f0;
+      color: #ffe4e6;
       margin-bottom: 5px;
       display: flex;
       align-items: center;
@@ -406,9 +406,9 @@
       box-sizing: border-box !important;
       height: 44px;
       padding: 10px 12px;
-      border: 1.5px solid #3d3368;
+      border: 1.5px solid #4a1f4e;
       border-radius: var(--radius-sm);
-      background: #0f0c1e;
+      background: #12071a;
       color: var(--text);
     }
     .date-range-grid input[type="date"]::-webkit-date-and-time-value {
@@ -427,12 +427,12 @@
     .chip {
       font-size: 0.8rem;
       font-weight: 600;
-      background: #1f1839;
-      border: 1px solid #433672;
+      background: #200d29;
+      border: 1px solid #4a1f4e;
       padding: 5px 11px;
       border-radius: 18px;
       cursor: pointer;
-      color: #fed7aa;
+      color: #ffe4e6;
       transition: all 0.15s ease;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
@@ -441,15 +441,15 @@
       gap: 4px;
     }
     .chip:hover {
-      background: #ea580c;
+      background: #e11d48;
       color: #ffffff;
-      border-color: #f97316;
-      box-shadow: 0 0 12px rgba(249, 115, 22, 0.45);
+      border-color: #f43f5e;
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
       transform: translateY(-1px);
     }
     .chip:active {
       transform: scale(0.96);
-      background: #c2410c;
+      background: #be123c;
     }
 
     /* Buttons */
@@ -476,28 +476,31 @@
       transform: scale(0.99);
     }
     .btn-danger {
-      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
       color: #fff;
-      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.45);
-      border: 1px solid rgba(248, 113, 113, 0.4);
+      box-shadow: 0 4px 15px rgba(225, 29, 72, 0.45);
+      border: 1px solid rgba(253, 164, 175, 0.4);
     }
     .btn-primary {
       background: var(--primary-gradient);
       color: #fff;
-      box-shadow: 0 4px 16px rgba(234, 88, 12, 0.45);
-      border: 1px solid rgba(253, 186, 116, 0.4);
+      box-shadow: 0 4px 16px rgba(225, 29, 72, 0.45);
+      border: 1px solid rgba(253, 164, 175, 0.4);
     }
     .btn-dark {
-      background: #1f1839;
-      color: #e2e8f0;
-      border: 1px solid #433672;
+      background: #200d29;
+      color: #fff1f2;
+      border: 1px solid #4a1f4e;
     }
     .btn-light {
-      background: #1b1534;
-      color: #fed7aa;
-      border: 1.5px solid #3d3368;
+      background: #1a0c24;
+      color: #ffe4e6;
+      border: 1.5px solid #4a1f4e;
     }
     .btn-light:hover {
+      background: #281238;
+      border-color: #f43f5e;
+    }
       background: #251d46;
       border-color: #ea580c;
     }
@@ -575,32 +578,32 @@
       vertical-align: middle;
     }
     th {
-      background: #110d22;
-      color: #fb923c;
+      background: #160822;
+      color: #fb7185;
       font-weight: 800;
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.6px;
-      text-shadow: 0 0 6px rgba(249, 115, 22, 0.3);
+      text-shadow: 0 0 6px rgba(244, 63, 94, 0.35);
     }
     tr {
       transition: background-color 0.15s ease;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover { background-color: rgba(249, 115, 22, 0.08); }
+    tr:hover { background-color: rgba(244, 63, 94, 0.08); }
     tr.tr-conflict { background-color: rgba(180, 83, 9, 0.22) !important; }
 
     /* Tags & Badges */
     .tag-duty {
-      background: rgba(234, 88, 12, 0.2);
-      color: #fdba74;
-      border: 1px solid rgba(234, 88, 12, 0.5);
+      background: rgba(225, 29, 72, 0.2);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.5);
       padding: 5px 12px;
       border-radius: 20px;
       font-weight: 800;
       display: inline-block;
       font-size: 0.92rem;
-      box-shadow: 0 0 8px rgba(234, 88, 12, 0.25);
+      box-shadow: 0 0 8px rgba(244, 63, 94, 0.25);
     }
     .tag-leave {
       background: rgba(225, 29, 72, 0.25);
@@ -861,51 +864,70 @@
   <!-- Top bar với Đồng hồ thời gian thực Giờ Việt Nam & Nút Admin -->
   <div class="top-header-bar">
     <div class="brand-title">
-      <span class="spooky-float">🎃</span>
-      <span>Cửa Hàng • Halloween 2026</span>
-      <span class="spooky-float">🦇</span>
+      <span class="floral-float">🌸</span>
+      <span>Cửa Hàng • Mừng 20/10</span>
+      <span class="floral-float">💐</span>
     </div>
 
     <div style="display: flex; align-items: center; gap: 8px;">
       <div class="clock-badge">
-        <span style="font-size: 0.95rem;">🕯️</span>
+        <span style="font-size: 0.95rem;">🌷</span>
         <span id="vn-live-clock" class="clock-time">--:--:--</span>
-        <span id="vn-live-date" style="color: #cbd5e1; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
+        <span id="vn-live-date" style="color: #fbcfe8; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
         <span class="clock-zone">Giờ VN</span>
       </div>
 
-      <button type="button" onclick="toggleAiChatPopup()" style="background: linear-gradient(135deg, #c2410c, #ea580c); border: 1px solid #f97316; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(234,88,12,0.45);">
-        🎃 Hỏi AI
+      <button type="button" onclick="toggleAiChatPopup()" style="background: linear-gradient(135deg, #e11d48, #db2777); border: 1px solid #f43f5e; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(225,29,72,0.45);">
+        💐 Hỏi AI
       </button>
 
       {% if is_admin %}
-        <span style="background: rgba(220, 38, 38, 0.25); border: 1.5px solid #ef4444; color: #fca5a5; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+        <span style="background: rgba(225, 29, 72, 0.25); border: 1.5px solid #f43f5e; color: #fda4af; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
           👑 Admin
         </span>
-        <a href="/admin-logout" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+        <a href="/admin-logout" style="background: rgba(225, 29, 72, 0.2); color: #fda4af; border: 1px solid #f43f5e; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
           Thoát
         </a>
       {% else %}
-        <button type="button" onclick="openAdminModal()" style="background: #1e1837; border: 1.5px solid #433872; color: #e2e8f0; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+        <button type="button" onclick="openAdminModal()" style="background: #1e0d28; border: 1.5px solid #4a1f4e; color: #ffe4e6; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
           🔐 Quản Trị
         </button>
       {% endif %}
     </div>
   </div>
 
+  <!-- BANNER CHÚC MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10 -->
+  <div style="background: linear-gradient(135deg, rgba(225, 29, 72, 0.22), rgba(219, 39, 119, 0.28)); border: 1.5px solid rgba(244, 63, 94, 0.45); border-radius: 16px; padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 20px rgba(225, 29, 72, 0.2);">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 1.9rem; filter: drop-shadow(0 2px 8px rgba(244,63,94,0.45));">💐</span>
+      <div>
+        <div style="font-size: 1rem; font-weight: 800; color: #ffe4e6; letter-spacing: 0.4px; display: flex; align-items: center; gap: 6px;">
+          <span>CHÀO MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10</span>
+          <span>🌸</span>
+        </div>
+        <div style="font-size: 0.83rem; color: #fbcfe8; margin-top: 2px;">
+          Kính chúc các chị em cửa hàng ({% for s in non_duty_staff %}{{ s }}{% if not loop.last %}, {% endif %}{% endfor %}) luôn ngập tràn niềm vui, xinh đẹp và rạng rỡ! 💖
+        </div>
+      </div>
+    </div>
+    <span style="font-size: 0.78rem; font-weight: 700; background: linear-gradient(135deg, #e11d48, #db2777); color: #fff; padding: 4px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(225,29,72,0.4);">
+      💝 Happy Vietnamese Women's Day
+    </span>
+  </div>
+
   <header>
     {% if active_tab == 'leaves' %}
-      <h1 id="page-title" class="halloween-glow-text">🎃 HÔM NAY AI NGHỈ 👻</h1>
+      <h1 id="page-title" class="floral-glow-text">💐 HÔM NAY AI NGHỈ 🌸</h1>
       <p class="subtitle" id="page-subtitle">
         {% if today_leaves %}
-          Hôm nay có: <strong style="color:#f87171;">{{ today_leaves | map(attribute="member_name") | join(", ") }}</strong> xin nghỉ
+          Hôm nay có: <strong style="color:#fb7185;">{{ today_leaves | map(attribute="member_name") | join(", ") }}</strong> xin nghỉ
         {% else %}
-          Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🍬)
+          Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🌸)
         {% endif %}
       </p>
     {% else %}
-      <h1 id="page-title" class="halloween-glow-text">🎃 HÔM NAY AI TRỰC 🦇</h1>
-      <p class="subtitle" id="page-subtitle">Người trực chính 7h30: <strong style="color:#fdba74;">{{ today_duty.assigned if today_duty else '---' }}</strong> 🧹</p>
+      <h1 id="page-title" class="floral-glow-text">🌸 HÔM NAY AI TRỰC 🌷</h1>
+      <p class="subtitle" id="page-subtitle">Người trực chính 7h30: <strong style="color:#fda4af;">{{ today_duty.assigned if today_duty else '---' }}</strong> 🧹</p>
     {% endif %}
   </header>
 
@@ -915,13 +937,13 @@
       📅 Lịch Trực Vệ Sinh 🧹
     </button>
     <button type="button" class="tab-btn" id="tab-btn-leaves" onclick="switchTab('leaves')">
-      📝 Xin Nghỉ & Lịch Nghỉ 🎃
+      📝 Xin Nghỉ & Lịch Nghỉ 🌸
       {% if future_leaves_count > 0 %}
         <span class="tab-badge {% if has_any_conflict %}badge-alert{% endif %}">{{ future_leaves_count }}</span>
       {% endif %}
     </button>
-    <a href="/history" class="tab-btn" style="color: #cbd5e1;">
-      📜 Lịch Sử Nghỉ ↗ 🦇
+    <a href="/history" class="tab-btn" style="color: #fda4af;">
+      📜 Lịch Sử Nghỉ ↗ 🌷
     </a>
   </div>
 
@@ -934,7 +956,7 @@
     <div class="cards-grid">
       <div class="hero-card hero-today">
         <div>
-          <div class="hero-label">🎃 Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
+          <div class="hero-label">🌸 Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
           {% if today_duty and today_duty.is_holiday %}
             <div class="badge-holiday-box">{{ today_duty.holiday_reason }}</div>
           {% elif today_duty and today_duty.assigned %}
@@ -953,7 +975,7 @@
 
       <div class="hero-card hero-tomorrow">
         <div>
-          <div class="hero-label">🦇 Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
+          <div class="hero-label">🌷 Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
           {% if tomorrow_duty and tomorrow_duty.is_holiday %}
             <div class="badge-holiday-box">{{ tomorrow_duty.holiday_reason }}</div>
           {% elif tomorrow_duty and tomorrow_duty.assigned %}
@@ -1138,10 +1160,10 @@
     <!-- FORM XIN NGHỈ -->
     <div class="action-box">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
-        <h2 style="font-size: 1.15rem; font-weight: 800; color: #fb923c; display: flex; align-items: center; gap: 8px; margin: 0; text-shadow: 0 0 10px rgba(249,115,22,0.4);">
-          <span>🎃</span> ĐĂNG KÝ XIN NGHỈ
+        <h2 style="font-size: 1.15rem; font-weight: 800; color: #fb7185; display: flex; align-items: center; gap: 8px; margin: 0; text-shadow: 0 0 10px rgba(244,63,94,0.4);">
+          <span>🌸</span> ĐĂNG KÝ XIN NGHỈ
         </h2>
-        <div style="font-size: 0.78rem; font-weight: 700; color: #fed7aa; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.45); padding: 4px 10px; border-radius: 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: #ffe4e6; background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(244, 63, 94, 0.45); padding: 4px 10px; border-radius: 20px;">
           ⚠️ Không nhận xin nghỉ Hôm nay, Ngày mai & Ngày mốt
         </div>
       </div>
@@ -1316,9 +1338,9 @@
       </table>
       {% else %}
       <div class="empty-state" style="text-align: center; padding: 36px 16px; color: var(--text-muted);">
-        <div style="font-size: 2.2rem; margin-bottom: 8px;">🎃</div>
-        <p><strong style="color: #fed7aa;">Hiện tại không có ai xin nghỉ sắp tới!</strong></p>
-        <p style="font-size: 0.85rem; margin-top: 4px; color: #cbd5e1;">Cả 10 anh em đều đang có lịch đi làm đầy đủ 🍬.</p>
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">🌸</div>
+        <p><strong style="color: #fda4af;">Hiện tại không có ai xin nghỉ sắp tới!</strong></p>
+        <p style="font-size: 0.85rem; margin-top: 4px; color: #ffe4e6;">Cả 10 anh em đều đang có lịch đi làm đầy đủ 💐.</p>
       </div>
       {% endif %}
     </div>
@@ -1349,18 +1371,18 @@
       const pageTitle = document.getElementById('page-title');
       const pageSubtitle = document.getElementById('page-subtitle');
       if (tabName === 'schedule') {
-        if (pageTitle) pageTitle.innerHTML = '🎃 HÔM NAY AI TRỰC 🦇';
-        if (pageSubtitle) pageSubtitle.innerHTML = 'Người trực chính 7h30: <strong style="color:#fdba74;">{{ today_duty.assigned if today_duty else "---" }}</strong> 🧹';
-        document.title = 'Hôm Nay Ai Trực? — Halloween 2026';
+        if (pageTitle) pageTitle.innerHTML = '🌸 HÔM NAY AI TRỰC 🌷';
+        if (pageSubtitle) pageSubtitle.innerHTML = 'Người trực chính 7h30: <strong style="color:#fda4af;">{{ today_duty.assigned if today_duty else "---" }}</strong> 🧹';
+        document.title = 'Hôm Nay Ai Trực? — Mừng 20/10';
       } else if (tabName === 'leaves') {
-        if (pageTitle) pageTitle.innerHTML = '🎃 HÔM NAY AI NGHỈ 👻';
+        if (pageTitle) pageTitle.innerHTML = '💐 HÔM NAY AI NGHỈ 🌸';
         {% if today_leaves %}
           const leaveNames = '{{ today_leaves | map(attribute="member_name") | join(", ") }}';
-          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay có: <strong style="color:#f87171;">' + leaveNames + '</strong> xin nghỉ';
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay có: <strong style="color:#fb7185;">' + leaveNames + '</strong> xin nghỉ';
         {% else %}
-          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🍬)';
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🌸)';
         {% endif %}
-        document.title = 'Hôm Nay Ai Nghỉ? — Xin Nghỉ & Lịch Nghỉ (Halloween 2026)';
+        document.title = 'Hôm Nay Ai Nghỉ? — Mừng 20/10';
       }
     }
 
@@ -1401,7 +1423,7 @@
       // 1. Hiển thị tin nhắn người dùng
       const userBubble = document.createElement('div');
       userBubble.style.cssText = 'display: flex; justify-content: flex-end; margin-bottom: 4px;';
-      userBubble.innerHTML = `<div style="background: linear-gradient(135deg, #c2410c, #ea580c); color: #fff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; max-width: 82%; line-height: 1.4; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-weight: 600;">${question}</div>`;
+      userBubble.innerHTML = `<div style="background: linear-gradient(135deg, #e11d48, #db2777); color: #fff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; max-width: 82%; line-height: 1.4; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-weight: 600;">${question}</div>`;
       container.appendChild(userBubble);
 
       input.value = '';
@@ -1414,7 +1436,7 @@
       const loadingBubble = document.createElement('div');
       loadingBubble.id = 'ai-loading-bubble';
       loadingBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
-      loadingBubble.innerHTML = `<span>🎃</span><div style="background: #1b1534; border: 1px solid #3d3368; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: #cbd5e1; font-style: italic;">Đang triệu hồi câu trả lời...</div>`;
+      loadingBubble.innerHTML = `<span>💐</span><div style="background: #1e0d28; border: 1px solid #4a1f4e; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: #ffe4e6; font-style: italic;">Đang tìm câu trả lời...</div>`;
       container.appendChild(loadingBubble);
       container.scrollTop = container.scrollHeight;
 
@@ -1443,15 +1465,15 @@
             : '🚀 Xác Nhận Tạo Luôn';
 
           aiBubble.innerHTML = `
-            <span>🎃</span>
-            <div style="background: #17122e; border: 1.5px solid #ea580c; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 10px rgba(249,115,22,0.2); max-width: 92%;">
-              <div style="font-weight: 800; color: #fb923c; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-                <span>🎃 XÁC NHẬN BÁO NGHỈ</span>
-                <span style="font-size: 0.7rem; background: rgba(234,88,12,0.25); color: #fed7aa; border: 1px solid rgba(234,88,12,0.4); padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
+            <span>🌸</span>
+            <div style="background: #1a0c24; border: 1.5px solid #f43f5e; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #fff1f2; line-height: 1.45; box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 10px rgba(244,63,94,0.25); max-width: 92%;">
+              <div style="font-weight: 800; color: #fda4af; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                <span>🌸 XÁC NHẬN BÁO NGHỈ</span>
+                <span style="font-size: 0.7rem; background: rgba(225,29,72,0.25); color: #ffe4e6; border: 1px solid rgba(244,63,94,0.4); padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
               </div>
               <div style="margin-bottom: 6px;">
-                • Nhân viên: <strong style="color: #fdba74;">${data.member_name}</strong><br>
-                • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: #cbd5e1;">(${data.weekday_vn})</span><br>
+                • Nhân viên: <strong style="color: #fda4af;">${data.member_name}</strong><br>
+                • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: #fbcfe8;">(${data.weekday_vn})</span><br>
                 • Lý do: <em>"${data.reason}"</em>
               </div>
               <div style="padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; font-size: 0.78rem; ${conflictStyle}">
@@ -1466,7 +1488,7 @@
           `;
         } else {
           // Trả lời văn bản thông thường
-          aiBubble.innerHTML = `<span>🎃</span><div style="background: #191432; border: 1px solid #3d3368; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #f8fafc; line-height: 1.5; box-shadow: 0 2px 6px rgba(0,0,0,0.3); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
+          aiBubble.innerHTML = `<span>🌸</span><div style="background: #1e0d28; border: 1px solid #4a1f4e; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #fff1f2; line-height: 1.5; box-shadow: 0 2px 6px rgba(0,0,0,0.3); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
         }
         container.appendChild(aiBubble);
 
@@ -1885,8 +1907,8 @@
 
   <!-- BONG BÓNG CHAT AI NỔI (FLOATING CHAT BUBBLE) -->
   <div class="ai-fab-btn" id="ai-fab-button" onclick="toggleAiChatPopup()" title="Hỏi nhanh trợ lý AI về lịch trực & ngày nghỉ">
-    <span class="ai-fab-icon">🎃</span>
-    <span class="ai-fab-text">AI Halloween</span>
+    <span class="ai-fab-icon">💐</span>
+    <span class="ai-fab-text">Hỏi AI 20/10</span>
     <span class="ai-fab-badge"></span>
   </div>
 
@@ -1894,11 +1916,11 @@
   <div class="ai-chat-popup" id="ai-chat-popup">
     <div class="ai-popup-header">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 1.25rem;">🎃</span>
+        <span style="font-size: 1.25rem;">🌸</span>
         <div>
-          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Ma Quái AI 👻</strong>
+          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Cửa Hàng AI 💐</strong>
           <span style="font-size: 0.72rem; opacity: 0.9; display: flex; align-items: center; gap: 4px;">
-            <span style="width: 6px; height: 6px; background: #fb923c; border-radius: 50%; display: inline-block;"></span> Halloween 2026 Edition
+            <span style="width: 6px; height: 6px; background: #fb7185; border-radius: 50%; display: inline-block;"></span> Mừng Ngày Phụ Nữ VN 20/10
           </span>
         </div>
       </div>
@@ -1910,9 +1932,9 @@
     <!-- Vùng tin nhắn chat -->
     <div class="ai-popup-messages" id="ai-chat-messages">
       <div style="display: flex; align-items: flex-start; gap: 8px;">
-        <span style="font-size: 1.1rem;">🎃</span>
-        <div style="background: #191432; border: 1px solid #3d3368; padding: 9px 13px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
-          Xin chào! 🎃 Tôi là Trợ Lý Ma Quái AI (Halloween 2026). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc <strong>tạo đơn xin nghỉ bằng tin nhắn</strong>.<br>
+        <span style="font-size: 1.1rem;">🌸</span>
+        <div style="background: #190c24; border: 1px solid #4a1d48; padding: 9px 13px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+          Xin chào! 🌸 Tôi là Trợ Lý Cửa Hàng AI (Mừng Ngày Phụ Nữ VN 20/10 💐). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc <strong>tạo đơn xin nghỉ bằng tin nhắn</strong>.<br>
           <small style="color: #cbd5e1; margin-top: 4px; display: block;">
             • Báo nghỉ: <em>"Vinh xin nghỉ ngày 25/10 việc gia đình"</em><br>
             • Tra cứu: <em>"Hôm nay ai trực?"</em>, <em>"Mai có ai nghỉ không?"</em>
@@ -1923,8 +1945,8 @@
 
     <!-- Thanh nhập câu hỏi -->
     <div class="ai-popup-footer">
-      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ... 🎃" style="flex: 1; padding: 10px 14px; border: 1.5px solid #3d3368; background: #0f0c1e; color: #f8fafc; border-radius: 20px; font-size: 16px; outline: none; -webkit-text-size-adjust: 100%;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
-      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #c2410c, #ea580c); color: #fff; border: 1px solid #f97316; border-radius: 20px; cursor: pointer; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(234,88,12,0.4);">
+      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ... 🌸" style="flex: 1; padding: 10px 14px; border: 1.5px solid #4a1d48; background: #0f0614; color: #f8fafc; border-radius: 20px; font-size: 16px; outline: none; -webkit-text-size-adjust: 100%;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
+      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #e11d48, #f43f5e); color: #fff; border: 1px solid #fb7185; border-radius: 20px; cursor: pointer; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(244,63,94,0.4);">
         Gửi
       </button>
     </div>
@@ -1932,9 +1954,9 @@
 
   <!-- MODAL ĐĂNG NHẬP ADMIN -->
   <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:360px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(249,115,22,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:360px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(244,63,94,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:6px;">
           🔐 Quyền Quản Trị Admin
         </h3>
         <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
@@ -1943,7 +1965,7 @@
       <form action="/admin-login" method="POST">
         <input type="hidden" name="next_url" value="{{ request.url }}">
         <div class="form-group">
-          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; box-sizing:border-box; width:100%;">
+          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; box-sizing:border-box; width:100%; background:#0f0614; color:#f8fafc; border:1.5px solid #4a1d48; border-radius:10px;">
         </div>
         <div style="display:flex; gap:8px; margin-top:16px;">
           <button type="button" class="btn btn-light" style="flex:1;" onclick="closeAdminModal()">Hủy</button>
@@ -1955,9 +1977,9 @@
 
   <!-- MODAL CHỈNH SỬA LỊCH NGHỈ CHO ADMIN -->
   <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:440px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(249,115,22,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:440px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(244,63,94,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:6px;">
           ✏️ Sửa Thông Tin Lịch Nghỉ
         </h3>
         <button type="button" onclick="closeEditModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
