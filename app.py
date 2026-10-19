@@ -424,8 +424,14 @@ def index():
     duty_by_date = {s['date_str']: s['assigned'] for s in schedule if not s.get('is_holiday')}
     has_any_conflict = any(l['has_conflict'] for l in leaves_summary)
 
-    today_str = get_vn_today().strftime('%Y-%m-%d')
+    today_dt = get_vn_today()
+    today_str = today_dt.strftime('%Y-%m-%d')
     today_leaves = [item for item in leaves_summary if item['leave_date'] == today_str]
+
+    # Quy định: Không cho xin nghỉ Hôm nay, Ngày mai và Ngày mốt (Tối thiểu từ ngày thứ 3 trở đi)
+    min_leave_date = today_dt + timedelta(days=3)
+    min_leave_date_str = min_leave_date.strftime('%Y-%m-%d')
+    min_leave_date_display = min_leave_date.strftime('%d/%m/%Y')
 
     with get_db() as conn:
         holidays_list = conn.execute('SELECT holiday_date, reason FROM shop_holidays ORDER BY holiday_date ASC').fetchall()
@@ -445,6 +451,8 @@ def index():
                            has_any_conflict=has_any_conflict,
                            today_leaves=today_leaves,
                            today_date_str=today_str,
+                           min_leave_date_str=min_leave_date_str,
+                           min_leave_date_display=min_leave_date_display,
                            holidays_list=holidays_list,
                            is_admin=is_admin())
 
@@ -1362,154 +1370,189 @@ def api_ai_chat_schedule():
     # Nếu câu có dấu hiệu báo nghỉ
     if is_leave_statement:
         m_name, first_d, found_dates, reason, engine = ai_parse_message(question)
-        if m_name and found_dates:
-            today = get_vn_today()
-            # Lọc và sắp xếp các ngày theo trình tự thời gian
-            valid_dates = sorted(list(set([d for d in found_dates if d >= today])))
-            if not valid_dates:
+        today = get_vn_today()
+        # Quy định: Tối thiểu cách 3 ngày (Không nhận Hôm nay, Ngày mai và Ngày mốt)
+        min_allowed_date = today + timedelta(days=3)
+        min_allowed_str = min_allowed_date.strftime('%Y-%m-%d')
+        min_allowed_disp = min_allowed_date.strftime('%d/%m/%Y')
+        weekday_vn = {
+            'Monday': 'Thứ Hai', 'Tuesday': 'Thứ Ba', 'Wednesday': 'Thứ Tư',
+            'Thursday': 'Thứ Năm', 'Friday': 'Thứ Sáu', 'Saturday': 'Thứ Bảy', 'Sunday': 'Chủ Nhật'
+        }
+        min_allowed_w = weekday_vn.get(min_allowed_date.strftime('%A'), '')
+        m_prefix = f"{m_name} " if m_name else ""
+
+        if found_dates:
+            past_dates = sorted([d for d in found_dates if d < today])
+            near_dates = sorted([d for d in found_dates if today <= d < min_allowed_date])
+            future_valid_dates = sorted([d for d in found_dates if d >= min_allowed_date])
+
+            # TRƯỜNG HỢP 1: Chỉ chọn ngày cận (hoặc ngày quá khứ) -> TỪ CHỐI & BÁO LIÊN HỆ ADMIN
+            if near_dates and not future_valid_dates:
+                near_disp = ', '.join([d.strftime('%d/%m/%Y') for d in near_dates])
                 chips = make_ai_chips([
-                    (f"📅 {m_name} nghỉ ngày mai", f"{m_name} xin nghỉ ngày mai"),
-                    (f"📅 {m_name} nghỉ 2 ngày từ mai", f"{m_name} xin nghỉ 2 ngày từ ngày mai"),
+                    (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_prefix}xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
+                    (f"📅 Nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_prefix}xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}"),
+                    ("🔔 Hôm nay ai trực?", "Hôm nay ai trực?"),
+                    ("🌱 Ngày mai ai trực?", "Ngày mai ai trực?"),
                 ])
                 return jsonify({
                     'success': True,
                     'is_leave_intent': False,
-                    'answer': f"⚠️ Các ngày bạn yêu cầu đều đã ở trong quá khứ nên hệ thống không nhận đơn được nữa.<br>👉 Bạn có muốn đổi sang ngày sắp tới không?{chips}",
+                    'answer': (
+                        f"⛔ <strong>KHÔNG ĐƯỢC PHÉP XIN NGHỈ CẬN NGÀY!</strong><br>"
+                        f"Theo quy định của cửa hàng, bạn <strong>không được tự đăng ký xin nghỉ vào Hôm nay, Ngày mai và Ngày mốt</strong> "
+                        f"(ngày bạn chọn: <strong>{near_disp}</strong>) để tránh thiếu hụt nhân sự và kịp sắp xếp trực nhật.<br>"
+                        f"👉 Ngày đăng ký sớm nhất có thể nhận là từ <strong>{min_allowed_disp}</strong> ({min_allowed_w}).<br>"
+                        f"📞 <em>Trường hợp có việc khẩn cấp hoặc đột xuất, bạn vui lòng <strong>liên hệ trực tiếp với Quản lý / Admin</strong> để được xử lý nhé!</em>{chips}"
+                    ),
                     'engine': engine
                 })
 
-            weekday_vn = {
-                'Monday': 'Thứ Hai', 'Tuesday': 'Thứ Ba', 'Wednesday': 'Thứ Tư',
-                'Thursday': 'Thứ Năm', 'Friday': 'Thứ Sáu', 'Saturday': 'Thứ Bảy', 'Sunday': 'Chủ Nhật'
-            }
-            
+            if not near_dates and not future_valid_dates and past_dates:
+                chips = make_ai_chips([
+                    (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_prefix}xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
+                    (f"📅 Nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_prefix}xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}"),
+                ])
+                return jsonify({
+                    'success': True,
+                    'is_leave_intent': False,
+                    'answer': f"⚠️ Các ngày bạn yêu cầu đều đã ở trong quá khứ nên hệ thống không nhận đơn được nữa.<br>👉 Ngày xin nghỉ sớm nhất có thể nhận là từ <strong>{min_allowed_disp}</strong> ({min_allowed_w}).{chips}",
+                    'engine': engine
+                })
+
+            # TRƯỜNG HỢP 2: Có các ngày hợp lệ từ min_allowed_date trở đi
+            valid_dates = future_valid_dates
             leave_dates_str = [d.strftime('%Y-%m-%d') for d in valid_dates]
             display_dates = [f"{d.strftime('%d/%m/%Y')} ({weekday_vn.get(d.strftime('%A'), '')})" for d in valid_dates]
-            
-            # Kiểm tra xung đột và lịch đóng cửa cho từng ngày
-            conflict_notes = []
-            has_any_conflict = False
-            
-            with get_db() as conn:
-                for d, d_str, disp in zip(valid_dates, leave_dates_str, display_dates):
-                    my_existing = conn.execute(
-                        'SELECT reason FROM leaves WHERE leave_date = ? AND member_name = ?',
-                        (d_str, m_name)
-                    ).fetchone()
-                    existing_leaves = conn.execute(
-                        'SELECT member_name, reason FROM leaves WHERE leave_date = ? AND member_name != ?',
-                        (d_str, m_name)
-                    ).fetchall()
-                    holiday_match = conn.execute(
-                        'SELECT reason FROM shop_holidays WHERE holiday_date = ?',
-                        (d_str,)
-                    ).fetchone()
 
-                    if holiday_match:
-                        conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: 🏢 Tiệm đóng cửa ({holiday_match['reason']}).")
-                    elif my_existing:
-                        conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: ℹ️ Bạn đã đăng ký trước đó (Lý do cũ: <em>\"{my_existing['reason']}\"</em>) ➔ Sẽ cập nhật lý do mới.")
-                    elif existing_leaves:
-                        has_any_conflict = True
-                        names = ", ".join([f"<strong>{p['member_name']}</strong>" for p in existing_leaves])
-                        conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: ⚠️ Đã có {names} xin nghỉ trước.")
+            near_warning_note = ""
+            if near_dates:
+                near_disp = ', '.join([d.strftime('%d/%m') for d in near_dates])
+                near_warning_note = f"• ⚠️ <strong>Các ngày cận ({near_disp})</strong>: Đã bị loại bỏ do quy định không nhận đơn Hôm nay, Ngày mai, Ngày mốt (vui lòng liên hệ Admin nếu cần nghỉ gấp)."
 
-            if not conflict_notes:
-                summary_note = f"✅ Toàn bộ {len(valid_dates)} ngày này hiện chưa có ai xin nghỉ (Tránh được trùng lịch)."
-            else:
-                summary_note = "<br>".join(conflict_notes)
+            if m_name:
+                conflict_notes = []
+                if near_warning_note:
+                    conflict_notes.append(near_warning_note)
+                has_any_conflict = False
 
-            # Tạo text hiển thị tóm tắt
-            if len(valid_dates) == 1:
-                display_date = valid_dates[0].strftime('%d/%m/%Y')
-                weekday_info = weekday_vn.get(valid_dates[0].strftime('%A'), '')
-            else:
-                is_consecutive = all((valid_dates[i] - valid_dates[i-1]).days == 1 for i in range(1, len(valid_dates)))
-                if is_consecutive:
-                    display_date = f"Từ {valid_dates[0].strftime('%d/%m/%Y')} đến {valid_dates[-1].strftime('%d/%m/%Y')}"
-                    weekday_info = f"{len(valid_dates)} ngày liên tiếp"
+                with get_db() as conn:
+                    for d, d_str, disp in zip(valid_dates, leave_dates_str, display_dates):
+                        my_existing = conn.execute(
+                            'SELECT reason FROM leaves WHERE leave_date = ? AND member_name = ?',
+                            (d_str, m_name)
+                        ).fetchone()
+                        existing_leaves = conn.execute(
+                            'SELECT member_name, reason FROM leaves WHERE leave_date = ? AND member_name != ?',
+                            (d_str, m_name)
+                        ).fetchall()
+                        holiday_match = conn.execute(
+                            'SELECT reason FROM shop_holidays WHERE holiday_date = ?',
+                            (d_str,)
+                        ).fetchone()
+
+                        if holiday_match:
+                            conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: 🏢 Tiệm đóng cửa ({holiday_match['reason']}).")
+                        elif my_existing:
+                            conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: ℹ️ Bạn đã đăng ký trước đó (Lý do cũ: <em>\"{my_existing['reason']}\"</em>) ➔ Sẽ cập nhật lý do mới.")
+                        elif existing_leaves:
+                            has_any_conflict = True
+                            names = ", ".join([f"<strong>{p['member_name']}</strong>" for p in existing_leaves])
+                            conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: ⚠️ Đã có {names} xin nghỉ trước.")
+
+                if not conflict_notes:
+                    summary_note = f"✅ Toàn bộ {len(valid_dates)} ngày này hiện chưa có ai xin nghỉ (Tránh được trùng lịch)."
                 else:
-                    dates_str_list = [d.strftime('%d/%m/%Y') for d in valid_dates]
-                    display_date = " & ".join(dates_str_list)
-                    weekday_info = f"{len(valid_dates)} ngày"
+                    summary_note = "<br>".join(conflict_notes)
 
-            return jsonify({
-                'success': True,
-                'is_leave_intent': True,
-                'member_name': m_name,
-                'leave_date': leave_dates_str[0], # ngày đầu tiên
-                'leave_dates': leave_dates_str,   # toàn bộ danh sách ngày
-                'display_date': display_date,
-                'weekday_vn': weekday_info,
-                'reason': reason,
-                'has_conflict': has_any_conflict,
-                'conflict_note': summary_note,
-                'engine': engine
-            })
-        elif m_name and not found_dates:
-            chips = make_ai_chips([
-                ("📅 Nghỉ hôm nay", f"{m_name} xin nghỉ hôm nay"),
-                ("📅 Nghỉ ngày mai", f"{m_name} xin nghỉ ngày mai"),
-                ("📅 Nghỉ 2 ngày từ mai", f"{m_name} xin nghỉ 2 ngày từ ngày mai"),
-                ("📅 Nghỉ 3 ngày từ mai", f"{m_name} xin nghỉ 3 ngày từ ngày mai"),
-            ])
-            return jsonify({
-                'success': True,
-                'is_leave_intent': False,
-                'answer': (
-                    f"❓ Bạn muốn đăng ký cho <strong>{m_name}</strong> xin nghỉ vào ngày nào vậy bạn?<br>"
-                    f"👉 Bạn có thể nhắn ngày (ví dụ: <em>'{m_name} xin nghỉ ngày 25, 26 tháng 10'</em> hoặc <em>'từ 20/10 đến 25/10'</em>), hoặc bấm chọn nhanh bên dưới:{chips}"
-                ),
-                'engine': engine
-            })
-        elif not m_name and found_dates:
-            today = get_vn_today()
-            valid_dates = sorted(list(set([d for d in found_dates if d >= today])))
-            if not valid_dates:
+                # Tạo text hiển thị tóm tắt
+                if len(valid_dates) == 1:
+                    display_date = valid_dates[0].strftime('%d/%m/%Y')
+                    weekday_info = weekday_vn.get(valid_dates[0].strftime('%A'), '')
+                else:
+                    is_consecutive = all((valid_dates[i] - valid_dates[i-1]).days == 1 for i in range(1, len(valid_dates)))
+                    if is_consecutive:
+                        display_date = f"Từ {valid_dates[0].strftime('%d/%m/%Y')} đến {valid_dates[-1].strftime('%d/%m/%Y')}"
+                        weekday_info = f"{len(valid_dates)} ngày liên tiếp"
+                    else:
+                        dates_str_list = [d.strftime('%d/%m/%Y') for d in valid_dates]
+                        display_date = " & ".join(dates_str_list)
+                        weekday_info = f"{len(valid_dates)} ngày"
+
+                return jsonify({
+                    'success': True,
+                    'is_leave_intent': True,
+                    'member_name': m_name,
+                    'leave_date': leave_dates_str[0],
+                    'leave_dates': leave_dates_str,
+                    'display_date': display_date,
+                    'weekday_vn': weekday_info,
+                    'reason': reason,
+                    'has_conflict': has_any_conflict,
+                    'conflict_note': summary_note,
+                    'engine': engine
+                })
+            else:
+                # Chưa biết tên nhân viên -> Hỏi lại kèm nút chọn tên
+                if len(valid_dates) > 1:
+                    dates_disp = ' và '.join([d.strftime('%d/%m') for d in valid_dates])
+                    lbl = f"các ngày <strong>{dates_disp}</strong> ({len(valid_dates)} ngày)"
+                else:
+                    dates_disp = valid_dates[0].strftime('%d/%m')
+                    lbl = f"ngày <strong>{dates_disp}</strong>"
+
+                near_prefix = ""
+                if near_dates:
+                    near_disp = ', '.join([d.strftime('%d/%m') for d in near_dates])
+                    near_prefix = f"⚠️ <em>Lưu ý: Các ngày cận ({near_disp}) đã được loại bỏ do quy định không nhận đơn cận ngày.</em><br>"
+
+                chips = make_ai_chips([(f"👤 {m}", f"{m} xin nghỉ ngày {dates_disp}") for m in ALL_STAFF])
+                return jsonify({
+                    'success': True,
+                    'is_leave_intent': False,
+                    'answer': (
+                        f"{near_prefix}"
+                        f"📝 Trợ lý đã ghi nhận bạn muốn đăng ký xin nghỉ vào {lbl}.<br>"
+                        f"❓ Bạn là ai trong 10 anh em cửa hàng? Vui lòng bấm chọn tên của bạn bên dưới để tạo đơn ngay nhé:{chips}"
+                    ),
+                    'engine': engine
+                })
+        else:
+            # Không phát hiện được ngày nào
+            if m_name:
                 chips = make_ai_chips([
-                    ("📅 Nghỉ hôm nay", "Tôi xin nghỉ hôm nay"),
-                    ("📅 Nghỉ ngày mai", "Tôi xin nghỉ ngày mai"),
-                    ("📅 Nghỉ 2 ngày từ mai", "Tôi xin nghỉ 2 ngày từ ngày mai")
+                    (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
+                    (f"📅 Nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}"),
+                    (f"📅 Nghỉ 3 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ 3 ngày từ {min_allowed_date.strftime('%d/%m')}"),
+                    ("🗓️ Nghỉ tuần sau", f"{m_name} xin nghỉ tuần sau"),
                 ])
                 return jsonify({
                     'success': True,
                     'is_leave_intent': False,
-                    'answer': f"⚠️ Các ngày bạn yêu cầu đều đã ở trong quá khứ nên hệ thống không nhận đơn được nữa.<br>👉 Bạn có muốn đổi sang ngày sắp tới không?{chips}",
+                    'answer': (
+                        f"❓ Bạn muốn đăng ký cho <strong>{m_name}</strong> xin nghỉ vào ngày nào vậy bạn?<br>"
+                        f"👉 Bạn có thể nhắn ngày hoặc bấm chọn nhanh bên dưới:<br>"
+                        f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay, Ngày mai và Ngày mốt. Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
+                    ),
                     'engine': engine
                 })
-
-            if len(valid_dates) > 1:
-                dates_disp = ' và '.join([d.strftime('%d/%m') for d in valid_dates])
-                lbl = f"các ngày <strong>{dates_disp}</strong> ({len(valid_dates)} ngày)"
             else:
-                dates_disp = valid_dates[0].strftime('%d/%m')
-                lbl = f"ngày <strong>{dates_disp}</strong>"
-
-            chips = make_ai_chips([(f"👤 {m}", f"{m} xin nghỉ ngày {dates_disp}") for m in ALL_STAFF])
-            return jsonify({
-                'success': True,
-                'is_leave_intent': False,
-                'answer': (
-                    f"📝 Trợ lý đã ghi nhận bạn muốn đăng ký xin nghỉ vào {lbl}.<br>"
-                    f"❓ Bạn là ai trong 10 anh em cửa hàng? Vui lòng bấm chọn tên của bạn bên dưới để tạo đơn ngay nhé:{chips}"
-                ),
-                'engine': engine
-            })
-        elif not m_name and not found_dates:
-            chips = make_ai_chips([
-                ("👤 Vinh nghỉ ngày mai", "Vinh xin nghỉ ngày mai việc bận"),
-                ("👤 Bảo Mập nghỉ 2 ngày", "Bảo Mập xin nghỉ 2 ngày từ ngày mai khám bệnh"),
-                ("👤 Thái nghỉ 25, 26/10", "Thái xin nghỉ ngày 25, 26 tháng 10 việc riêng"),
-            ])
-            return jsonify({
-                'success': True,
-                'is_leave_intent': False,
-                'answer': (
-                    "❓ Bạn muốn đăng ký xin nghỉ cho ai và vào ngày nào vậy bạn?<br>"
-                    f"👉 Bạn có thể nhắn theo mẫu đầy đủ hoặc bấm chọn gợi ý bên dưới:{chips}"
-                ),
-                'engine': engine
-            })
+                chips = make_ai_chips([
+                    (f"👤 Vinh nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"Vinh xin nghỉ ngày {min_allowed_date.strftime('%d/%m')} việc bận"),
+                    (f"👤 Bảo Mập nghỉ 2 ngày", f"Bảo Mập xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')} khám bệnh"),
+                    (f"👤 Thái nghỉ tuần sau", "Thái xin nghỉ tuần sau việc riêng"),
+                ])
+                return jsonify({
+                    'success': True,
+                    'is_leave_intent': False,
+                    'answer': (
+                        "❓ Bạn muốn đăng ký xin nghỉ cho ai và vào ngày nào vậy bạn?<br>"
+                        "👉 Bạn có thể nhắn theo mẫu đầy đủ hoặc bấm chọn gợi ý bên dưới:<br>"
+                        f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay, Ngày mai và Ngày mốt. Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
+                    ),
+                    'engine': engine
+                })
 
     # Nếu không phải báo nghỉ hoặc chỉ là câu hỏi tra cứu
     answer, engine = answer_schedule_query(question)
@@ -1543,8 +1586,24 @@ def api_ai_confirm_leave():
         single_date = (data.get('leave_date') or '').strip()
         leave_dates = [single_date] if single_date else []
 
-    today_str = get_vn_today().strftime('%Y-%m-%d')
+    today = get_vn_today()
+    today_str = today.strftime('%Y-%m-%d')
+    min_allowed_date = today + timedelta(days=3)
+    min_allowed_str = min_allowed_date.strftime('%Y-%m-%d')
+
+    # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt) nếu không phải Admin
+    if not is_admin():
+        invalid_near_dates = [d for d in leave_dates if d and today_str <= d < min_allowed_str]
+        if invalid_near_dates:
+            near_fmt = ', '.join([datetime.strptime(d, '%Y-%m-%d').strftime('%d/%m/%Y') for d in invalid_near_dates])
+            return jsonify({
+                'success': False,
+                'error': f'⛔ Không được phép xin nghỉ cận ngày ({near_fmt}). Cửa hàng không nhận đơn nghỉ Hôm nay, Ngày mai và Ngày mốt. Vui lòng liên hệ trực tiếp với Admin nếu có việc khẩn cấp!'
+            })
+
     valid_dates = [d for d in leave_dates if d and d >= today_str]
+    if not is_admin():
+        valid_dates = [d for d in valid_dates if d >= min_allowed_str]
 
     if not valid_dates:
         return jsonify({'success': False, 'error': 'Không có ngày xin nghỉ nào hợp lệ hoặc ngày đã qua.'})
@@ -1580,13 +1639,21 @@ def report_leave():
     reason = request.form.get('reason', '').strip() or 'Việc cá nhân'
     created_at = get_vn_now().strftime('%Y-%m-%d %H:%M:%S')
     
-    today_str = get_vn_today().strftime('%Y-%m-%d')
+    today_dt = get_vn_today()
+    today_str = today_dt.strftime('%Y-%m-%d')
+    min_allowed_date = today_dt + timedelta(days=3)
+
     if start_date_str and member_name in ALL_STAFF:
         try:
             d_start = datetime.strptime(start_date_str, '%Y-%m-%d').date()
             d_end = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else d_start
             if d_end < d_start:
                 d_start, d_end = d_end, d_start
+
+            # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt) cho form thông thường
+            if not is_admin() and d_start < min_allowed_date:
+                log_action('TỪ CHỐI XIN NGHỈ CẬN', f"{member_name} bị từ chối xin nghỉ cận ngày ({d_start.strftime('%d/%m/%Y')})", actor=member_name)
+                return redirect(url_for('index', tab='leaves'))
                 
             num_days = (d_end - d_start).days + 1
             num_days = min(num_days, 31) # Giới hạn tối đa 31 ngày một lần

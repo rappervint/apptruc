@@ -1087,9 +1087,12 @@
         <h2 style="font-size: 1.15rem; font-weight: 800; color: #b91c1c; display: flex; align-items: center; gap: 8px; margin: 0;">
           <span>📝</span> ĐĂNG KÝ XIN NGHỈ
         </h2>
+        <div style="font-size: 0.78rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 4px 10px; border-radius: 20px;">
+          ⚠️ Không nhận xin nghỉ Hôm nay, Ngày mai & Ngày mốt
+        </div>
       </div>
 
-      <form action="/report-leave" method="POST" id="leave-form">
+      <form action="/report-leave" method="POST" id="leave-form" onsubmit="return validateLeaveForm(event)">
         <div class="form-group">
           <label>👤 Chọn người xin nghỉ:</label>
           <select name="member_name" id="member_select" required onchange="checkLiveConflict()">
@@ -1107,22 +1110,26 @@
         </div>
 
         <div class="date-picker-card">
+          <div style="font-size: 0.78rem; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+            <span>📌</span>
+            <span>Ngày đăng ký sớm nhất có thể nhận: <strong>{{ min_leave_date_display }}</strong> (cách 3 ngày để xếp trực nhật).</span>
+          </div>
           <div class="date-range-grid">
             <div class="form-group">
               <label>📅 Từ ngày:</label>
-              <input type="date" name="leave_date" id="leave_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" required onchange="syncLeaveEndDate(); checkLiveConflict();">
+              <input type="date" name="leave_date" id="leave_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{{ min_leave_date_str }}" required onchange="syncLeaveEndDate(); checkLiveConflict();">
             </div>
             <div class="form-group">
               <label>📅 Đến ngày <span style="font-weight: normal; color: #64748b; font-size: 0.8rem;">(chọn nếu nghỉ nhiều ngày)</span>:</label>
-              <input type="date" name="end_date" id="leave_end_date_input" min="{{ today_date_str }}" value="{{ today_date_str }}" onchange="checkLiveConflict();">
+              <input type="date" name="end_date" id="leave_end_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{{ min_leave_date_str }}" onchange="checkLiveConflict();">
             </div>
           </div>
           <div class="quick-chips" style="margin-top: 10px;">
             <span class="chip" onclick="setQuickLeaveDays(1)">⚡ 1 ngày</span>
             <span class="chip" onclick="setQuickLeaveDays(2)">✨ 2 ngày liên tiếp</span>
             <span class="chip" onclick="setQuickLeaveDays(3)">🌟 3 ngày liên tiếp</span>
-            <span class="chip" onclick="setQuickLeaveOffset(1, 1)">🌅 Ngày mai</span>
-            <span class="chip" onclick="setQuickLeaveOffset(2, 1)">🌄 Ngày mốt</span>
+            <span class="chip" onclick="setQuickLeaveOffset(3, 1)">📅 Sau 3 ngày</span>
+            <span class="chip" onclick="setQuickLeaveNextWeek()">🗓️ Thứ Hai tuần sau</span>
           </div>
         </div>
 
@@ -1518,6 +1525,8 @@
     }
 
     function setQuickLeaveOffset(offset, daysCount = 1) {
+      const isAdmin = {{ 'true' if is_admin else 'false' }};
+      if (!isAdmin && offset < 3) offset = 3;
       const now = new Date();
       now.setDate(now.getDate() + offset);
       const yyyy = now.getFullYear();
@@ -1528,6 +1537,26 @@
         dateInput.value = `${yyyy}-${mm}-${dd}`;
       }
       setQuickLeaveDays(daysCount);
+    }
+
+    function setQuickLeaveNextWeek() {
+      const now = new Date();
+      const day = now.getDay(); // 0 is Sunday, 1 is Monday...
+      let daysToAdd = (1 - day + 7) % 7;
+      if (daysToAdd < 3) daysToAdd += 7; // Phải cách ít nhất 3 ngày
+      setQuickLeaveOffset(daysToAdd, 1);
+    }
+
+    function validateLeaveForm(e) {
+      const dateInput = document.getElementById('leave_date_input');
+      const isAdmin = {{ 'true' if is_admin else 'false' }};
+      const minAllowed = '{{ min_leave_date_str }}';
+      if (!isAdmin && dateInput && dateInput.value < minAllowed) {
+        if (e) e.preventDefault();
+        alert('⛔ QUY ĐỊNH CỬA HÀNG:\nKhông được phép tự đăng ký xin nghỉ cận ngày (Hôm nay, Ngày mai và Ngày mốt) để anh em kịp sắp xếp công việc.\n\nTrường hợp đột xuất hoặc khẩn cấp, vui lòng liên hệ trực tiếp với Quản lý / Admin!');
+        return false;
+      }
+      return true;
     }
 
     function setQuickLeaveDate(offset) {
@@ -1649,6 +1678,22 @@
 
       let html = '';
 
+      const minAllowedStr = '{{ min_leave_date_str }}';
+      const isAdmin = {{ 'true' if is_admin else 'false' }};
+      const nearDates = dateList.filter(dStr => dStr < minAllowedStr);
+      let nearWarningHtml = '';
+      if (!isAdmin && nearDates.length > 0) {
+        const nearFmt = nearDates.map(d => d.split('-').reverse().slice(0, 2).join('/')).join(', ');
+        nearWarningHtml = `
+          <div class="alert-box alert-danger" style="border-left: 5px solid #dc2626; margin-bottom: 12px; background: #fef2f2; color: #991b1b;">
+            ⛔ <strong>KHÔNG ĐƯỢC PHÉP XIN NGHỈ CẬN NGÀY:</strong><br>
+            Bạn đang chọn ngày nghỉ cận: <strong>${nearFmt}</strong> (thuộc Hôm nay, Ngày mai hoặc Ngày mốt).<br>
+            Theo quy định, nhân viên không được tự đăng ký nghỉ cận ngày để anh em kịp sắp xếp công việc.<br>
+            👉 <em>Trường hợp khẩn cấp hoặc đột xuất, vui lòng <strong>liên hệ trực tiếp với Quản lý / Admin</strong>!</em>
+          </div>
+        `;
+      }
+
       // Tóm tắt số ngày đăng ký
       if (dateList.length > 1) {
         const dStartFmt = dateList[0].split('-').reverse().join('/');
@@ -1717,8 +1762,24 @@
         `;
       }
 
+      html = nearWarningHtml + html;
       alertContainer.innerHTML = html;
       alertContainer.style.display = 'block';
+
+      const submitBtn = document.querySelector('#leave-form button[type="submit"]');
+      if (submitBtn) {
+        if (!isAdmin && nearDates.length > 0) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+          submitBtn.title = 'Không được phép xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt)';
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+          submitBtn.title = '';
+        }
+      }
     }
 
     // Đồng hồ thời gian thực Giờ Việt Nam (Asia/Ho_Chi_Minh - UTC+7)
