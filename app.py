@@ -35,20 +35,20 @@ def is_admin():
 def get_current_theme():
     """
     Xác định theme hiện hành:
-    - 1. Có query param ?theme=...: nếu hợp lệ thì lưu session, nếu là reset thì xóa session.
-    - 2. Đã lưu trong session: trả về theme đó.
-    - 3. Tự động theo thời gian thực (Giờ VN): so khớp lịch 12 tháng (đổi trước lễ vài ngày).
+    - 1. Chỉ Admin mới có quyền xem thử/đổi giao diện qua ?theme=... hoặc session.
+    - 2. Người dùng thông thường và khách luôn xem theme tự động theo thời gian thực (Giờ VN).
     """
-    theme_arg = request.args.get('theme')
-    if theme_arg == 'reset':
-        session.pop('active_theme', None)
-    elif theme_arg and theme_arg in THEMES_CATALOG:
-        session['active_theme'] = theme_arg
-        return THEMES_CATALOG[theme_arg]
+    if is_admin():
+        theme_arg = request.args.get('theme')
+        if theme_arg == 'reset':
+            session.pop('active_theme', None)
+        elif theme_arg and theme_arg in THEMES_CATALOG:
+            session['active_theme'] = theme_arg
+            return THEMES_CATALOG[theme_arg]
 
-    active_key = session.get('active_theme')
-    if active_key and active_key in THEMES_CATALOG:
-        return THEMES_CATALOG[active_key]
+        active_key = session.get('active_theme')
+        if active_key and active_key in THEMES_CATALOG:
+            return THEMES_CATALOG[active_key]
 
     vn_today = get_vn_today()
     return get_theme_for_date(vn_today)
@@ -723,6 +723,7 @@ def admin_login():
 def admin_logout():
     """Thoát chế độ Admin quản trị"""
     session.pop('is_admin', None)
+    session.pop('active_theme', None)
     return redirect(request.referrer or url_for('index'))
 
 @app.route('/edit-leave', methods=['POST'])
