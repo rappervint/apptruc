@@ -1062,20 +1062,17 @@
       }
 
       .ai-chat-popup {
-        top: 0 !important;
+        position: fixed !important;
+        top: 0;
         left: 0 !important;
         right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
+        bottom: auto !important;
         width: 100vw !important;
         max-width: 100vw !important;
-        height: 100% !important;
-        height: 100dvh !important;
-        min-height: 100% !important;
+        height: 100dvh;
         border-radius: 0 !important;
         border: none !important;
         box-shadow: none !important;
-        position: fixed !important;
         z-index: 999999 !important;
         touch-action: pan-y !important;
       }
@@ -2394,10 +2391,7 @@
         document.documentElement.style.overflow = 'hidden';
 
         if (window.innerWidth <= 600) {
-          popup.style.top = '0px';
-          popup.style.left = '0px';
-          popup.style.height = (window.visualViewport ? `${window.visualViewport.height}px` : '100dvh');
-          window.scrollTo(0, 0);
+          syncVisualViewport();
         }
 
         if (messagesContainer) {
@@ -2407,38 +2401,50 @@
     }
 
     // Xử lý co giãn bàn phím ảo thông minh cho Safari iPhone & Android
-    if (window.visualViewport) {
-      function syncVisualViewport() {
-        const popup = document.getElementById('ai-chat-popup');
-        const messagesContainer = document.getElementById('ai-chat-messages');
+    function syncVisualViewport() {
+      const popup = document.getElementById('ai-chat-popup');
+      const messagesContainer = document.getElementById('ai-chat-messages');
 
-        if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
+      if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
+        if (window.visualViewport) {
           const vv = window.visualViewport;
-          popup.style.height = `${vv.height}px`;
-          popup.style.top = `${vv.offsetTop}px`;
-          window.scrollTo(0, 0);
+          popup.style.setProperty('height', `${vv.height}px`, 'important');
+          popup.style.setProperty('top', `${vv.offsetTop}px`, 'important');
+          popup.style.setProperty('bottom', 'auto', 'important');
 
           if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
           }
         }
       }
-
-      window.visualViewport.addEventListener('resize', syncVisualViewport);
     }
 
-    // Tự động căn chỉnh khi bàn phím ảo iPhone thu xuống (blur)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', syncVisualViewport);
+      window.visualViewport.addEventListener('scroll', syncVisualViewport);
+    }
+
+    // Tự động căn chỉnh khi bàn phím ảo iPhone bật lên (focus) hoặc thu xuống (blur)
     document.addEventListener('DOMContentLoaded', function() {
       const chatInput = document.getElementById('ai-chat-input');
+      const messagesContainer = document.getElementById('ai-chat-messages');
+
       if (chatInput) {
+        chatInput.addEventListener('focus', function() {
+          if (window.innerWidth <= 600) {
+            setTimeout(syncVisualViewport, 60);
+            setTimeout(syncVisualViewport, 200);
+            setTimeout(syncVisualViewport, 400);
+            setTimeout(() => {
+              if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 300);
+          }
+        });
+
         chatInput.addEventListener('blur', function() {
           if (window.innerWidth <= 600) {
-            window.scrollTo(0, 0);
-            const popup = document.getElementById('ai-chat-popup');
-            if (popup && popup.style.display === 'flex') {
-              popup.style.top = '0px';
-              popup.style.height = (window.visualViewport ? `${window.visualViewport.height}px` : '100dvh');
-            }
+            setTimeout(syncVisualViewport, 80);
+            setTimeout(syncVisualViewport, 250);
           }
         });
       }
