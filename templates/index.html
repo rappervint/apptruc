@@ -9,20 +9,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #1e40af;
-      --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-      --accent-gradient: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
-      --today-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-      --tomorrow-gradient: linear-gradient(135deg, #0f766e 0%, #10b981 100%);
-      --bg: #f1f5f9;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --border-focus: #3b82f6;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
-      --shadow-lg: 0 10px 25px -3px rgba(30, 58, 138, 0.1), 0 4px 6px -2px rgba(30, 58, 138, 0.05);
+      --primary: #f97316;
+      --primary-gradient: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+      --accent-gradient: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+      --today-gradient: linear-gradient(135deg, #c2410c 0%, #ea580c 55%, #7c2d12 100%);
+      --tomorrow-gradient: linear-gradient(135deg, #581c87 0%, #7e22ce 55%, #3b0764 100%);
+      --bg: #0b0914;
+      --card-bg: #151128;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #2e2652;
+      --border-focus: #f97316;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.4);
+      --shadow-md: 0 6px 18px rgba(0,0,0,0.5);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.7), 0 0 20px rgba(249, 115, 22, 0.2);
       --radius: 16px;
       --radius-sm: 10px;
     }
@@ -36,13 +36,34 @@
     }
 
     body {
-      background-color: var(--bg);
+      background: radial-gradient(circle at 15% 15%, rgba(126, 34, 206, 0.2) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 85%, rgba(234, 88, 12, 0.18) 0%, transparent 45%),
+                  radial-gradient(circle at 50% 50%, rgba(88, 28, 135, 0.12) 0%, transparent 60%),
+                  #0b0914;
+      background-attachment: fixed;
       color: var(--text);
       padding: 12px 14px;
       max-width: 860px;
       margin: 0 auto;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* Halloween Animations */
+    @keyframes eerieFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(2deg); }
+    }
+    .spooky-float {
+      display: inline-block;
+      animation: eerieFloat 3.5s ease-in-out infinite;
+    }
+    @keyframes spookyGlow {
+      0%, 100% { text-shadow: 0 0 10px rgba(249, 115, 22, 0.5), 0 0 24px rgba(249, 115, 22, 0.25); }
+      50% { text-shadow: 0 0 18px rgba(249, 115, 22, 0.85), 0 0 36px rgba(249, 115, 22, 0.45); }
+    }
+    .halloween-glow-text {
+      animation: spookyGlow 3s ease-in-out infinite;
     }
 
     /* Top Bar Header */
@@ -53,43 +74,44 @@
       gap: 12px;
       margin-bottom: 20px;
       padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(8px);
+      background: rgba(21, 17, 40, 0.92);
+      backdrop-filter: blur(10px);
       border-radius: 30px;
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 15px rgba(249, 115, 22, 0.15);
     }
     .brand-title {
       font-size: 0.92rem;
       font-weight: 800;
-      color: var(--primary);
+      color: #fb923c;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       display: flex;
       align-items: center;
       gap: 6px;
+      text-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
     }
     .clock-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
+      background: #120e24;
+      border: 1px solid #3d3368;
       padding: 5px 12px;
       border-radius: 20px;
       font-size: 0.82rem;
-      color: #1e3a8a;
+      color: #fed7aa;
     }
     .clock-badge .clock-time {
       font-size: 0.95rem;
       font-weight: 800;
-      color: #1e40af;
+      color: #fb923c;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.5px;
     }
     .clock-badge .clock-zone {
       font-size: 0.68rem;
-      background: #2563eb;
+      background: linear-gradient(135deg, #ea580c, #c2410c);
       color: #fff;
       font-weight: 700;
       padding: 2px 6px;
@@ -104,33 +126,34 @@
     }
     h1 {
       font-size: 1.65rem;
-      color: #0f172a;
+      color: #ffedd5;
       margin-bottom: 4px;
       font-weight: 800;
       letter-spacing: -0.5px;
     }
     .subtitle {
       font-size: 0.92rem;
-      color: var(--text-muted);
+      color: #cbd5e1;
       font-weight: 500;
     }
 
     /* Tab Navigation */
     .tab-container {
       display: flex;
-      background: #e2e8f0;
+      background: #110d22;
       padding: 5px;
       border-radius: 14px;
       margin-bottom: 22px;
       gap: 5px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
+      border: 1px solid #2d254f;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
     }
     .tab-btn {
       flex: 1;
       padding: 12px 14px;
       border: none;
       background: transparent;
-      color: #475569;
+      color: #94a3b8;
       font-size: 0.92rem;
       font-weight: 700;
       border-radius: 10px;
@@ -143,24 +166,26 @@
       text-decoration: none;
     }
     .tab-btn:hover {
-      color: #0f172a;
+      color: #fed7aa;
     }
     .tab-btn.active {
-      background: var(--card-bg);
-      color: var(--primary);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(234, 88, 12, 0.45);
       transform: translateY(-1px);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     }
     .tab-badge {
       font-size: 0.72rem;
       padding: 2px 7px;
       border-radius: 12px;
-      background: #94a3b8;
-      color: #fff;
+      background: #7c2d12;
+      color: #fed7aa;
       font-weight: 700;
     }
     .tab-badge.badge-alert {
-      background: #ef4444;
+      background: #dc2626;
+      color: #fff;
       animation: pulseAlert 2s infinite;
     }
 
@@ -206,27 +231,36 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
     .hero-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 14px 28px -4px rgba(30, 58, 138, 0.16);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(249, 115, 22, 0.35);
     }
     .hero-today {
-      background: var(--today-gradient);
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 55%, #7c2d12 100%);
+      border: 1px solid rgba(253, 186, 116, 0.45);
+      box-shadow: 0 10px 30px rgba(234, 88, 12, 0.4), 0 0 20px rgba(249, 115, 22, 0.25);
     }
     .hero-tomorrow {
-      background: var(--tomorrow-gradient);
+      background: linear-gradient(135deg, #581c87 0%, #7e22ce 55%, #3b0764 100%);
+      border: 1px solid rgba(216, 180, 254, 0.4);
+      box-shadow: 0 10px 30px rgba(126, 34, 206, 0.4), 0 0 20px rgba(168, 85, 247, 0.25);
     }
     .hero-label {
       font-size: 0.76rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 1px;
-      opacity: 0.9;
+      opacity: 0.95;
       display: flex;
       align-items: center;
       gap: 6px;
       margin-bottom: 8px;
+      color: #fed7aa;
+    }
+    .hero-tomorrow .hero-label {
+      color: #e9d5ff;
     }
     .hero-name {
       font-size: 2.1rem;
@@ -234,30 +268,36 @@
       letter-spacing: -0.5px;
       line-height: 1.15;
       margin-bottom: 6px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 16px rgba(255,255,255,0.2);
     }
     .hero-meta {
       font-size: 0.88rem;
       opacity: 0.92;
       font-weight: 600;
+      color: #ffedd5;
+    }
+    .hero-tomorrow .hero-meta {
+      color: #f3e8ff;
     }
     .hero-alert {
       margin-top: 10px;
       padding: 6px 10px;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.35);
       backdrop-filter: blur(4px);
       border-radius: 8px;
       font-size: 0.78rem;
       font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
     .badge-holiday-box {
-      background: rgba(254, 226, 226, 0.95);
-      color: #991b1b;
+      background: rgba(185, 28, 28, 0.85);
+      color: #fee2e2;
       padding: 10px 16px;
       border-radius: 12px;
       font-weight: 800;
       font-size: 1.05rem;
       margin-top: 6px;
+      border: 1px solid rgba(239, 68, 68, 0.5);
     }
 
     /* Action bar shortcuts */
@@ -274,10 +314,11 @@
       font-size: 1.08rem;
       font-weight: 800;
       margin: 24px 0 12px;
-      color: #1e293b;
+      color: #fed7aa;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      text-shadow: 0 0 8px rgba(249, 115, 22, 0.25);
     }
 
     /* Cards & Action Box */
@@ -291,7 +332,7 @@
       transition: box-shadow 0.2s ease;
     }
     .action-box:hover {
-      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(249, 115, 22, 0.1);
     }
 
     .form-group {
@@ -303,7 +344,7 @@
     label {
       font-size: 0.86rem;
       font-weight: 700;
-      color: #334155;
+      color: #e2e8f0;
     }
     select, input[type="date"], input[type="text"] {
       width: 100%;
@@ -316,18 +357,22 @@
       font-size: 0.95rem;
       outline: none;
       transition: all 0.2s ease;
-      background: #fff;
+      background: #0f0c1e;
       color: var(--text);
     }
     select:focus, input[type="date"]:focus, input[type="text"]:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.28);
+    }
+    select option, optgroup {
+      background: #151128;
+      color: #f8fafc;
     }
 
-    /* Date Picker Card & Range Grid (Chống tràn di động 100%) */
+    /* Date Picker Card & Range Grid */
     .date-picker-card {
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
+      background: #110d22;
+      border: 1.5px solid #332a5a;
       border-radius: 12px;
       padding: 14px 14px 12px;
       margin-bottom: 16px;
@@ -348,7 +393,7 @@
     .date-range-grid label {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #334155;
+      color: #e2e8f0;
       margin-bottom: 5px;
       display: flex;
       align-items: center;
@@ -361,9 +406,9 @@
       box-sizing: border-box !important;
       height: 44px;
       padding: 10px 12px;
-      border: 1.5px solid #cbd5e1;
+      border: 1.5px solid #3d3368;
       border-radius: var(--radius-sm);
-      background: #ffffff;
+      background: #0f0c1e;
       color: var(--text);
     }
     .date-range-grid input[type="date"]::-webkit-date-and-time-value {
@@ -382,12 +427,12 @@
     .chip {
       font-size: 0.8rem;
       font-weight: 600;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
+      background: #1f1839;
+      border: 1px solid #433672;
       padding: 5px 11px;
       border-radius: 18px;
       cursor: pointer;
-      color: #475569;
+      color: #fed7aa;
       transition: all 0.15s ease;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
@@ -396,14 +441,15 @@
       gap: 4px;
     }
     .chip:hover {
-      background: #e2e8f0;
-      color: #0f172a;
-      border-color: #94a3b8;
+      background: #ea580c;
+      color: #ffffff;
+      border-color: #f97316;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.45);
       transform: translateY(-1px);
     }
     .chip:active {
       transform: scale(0.96);
-      background: #cbd5e1;
+      background: #c2410c;
     }
 
     /* Buttons */
@@ -430,32 +476,35 @@
       transform: scale(0.99);
     }
     .btn-danger {
-      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.45);
+      border: 1px solid rgba(248, 113, 113, 0.4);
     }
     .btn-primary {
       background: var(--primary-gradient);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      box-shadow: 0 4px 16px rgba(234, 88, 12, 0.45);
+      border: 1px solid rgba(253, 186, 116, 0.4);
     }
     .btn-dark {
-      background: #334155;
-      color: #fff;
+      background: #1f1839;
+      color: #e2e8f0;
+      border: 1px solid #433672;
     }
     .btn-light {
-      background: #fff;
-      color: #334155;
-      border: 1.5px solid var(--border);
+      background: #1b1534;
+      color: #fed7aa;
+      border: 1.5px solid #3d3368;
     }
     .btn-light:hover {
-      background: #f8fafc;
-      border-color: #cbd5e1;
+      background: #251d46;
+      border-color: #ea580c;
     }
     .cancel-btn {
-      background: #fee2e2;
-      border: 1px solid #fecaca;
-      color: #b91c1c;
+      background: rgba(220, 38, 38, 0.25);
+      border: 1px solid rgba(248, 113, 113, 0.5);
+      color: #fca5a5;
       padding: 4px 10px;
       border-radius: 8px;
       cursor: pointer;
@@ -464,7 +513,8 @@
       transition: all 0.18s ease;
     }
     .cancel-btn:hover {
-      background: #fca5a5;
+      background: rgba(220, 38, 38, 0.45);
+      color: #fff;
     }
 
     /* Alert Boxes */
@@ -484,24 +534,24 @@
       to { opacity: 1; transform: translateY(0); }
     }
     .alert-warning {
-      background: #fffbeb;
-      border: 1.5px solid #fcd34d;
-      color: #92400e;
+      background: rgba(245, 158, 11, 0.16);
+      border: 1.5px solid rgba(245, 158, 11, 0.45);
+      color: #fef3c7;
     }
     .alert-danger {
-      background: #fef2f2;
-      border: 1.5px solid #fecaca;
-      color: #991b1b;
+      background: rgba(220, 38, 38, 0.2);
+      border: 1.5px solid rgba(239, 68, 68, 0.5);
+      color: #fee2e2;
     }
     .alert-info {
-      background: #eff6ff;
-      border: 1.5px solid #bfdbfe;
-      color: #1e40af;
+      background: rgba(147, 51, 234, 0.2);
+      border: 1.5px solid rgba(168, 85, 247, 0.5);
+      color: #f3e8ff;
     }
     .alert-success {
-      background: #ecfdf5;
-      border: 1.5px solid #a7f3d0;
-      color: #065f46;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1.5px solid rgba(16, 185, 129, 0.5);
+      color: #d1fae5;
     }
 
     /* Tables */
@@ -525,35 +575,37 @@
       vertical-align: middle;
     }
     th {
-      background: #f8fafc;
-      color: #475569;
+      background: #110d22;
+      color: #fb923c;
       font-weight: 800;
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.6px;
+      text-shadow: 0 0 6px rgba(249, 115, 22, 0.3);
     }
     tr {
       transition: background-color 0.15s ease;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover { background-color: #f8fafc; }
-    tr.tr-conflict { background-color: #fffbeb !important; }
+    tr:hover { background-color: rgba(249, 115, 22, 0.08); }
+    tr.tr-conflict { background-color: rgba(180, 83, 9, 0.22) !important; }
 
     /* Tags & Badges */
     .tag-duty {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
+      background: rgba(234, 88, 12, 0.2);
+      color: #fdba74;
+      border: 1px solid rgba(234, 88, 12, 0.5);
       padding: 5px 12px;
       border-radius: 20px;
       font-weight: 800;
       display: inline-block;
       font-size: 0.92rem;
+      box-shadow: 0 0 8px rgba(234, 88, 12, 0.25);
     }
     .tag-leave {
-      background: #fff1f2;
-      color: #be123c;
-      border: 1px solid #fecdd3;
+      background: rgba(225, 29, 72, 0.25);
+      color: #fca5a5;
+      border: 1px solid rgba(225, 29, 72, 0.5);
       padding: 4px 10px;
       border-radius: 8px;
       font-size: 0.82rem;
@@ -562,9 +614,9 @@
       margin: 2px 0;
     }
     .tag-shift-auto {
-      background: #fdf4ff;
-      color: #a21caf;
-      border: 1px solid #f0abfc;
+      background: rgba(147, 51, 234, 0.25);
+      color: #e9d5ff;
+      border: 1px solid rgba(168, 85, 247, 0.45);
       padding: 3px 8px;
       border-radius: 6px;
       font-size: 0.76rem;
@@ -573,8 +625,9 @@
       margin-top: 3px;
     }
     .tag-nonduty {
-      background: #fef3c7;
-      color: #b45309;
+      background: rgba(234, 179, 8, 0.22);
+      color: #fde047;
+      border: 1px solid rgba(234, 179, 8, 0.4);
       padding: 2px 6px;
       border-radius: 6px;
       font-size: 0.72rem;
@@ -582,9 +635,9 @@
       display: inline-block;
     }
     .badge-first {
-      background: #f0fdf4;
-      border: 1.5px solid #86efac;
-      color: #15803d;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1.5px solid rgba(16, 185, 129, 0.5);
+      color: #6ee7b7;
       padding: 5px 10px;
       border-radius: 8px;
       font-size: 0.82rem;
@@ -592,9 +645,9 @@
       display: inline-block;
     }
     .badge-later {
-      background: #fef2f2;
-      border: 1.5px solid #f87171;
-      color: #991b1b;
+      background: rgba(239, 68, 68, 0.22);
+      border: 1.5px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
       padding: 5px 10px;
       border-radius: 8px;
       font-size: 0.82rem;
@@ -603,9 +656,9 @@
       line-height: 1.35;
     }
     .badge-ok {
-      background: #ecfdf5;
-      color: #047857;
-      border: 1px solid #a7f3d0;
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.5);
       padding: 4px 9px;
       border-radius: 8px;
       font-size: 0.8rem;
@@ -626,7 +679,7 @@
       padding: 16px 20px;
       font-weight: 700;
       font-size: 0.95rem;
-      color: #334155;
+      color: #fed7aa;
       cursor: pointer;
       user-select: none;
       display: flex;
@@ -636,7 +689,7 @@
       transition: background 0.2s ease;
     }
     details.holiday-settings summary::-webkit-details-marker { display: none; }
-    details.holiday-settings summary:hover { background: #f8fafc; }
+    details.holiday-settings summary:hover { background: #1c1635; }
     details.holiday-settings summary::after {
       content: "➕";
       font-size: 0.85rem;
@@ -651,7 +704,7 @@
       animation: tabFadeIn 0.2s ease;
     }
 
-    /* Floating Chat Bubble & Popup Window (Tối ưu cho cả Di Động & Máy Tính) */
+    /* Floating Chat Bubble & Popup Window */
     .ai-fab-btn {
       position: fixed !important;
       bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
@@ -659,16 +712,16 @@
       height: 52px !important;
       padding: 0 16px 0 12px !important;
       border-radius: 30px !important;
-      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #4338ca 100%) !important;
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #7c2d12 100%) !important;
       color: #ffffff !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       gap: 8px !important;
-      box-shadow: 0 6px 22px rgba(29, 78, 216, 0.48), 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+      box-shadow: 0 6px 24px rgba(234, 88, 12, 0.65), 0 0 20px rgba(249, 115, 22, 0.4) !important;
       cursor: pointer !important;
       z-index: 99999 !important;
-      border: 2.5px solid #ffffff !important;
+      border: 2.5px solid #fed7aa !important;
       transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease !important;
       user-select: none !important;
       -webkit-tap-highlight-color: transparent !important;
@@ -679,6 +732,7 @@
       font-size: 1.5rem;
       line-height: 1;
       display: inline-block;
+      animation: eerieFloat 3s ease-in-out infinite;
     }
     .ai-fab-text {
       font-size: 0.88rem;
@@ -686,14 +740,15 @@
       letter-spacing: 0.3px;
       white-space: nowrap;
       color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     }
     @keyframes fabPulse {
-      0%, 100% { box-shadow: 0 6px 20px rgba(29, 78, 216, 0.45); }
-      50% { box-shadow: 0 6px 26px rgba(59, 130, 246, 0.7), 0 0 0 6px rgba(59, 130, 246, 0.18); }
+      0%, 100% { box-shadow: 0 6px 20px rgba(234, 88, 12, 0.55), 0 0 15px rgba(249, 115, 22, 0.3); }
+      50% { box-shadow: 0 8px 30px rgba(249, 115, 22, 0.8), 0 0 0 7px rgba(249, 115, 22, 0.22); }
     }
     .ai-fab-btn:hover {
       transform: scale(1.06);
-      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.55) !important;
+      box-shadow: 0 10px 32px rgba(249, 115, 22, 0.85) !important;
     }
     .ai-fab-btn:active {
       transform: scale(0.94);
@@ -704,9 +759,9 @@
       right: 2px;
       width: 13px;
       height: 13px;
-      background: #10b981;
+      background: #22c55e;
       border-radius: 50%;
-      border: 2px solid #fff;
+      border: 2px solid #151128;
     }
 
     .ai-chat-popup {
@@ -718,17 +773,16 @@
       max-width: calc(100vw - 32px) !important;
       height: 500px !important;
       max-height: calc(100vh - 100px) !important;
-      background: #ffffff !important;
+      background: #140f28 !important;
       border-radius: 18px !important;
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28) !important;
-      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(249, 115, 22, 0.25) !important;
+      border: 1.5px solid #433672 !important;
       z-index: 999999 !important;
       flex-direction: column !important;
       overflow: hidden !important;
       animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
     
-    /* Giao diện di động: Hiển thị dạng Sheet toàn màn hình thông minh chống bàn phím che */
     @media (max-width: 600px) {
       .ai-chat-popup {
         top: 0 !important;
@@ -752,11 +806,9 @@
       .ai-popup-footer {
         padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
       }
-      /* Triệt tiêu 100% hành vi auto-zoom của Safari iPhone */
       input, select, textarea {
         font-size: 16px !important;
       }
-      /* Tối ưu hộp điền đơn xin nghỉ & chọn ngày trên di động chống tràn 100% */
       .action-box {
         padding: 16px 14px;
         border-radius: 14px;
@@ -775,19 +827,20 @@
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
     .ai-popup-header {
-      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 55%, #7c2d12 100%);
       color: #fff;
       padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
+      border-bottom: 1px solid rgba(253, 186, 116, 0.3);
     }
     .ai-popup-messages {
       flex: 1;
       padding: 12px 14px;
       overflow-y: auto;
-      background: #f8fafc;
+      background: #0d0a1b;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -795,8 +848,8 @@
     }
     .ai-popup-footer {
       padding: 10px 12px;
-      background: #fff;
-      border-top: 1px solid #e2e8f0;
+      background: #140f28;
+      border-top: 1px solid #332a5a;
       display: flex;
       gap: 6px;
       flex-shrink: 0;
@@ -808,31 +861,32 @@
   <!-- Top bar với Đồng hồ thời gian thực Giờ Việt Nam & Nút Admin -->
   <div class="top-header-bar">
     <div class="brand-title">
-      <span>🏢</span>
-      <span>Cửa Hàng</span>
+      <span class="spooky-float">🎃</span>
+      <span>Cửa Hàng • Halloween 2026</span>
+      <span class="spooky-float">🦇</span>
     </div>
 
     <div style="display: flex; align-items: center; gap: 8px;">
       <div class="clock-badge">
-        <span style="font-size: 0.95rem;">⏰</span>
+        <span style="font-size: 0.95rem;">🕯️</span>
         <span id="vn-live-clock" class="clock-time">--:--:--</span>
-        <span id="vn-live-date" style="color: #64748b; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
+        <span id="vn-live-date" style="color: #cbd5e1; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
         <span class="clock-zone">Giờ VN</span>
       </div>
 
-      <button type="button" onclick="toggleAiChatPopup()" style="background: linear-gradient(135deg, #1d4ed8, #2563eb); border: none; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);">
-        🤖 Hỏi AI
+      <button type="button" onclick="toggleAiChatPopup()" style="background: linear-gradient(135deg, #c2410c, #ea580c); border: 1px solid #f97316; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(234,88,12,0.45);">
+        🎃 Hỏi AI
       </button>
 
       {% if is_admin %}
-        <span style="background: #fef2f2; border: 1.5px solid #f87171; color: #b91c1c; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+        <span style="background: rgba(220, 38, 38, 0.25); border: 1.5px solid #ef4444; color: #fca5a5; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
           👑 Admin
         </span>
-        <a href="/admin-logout" style="background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+        <a href="/admin-logout" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
           Thoát
         </a>
       {% else %}
-        <button type="button" onclick="openAdminModal()" style="background: #f8fafc; border: 1.5px solid #cbd5e1; color: #475569; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+        <button type="button" onclick="openAdminModal()" style="background: #1e1837; border: 1.5px solid #433872; color: #e2e8f0; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
           🔐 Quản Trị
         </button>
       {% endif %}
@@ -841,33 +895,33 @@
 
   <header>
     {% if active_tab == 'leaves' %}
-      <h1 id="page-title">HÔM NAY AI NGHỈ</h1>
+      <h1 id="page-title" class="halloween-glow-text">🎃 HÔM NAY AI NGHỈ 👻</h1>
       <p class="subtitle" id="page-subtitle">
         {% if today_leaves %}
-          Hôm nay có: <strong style="color:#dc2626;">{{ today_leaves | map(attribute="member_name") | join(", ") }}</strong> xin nghỉ
+          Hôm nay có: <strong style="color:#f87171;">{{ today_leaves | map(attribute="member_name") | join(", ") }}</strong> xin nghỉ
         {% else %}
-          Hôm nay: <strong style="color:#16a34a;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm)
+          Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🍬)
         {% endif %}
       </p>
     {% else %}
-      <h1 id="page-title">HÔM NAY AI TRỰC</h1>
-      <p class="subtitle" id="page-subtitle">Người trực chính 7h30: <strong>{{ today_duty.assigned if today_duty else '---' }}</strong></p>
+      <h1 id="page-title" class="halloween-glow-text">🎃 HÔM NAY AI TRỰC 🦇</h1>
+      <p class="subtitle" id="page-subtitle">Người trực chính 7h30: <strong style="color:#fdba74;">{{ today_duty.assigned if today_duty else '---' }}</strong> 🧹</p>
     {% endif %}
   </header>
 
   <!-- TAB SWITCHER -->
   <div class="tab-container">
     <button type="button" class="tab-btn active" id="tab-btn-schedule" onclick="switchTab('schedule')">
-      📅 Lịch Trực Vệ Sinh
+      📅 Lịch Trực Vệ Sinh 🧹
     </button>
     <button type="button" class="tab-btn" id="tab-btn-leaves" onclick="switchTab('leaves')">
-      📝 Xin Nghỉ & Lịch Nghỉ
+      📝 Xin Nghỉ & Lịch Nghỉ 🎃
       {% if future_leaves_count > 0 %}
         <span class="tab-badge {% if has_any_conflict %}badge-alert{% endif %}">{{ future_leaves_count }}</span>
       {% endif %}
     </button>
-    <a href="/history" class="tab-btn" style="color: #334155;">
-      📜 Lịch Sử Nghỉ ↗
+    <a href="/history" class="tab-btn" style="color: #cbd5e1;">
+      📜 Lịch Sử Nghỉ ↗ 🦇
     </a>
   </div>
 
@@ -880,7 +934,7 @@
     <div class="cards-grid">
       <div class="hero-card hero-today">
         <div>
-          <div class="hero-label">🌟 Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
+          <div class="hero-label">🎃 Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
           {% if today_duty and today_duty.is_holiday %}
             <div class="badge-holiday-box">{{ today_duty.holiday_reason }}</div>
           {% elif today_duty and today_duty.assigned %}
@@ -899,7 +953,7 @@
 
       <div class="hero-card hero-tomorrow">
         <div>
-          <div class="hero-label">🌱 Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
+          <div class="hero-label">🦇 Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
           {% if tomorrow_duty and tomorrow_duty.is_holiday %}
             <div class="badge-holiday-box">{{ tomorrow_duty.holiday_reason }}</div>
           {% elif tomorrow_duty and tomorrow_duty.assigned %}
@@ -1084,10 +1138,10 @@
     <!-- FORM XIN NGHỈ -->
     <div class="action-box">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
-        <h2 style="font-size: 1.15rem; font-weight: 800; color: #b91c1c; display: flex; align-items: center; gap: 8px; margin: 0;">
-          <span>📝</span> ĐĂNG KÝ XIN NGHỈ
+        <h2 style="font-size: 1.15rem; font-weight: 800; color: #fb923c; display: flex; align-items: center; gap: 8px; margin: 0; text-shadow: 0 0 10px rgba(249,115,22,0.4);">
+          <span>🎃</span> ĐĂNG KÝ XIN NGHỈ
         </h2>
-        <div style="font-size: 0.78rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 4px 10px; border-radius: 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: #fed7aa; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.45); padding: 4px 10px; border-radius: 20px;">
           ⚠️ Không nhận xin nghỉ Hôm nay, Ngày mai & Ngày mốt
         </div>
       </div>
@@ -1110,9 +1164,9 @@
         </div>
 
         <div class="date-picker-card">
-          <div style="font-size: 0.78rem; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+          <div style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
             <span>📌</span>
-            <span>Ngày đăng ký sớm nhất có thể nhận: <strong>{{ min_leave_date_display }}</strong> (cách 3 ngày để xếp trực nhật).</span>
+            <span>Ngày đăng ký sớm nhất có thể nhận: <strong style="color: #fb923c;">{{ min_leave_date_display }}</strong> (cách 3 ngày để xếp trực nhật).</span>
           </div>
           <div class="date-range-grid">
             <div class="form-group">
@@ -1120,7 +1174,7 @@
               <input type="date" name="leave_date" id="leave_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{{ min_leave_date_str }}" required onchange="syncLeaveEndDate(); checkLiveConflict();">
             </div>
             <div class="form-group">
-              <label>📅 Đến ngày <span style="font-weight: normal; color: #64748b; font-size: 0.8rem;">(chọn nếu nghỉ nhiều ngày)</span>:</label>
+              <label>📅 Đến ngày <span style="font-weight: normal; color: #94a3b8; font-size: 0.8rem;">(chọn nếu nghỉ nhiều ngày)</span>:</label>
               <input type="date" name="end_date" id="leave_end_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{{ min_leave_date_str }}" onchange="checkLiveConflict();">
             </div>
           </div>
@@ -1128,7 +1182,7 @@
             <span class="chip" onclick="setQuickLeaveDays(1)">⚡ 1 ngày</span>
             <span class="chip" onclick="setQuickLeaveDays(2)">✨ 2 ngày liên tiếp</span>
             <span class="chip" onclick="setQuickLeaveDays(3)">🌟 3 ngày liên tiếp</span>
-            <span class="chip" onclick="setQuickLeaveOffset(3, 1)">📅 Sau 3 ngày</span>
+            <span class="chip" onclick="setQuickLeaveOffset(3, 1)">🎃 Sau 3 ngày</span>
             <span class="chip" onclick="setQuickLeaveNextWeek()">🗓️ Thứ Hai tuần sau</span>
           </div>
         </div>
@@ -1157,11 +1211,11 @@
     <div class="section-title">
       <div>
         <span>📋 Bảng Theo Dõi Nghỉ (Hiện Tại & Sắp Tới)</span>
-        <div style="font-size: 0.8rem; font-weight: 500; color: #16a34a; margin-top: 2px;">
+        <div style="font-size: 0.8rem; font-weight: 500; color: #4ade80; margin-top: 2px;">
           ✨ Tự động chuyển vào Lịch sử và xóa khỏi bảng khi đã qua ngày để tránh rối mắt
         </div>
       </div>
-      <span style="font-size: 0.82rem; font-weight: 800; color: var(--primary); background: #eff6ff; padding: 4px 12px; border-radius: 20px; border: 1px solid #bfdbfe;">
+      <span style="font-size: 0.82rem; font-weight: 800; color: #fed7aa; background: #1c1635; padding: 4px 12px; border-radius: 20px; border: 1px solid #3d3368;">
         {{ leaves_summary|length }} ca sắp tới
       </span>
     </div>
@@ -1187,12 +1241,12 @@
               <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.weekday_vn }}</span>
             </td>
             <td>
-              <strong style="font-size: 1rem; color: #1e3a8a;">{{ item.member_name }}</strong>
+              <strong style="font-size: 1rem; color: #fed7aa;">{{ item.member_name }}</strong>
               {% if not item.is_duty_member %}
                 <span class="tag-nonduty" style="margin-left: 4px;">Không trực</span>
               {% endif %}
               {% if item.created_at %}
-                <br><span style="font-size: 0.75rem; color: #64748b;">Nộp lúc: {{ item.created_at }}</span>
+                <br><span style="font-size: 0.75rem; color: #94a3b8;">Nộp lúc: {{ item.created_at }}</span>
               {% endif %}
             </td>
             <td>
@@ -1204,7 +1258,7 @@
                   <div class="badge-first">
                     🥇 <strong>ĐÃ XIN NGHỈ TRƯỚC</strong>
                     {% if item.later_names_str %}
-                      <div style="font-size: 0.74rem; color: #166534; font-weight: normal; margin-top: 2px;">
+                      <div style="font-size: 0.74rem; color: #86efac; font-weight: normal; margin-top: 2px;">
                         ({{ item.later_names_str }} xin sau)
                       </div>
                     {% endif %}
@@ -1221,13 +1275,13 @@
             </td>
             <td>
               {% if not item.is_duty_member %}
-                <span style="color: #64748b; font-size: 0.82rem;">— Không trực nhật</span>
+                <span style="color: #94a3b8; font-size: 0.82rem;">— Không trực nhật</span>
               {% elif item.is_duty_skip %}
-                <span class="tag-shift-auto" style="background:#fee2e2; color:#b91c1c; border-color:#fca5a5;">
+                <span class="tag-shift-auto" style="background:rgba(220, 38, 38, 0.25); color:#fca5a5; border-color:rgba(248, 113, 113, 0.4);">
                   🔄 Đã đôn cho <strong>{{ item.replaced_by }}</strong> trực thay
                 </span>
               {% else %}
-                <span style="color: #16a34a; font-size: 0.82rem; font-weight: 600;">Không trùng ca trực</span>
+                <span style="color: #4ade80; font-size: 0.82rem; font-weight: 600;">Không trùng ca trực</span>
               {% endif %}
             </td>
             <td style="text-align: center; white-space: nowrap;">
@@ -1251,7 +1305,7 @@
                   </button>
                 </form>
               {% else %}
-                <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px;" title="Đã quá 15 phút sau khi nộp. Chỉ Admin mới có quyền hủy/sửa đơn này.">
+                <span style="font-size: 0.74rem; color: #cbd5e1; font-weight: 700; background: #1c1635; border: 1px solid #3d3368; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px;" title="Đã quá 15 phút sau khi nộp. Chỉ Admin mới có quyền hủy/sửa đơn này.">
                   🔒 Cố định
                 </span>
               {% endif %}
@@ -1262,9 +1316,9 @@
       </table>
       {% else %}
       <div class="empty-state" style="text-align: center; padding: 36px 16px; color: var(--text-muted);">
-        <div style="font-size: 2.2rem; margin-bottom: 8px;">🌴</div>
-        <p><strong>Hiện tại không có ai xin nghỉ sắp tới!</strong></p>
-        <p style="font-size: 0.85rem; margin-top: 4px;">Cả 10 anh em đều đang có lịch đi làm đầy đủ.</p>
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">🎃</div>
+        <p><strong style="color: #fed7aa;">Hiện tại không có ai xin nghỉ sắp tới!</strong></p>
+        <p style="font-size: 0.85rem; margin-top: 4px; color: #cbd5e1;">Cả 10 anh em đều đang có lịch đi làm đầy đủ 🍬.</p>
       </div>
       {% endif %}
     </div>
@@ -1295,18 +1349,18 @@
       const pageTitle = document.getElementById('page-title');
       const pageSubtitle = document.getElementById('page-subtitle');
       if (tabName === 'schedule') {
-        if (pageTitle) pageTitle.innerHTML = 'HÔM NAY AI TRỰC';
-        if (pageSubtitle) pageSubtitle.innerHTML = 'Người trực chính 7h30: <strong>{{ today_duty.assigned if today_duty else "---" }}</strong>';
-        document.title = 'Hôm Nay Ai Trực? — 7H30 Sáng';
+        if (pageTitle) pageTitle.innerHTML = '🎃 HÔM NAY AI TRỰC 🦇';
+        if (pageSubtitle) pageSubtitle.innerHTML = 'Người trực chính 7h30: <strong style="color:#fdba74;">{{ today_duty.assigned if today_duty else "---" }}</strong> 🧹';
+        document.title = 'Hôm Nay Ai Trực? — Halloween 2026';
       } else if (tabName === 'leaves') {
-        if (pageTitle) pageTitle.innerHTML = 'HÔM NAY AI NGHỈ';
+        if (pageTitle) pageTitle.innerHTML = '🎃 HÔM NAY AI NGHỈ 👻';
         {% if today_leaves %}
           const leaveNames = '{{ today_leaves | map(attribute="member_name") | join(", ") }}';
-          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay có: <strong style="color:#dc2626;">' + leaveNames + '</strong> xin nghỉ';
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay có: <strong style="color:#f87171;">' + leaveNames + '</strong> xin nghỉ';
         {% else %}
-          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay: <strong style="color:#16a34a;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm)';
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🍬)';
         {% endif %}
-        document.title = 'Hôm Nay Ai Nghỉ? — Xin Nghỉ & Lịch Nghỉ';
+        document.title = 'Hôm Nay Ai Nghỉ? — Xin Nghỉ & Lịch Nghỉ (Halloween 2026)';
       }
     }
 
@@ -1347,7 +1401,7 @@
       // 1. Hiển thị tin nhắn người dùng
       const userBubble = document.createElement('div');
       userBubble.style.cssText = 'display: flex; justify-content: flex-end; margin-bottom: 4px;';
-      userBubble.innerHTML = `<div style="background: #2563eb; color: #fff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; max-width: 82%; line-height: 1.4; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 500;">${question}</div>`;
+      userBubble.innerHTML = `<div style="background: linear-gradient(135deg, #c2410c, #ea580c); color: #fff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; max-width: 82%; line-height: 1.4; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-weight: 600;">${question}</div>`;
       container.appendChild(userBubble);
 
       input.value = '';
@@ -1360,7 +1414,7 @@
       const loadingBubble = document.createElement('div');
       loadingBubble.id = 'ai-loading-bubble';
       loadingBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
-      loadingBubble.innerHTML = `<span>🤖</span><div style="background: #fff; border: 1px solid #cbd5e1; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: #64748b; font-style: italic;">Đang xử lý...</div>`;
+      loadingBubble.innerHTML = `<span>🎃</span><div style="background: #1b1534; border: 1px solid #3d3368; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: #cbd5e1; font-style: italic;">Đang triệu hồi câu trả lời...</div>`;
       container.appendChild(loadingBubble);
       container.scrollTop = container.scrollHeight;
 
@@ -1382,29 +1436,29 @@
 
         if (data.is_leave_intent) {
           // Thẻ xác nhận tạo đơn xin nghỉ ngay trong khung chat
-          const conflictStyle = data.has_conflict ? 'background:#fffbeb; border:1px solid #fde68a;' : 'background:#ecfdf5; border:1px solid #a7f3d0;';
+          const conflictStyle = data.has_conflict ? 'background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.5); color:#fef3c7;' : 'background:rgba(16, 185, 129, 0.2); border:1px solid rgba(16, 185, 129, 0.5); color:#d1fae5;';
           const datesPayload = encodeURIComponent(JSON.stringify(data.leave_dates || [data.leave_date]));
           const btnLabel = (data.leave_dates && data.leave_dates.length > 1)
             ? `🚀 Xác Nhận Tạo ${data.leave_dates.length} Ngày Luôn`
             : '🚀 Xác Nhận Tạo Luôn';
 
           aiBubble.innerHTML = `
-            <span>🤖</span>
-            <div style="background: #ffffff; border: 1.5px solid #93c5fd; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #1e293b; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.06); max-width: 92%;">
-              <div style="font-weight: 800; color: #1e40af; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-                <span>📝 XÁC NHẬN BÁO NGHỈ</span>
-                <span style="font-size: 0.7rem; background: #eff6ff; color: #2563eb; padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
+            <span>🎃</span>
+            <div style="background: #17122e; border: 1.5px solid #ea580c; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 10px rgba(249,115,22,0.2); max-width: 92%;">
+              <div style="font-weight: 800; color: #fb923c; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                <span>🎃 XÁC NHẬN BÁO NGHỈ</span>
+                <span style="font-size: 0.7rem; background: rgba(234,88,12,0.25); color: #fed7aa; border: 1px solid rgba(234,88,12,0.4); padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
               </div>
               <div style="margin-bottom: 6px;">
-                • Nhân viên: <strong style="color: #2563eb;">${data.member_name}</strong><br>
-                • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: #64748b;">(${data.weekday_vn})</span><br>
+                • Nhân viên: <strong style="color: #fdba74;">${data.member_name}</strong><br>
+                • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: #cbd5e1;">(${data.weekday_vn})</span><br>
                 • Lý do: <em>"${data.reason}"</em>
               </div>
               <div style="padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; font-size: 0.78rem; ${conflictStyle}">
                 ${data.conflict_note}
               </div>
               <div style="display: flex; gap: 6px;">
-                <button type="button" onclick="confirmLeaveFromChat('${data.member_name}', '${datesPayload}', '${encodeURIComponent(data.reason)}', this)" style="flex: 1; padding: 7px 10px; font-size: 0.8rem; background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <button type="button" onclick="confirmLeaveFromChat('${data.member_name}', '${datesPayload}', '${encodeURIComponent(data.reason)}', this)" style="flex: 1; padding: 7px 10px; font-size: 0.8rem; background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 6px rgba(22,163,74,0.4);">
                   ${btnLabel}
                 </button>
               </div>
@@ -1412,7 +1466,7 @@
           `;
         } else {
           // Trả lời văn bản thông thường
-          aiBubble.innerHTML = `<span>🤖</span><div style="background: #fff; border: 1px solid #cbd5e1; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #1e293b; line-height: 1.5; box-shadow: 0 1px 3px rgba(0,0,0,0.04); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
+          aiBubble.innerHTML = `<span>🎃</span><div style="background: #191432; border: 1px solid #3d3368; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #f8fafc; line-height: 1.5; box-shadow: 0 2px 6px rgba(0,0,0,0.3); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
         }
         container.appendChild(aiBubble);
 
@@ -1425,7 +1479,7 @@
         }
         const errBubble = document.createElement('div');
         errBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
-        errBubble.innerHTML = `<span>⚠️</span><div style="background: #fee2e2; border: 1px solid #fca5a5; padding: 8px 12px; border-radius: 10px; font-size: 0.86rem; color: #b91c1c;">Lỗi: ${err}</div>`;
+        errBubble.innerHTML = `<span>⚠️</span><div style="background: rgba(220, 38, 38, 0.25); border: 1px solid rgba(248, 113, 113, 0.5); padding: 8px 12px; border-radius: 10px; font-size: 0.86rem; color: #fca5a5;">Lỗi: ${err}</div>`;
         container.appendChild(errBubble);
       } finally {
         if (btn) {
@@ -1831,8 +1885,8 @@
 
   <!-- BONG BÓNG CHAT AI NỔI (FLOATING CHAT BUBBLE) -->
   <div class="ai-fab-btn" id="ai-fab-button" onclick="toggleAiChatPopup()" title="Hỏi nhanh trợ lý AI về lịch trực & ngày nghỉ">
-    <span class="ai-fab-icon">🤖</span>
-    <span class="ai-fab-text">Hỏi AI</span>
+    <span class="ai-fab-icon">🎃</span>
+    <span class="ai-fab-text">AI Halloween</span>
     <span class="ai-fab-badge"></span>
   </div>
 
@@ -1840,11 +1894,11 @@
   <div class="ai-chat-popup" id="ai-chat-popup">
     <div class="ai-popup-header">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 1.25rem;">🤖</span>
+        <span style="font-size: 1.25rem;">🎃</span>
         <div>
-          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý AI Cửa Hàng</strong>
+          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Ma Quái AI 👻</strong>
           <span style="font-size: 0.72rem; opacity: 0.9; display: flex; align-items: center; gap: 4px;">
-            <span style="width: 6px; height: 6px; background: #34d399; border-radius: 50%; display: inline-block;"></span> Sẵn sàng giải đáp
+            <span style="width: 6px; height: 6px; background: #fb923c; border-radius: 50%; display: inline-block;"></span> Halloween 2026 Edition
           </span>
         </div>
       </div>
@@ -1856,10 +1910,10 @@
     <!-- Vùng tin nhắn chat -->
     <div class="ai-popup-messages" id="ai-chat-messages">
       <div style="display: flex; align-items: flex-start; gap: 8px;">
-        <span style="font-size: 1.1rem;">🤖</span>
-        <div style="background: #fff; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 12px; font-size: 0.86rem; color: #334155; line-height: 1.45; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-          Xin chào! Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc <strong>tạo đơn xin nghỉ bằng tin nhắn</strong>.<br>
-          <small style="color: #64748b; margin-top: 4px; display: block;">
+        <span style="font-size: 1.1rem;">🎃</span>
+        <div style="background: #191432; border: 1px solid #3d3368; padding: 9px 13px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+          Xin chào! 🎃 Tôi là Trợ Lý Ma Quái AI (Halloween 2026). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc <strong>tạo đơn xin nghỉ bằng tin nhắn</strong>.<br>
+          <small style="color: #cbd5e1; margin-top: 4px; display: block;">
             • Báo nghỉ: <em>"Vinh xin nghỉ ngày 25/10 việc gia đình"</em><br>
             • Tra cứu: <em>"Hôm nay ai trực?"</em>, <em>"Mai có ai nghỉ không?"</em>
           </small>
@@ -1869,23 +1923,23 @@
 
     <!-- Thanh nhập câu hỏi -->
     <div class="ai-popup-footer">
-      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ..." style="flex: 1; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 20px; font-size: 16px; outline: none; -webkit-text-size-adjust: 100%;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
-      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; border-radius: 20px; cursor: pointer; font-weight: 700; white-space: nowrap;">
+      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ... 🎃" style="flex: 1; padding: 10px 14px; border: 1.5px solid #3d3368; background: #0f0c1e; color: #f8fafc; border-radius: 20px; font-size: 16px; outline: none; -webkit-text-size-adjust: 100%;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
+      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #c2410c, #ea580c); color: #fff; border: 1px solid #f97316; border-radius: 20px; cursor: pointer; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(234,88,12,0.4);">
         Gửi
       </button>
     </div>
   </div>
 
   <!-- MODAL ĐĂNG NHẬP ADMIN -->
-  <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#fff; border-radius:16px; padding:22px 18px; max-width:360px; width:100%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+  <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
+    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:360px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(249,115,22,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#1e293b; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:6px;">
           🔐 Quyền Quản Trị Admin
         </h3>
-        <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#64748b;">✕</button>
+        <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
       </div>
-      <p style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">Nhập mật khẩu quản trị để chỉnh sửa hoặc xóa lịch nghỉ của cửa hàng.</p>
+      <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom:14px;">Nhập mật khẩu quản trị để chỉnh sửa hoặc xóa lịch nghỉ của cửa hàng.</p>
       <form action="/admin-login" method="POST">
         <input type="hidden" name="next_url" value="{{ request.url }}">
         <div class="form-group">
@@ -1900,13 +1954,13 @@
   </div>
 
   <!-- MODAL CHỈNH SỬA LỊCH NGHỈ CHO ADMIN -->
-  <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#fff; border-radius:16px; padding:22px 18px; max-width:440px; width:100%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+  <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
+    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:440px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(249,115,22,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#1e293b; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:6px;">
           ✏️ Sửa Thông Tin Lịch Nghỉ
         </h3>
-        <button type="button" onclick="closeEditModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#64748b;">✕</button>
+        <button type="button" onclick="closeEditModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
       </div>
       <form action="/edit-leave" method="POST">
         <input type="hidden" name="source" id="edit_source">
