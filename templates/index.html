@@ -68,29 +68,85 @@
       animation: floralGlow 3s ease-in-out infinite;
     }
 
-    /* Top Bar Header */
-    .top-header-bar {
+    /* All-in-One Unified Header Card (Gộp Top Bar & Banner Lễ Hội vào 1 ô duy nhất) */
+    .top-unified-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, {{ theme.colors.card_bg }} 0%, rgba(10, 8, 20, 0.88) 100%);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      border: 1.5px solid {{ theme.colors.border_focus }};
+      box-shadow: 0 4px 24px rgba(0,0,0,0.65), 0 0 18px {{ theme.colors.primary_glow }};
+    }
+    .unified-top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 18px;
-      padding: 10px 16px;
-      background: {{ theme.colors.card_bg }};
-      backdrop-filter: blur(10px);
-      border-radius: 30px;
-      border: 1px solid {{ theme.colors.border }};
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 16px {{ theme.colors.primary_glow }};
+      flex-wrap: wrap;
     }
-    .top-header-top-row {
+    .unified-brand-clock {
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
     .top-header-actions {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
+    }
+    .unified-banner-body {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .unified-banner-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex: 1;
+    }
+    .seasonal-banner-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+      filter: drop-shadow(0 2px 8px {{ theme.colors.primary_glow }});
+      flex-shrink: 0;
+    }
+    .seasonal-banner-title {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: {{ theme.colors.highlight }};
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .seasonal-banner-sub {
+      font-size: 0.83rem;
+      color: {{ theme.colors.text_muted }};
+      margin-top: 3px;
+      line-height: 1.45;
+    }
+    .seasonal-banner-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: {{ theme.colors.primary_gradient }};
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px {{ theme.colors.primary_glow }};
+      align-self: flex-start;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .brand-title {
       font-size: 0.92rem;
@@ -860,15 +916,19 @@
       body {
         padding: 8px 10px !important;
       }
-      .top-header-bar {
+      /* Unified Header Card Mobile */
+      .top-unified-card {
+        padding: 10px 12px !important;
+        border-radius: 16px !important;
+        margin-bottom: 12px !important;
+        gap: 8px !important;
+      }
+      .unified-top-bar {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 8px !important;
-        padding: 10px 12px !important;
-        border-radius: 18px !important;
-        margin-bottom: 12px !important;
       }
-      .top-header-top-row {
+      .unified-brand-clock {
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
@@ -876,7 +936,7 @@
         gap: 6px !important;
       }
       .brand-title {
-        font-size: 0.82rem !important;
+        font-size: 0.8rem !important;
         letter-spacing: 0.2px !important;
       }
       .clock-badge {
@@ -907,30 +967,33 @@
         font-size: 0.74rem !important;
         padding: 3px 8px !important;
       }
-
-      /* Seasonal Banner Mobile */
-      .seasonal-banner {
-        padding: 10px 12px !important;
-        margin-bottom: 14px !important;
-        border-radius: 14px !important;
+      .unified-banner-body {
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding-top: 8px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+      }
+      .unified-banner-left {
         gap: 8px !important;
       }
       .seasonal-banner-icon {
-        font-size: 1.5rem !important;
+        font-size: 1.35rem !important;
       }
       .seasonal-banner-title {
-        font-size: 0.88rem !important;
+        font-size: 0.85rem !important;
         line-height: 1.25 !important;
       }
       .seasonal-banner-sub {
-        font-size: 0.74rem !important;
+        font-size: 0.73rem !important;
         line-height: 1.35 !important;
         margin-top: 2px !important;
       }
       .seasonal-banner-badge {
-        font-size: 0.7rem !important;
+        align-self: flex-start !important;
+        font-size: 0.68rem !important;
         padding: 3px 8px !important;
-        border-radius: 12px !important;
+        border-radius: 10px !important;
       }
 
       /* Header & Subtitle Mobile */
@@ -1144,63 +1207,66 @@
 </head>
 <body>
 
-  <!-- Top bar với Đồng hồ thời gian thực Giờ Việt Nam & Nút Admin -->
-  <div class="top-header-bar">
-    <div class="top-header-top-row">
-      <div class="brand-title">
-        <span class="floral-float">{{ theme.icons.main }}</span>
-        <span>Cửa Hàng • {{ theme.name }}</span>
-        <span class="floral-float">{{ theme.icons.sub }}</span>
-      </div>
-
-      <div class="clock-badge">
-        <span style="font-size: 0.95rem;">{{ theme.icons.clock }}</span>
-        <span id="vn-live-clock" class="clock-time">--:--:--</span>
-        <span id="vn-live-date" class="clock-date" style="color: {{ theme.colors.text_muted }}; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
-        <span class="clock-zone">Giờ VN</span>
-      </div>
-    </div>
-
-    <div class="top-header-actions">
-      <button type="button" class="top-btn" onclick="toggleAiChatPopup()" style="background: {{ theme.colors.primary_gradient }}; border: 1px solid {{ theme.colors.border_focus }}; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px {{ theme.colors.primary_glow }};">
-        {{ theme.icons.bot }} Hỏi AI
-      </button>
-
-      {% if is_admin %}
-        <button type="button" class="top-btn" onclick="openThemePickerModal()" style="background: rgba(255,255,255,0.12); border: 1.5px solid var(--border-focus); color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-          🎨 Đổi Giao Diện
-        </button>
-        <span class="admin-badge" style="background: {{ theme.colors.primary_glow }}; border: 1.5px solid var(--border-focus); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
-          👑 Admin
-        </span>
-        <a href="/admin-logout" class="top-btn" style="background: {{ theme.colors.primary_glow }}; color: {{ theme.colors.highlight }}; border: 1px solid var(--border-focus); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
-          Thoát
-        </a>
-      {% else %}
-        <button type="button" class="top-btn" onclick="openAdminModal()" style="background: {{ theme.colors.card_bg }}; border: 1.5px solid {{ theme.colors.border }}; color: {{ theme.colors.text }}; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-          🔐 Quản Trị
-        </button>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- BANNER CHỦ ĐỀ SỰ KIỆN THEO MÙA -->
-  <div class="seasonal-banner" style="background: linear-gradient(135deg, {{ theme.colors.primary_glow }}, rgba(0,0,0,0.55)); border: 1.5px solid {{ theme.colors.border_focus }}; border-radius: 16px; padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 20px {{ theme.colors.primary_glow }};">
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <span class="seasonal-banner-icon" style="font-size: 1.9rem; filter: drop-shadow(0 2px 8px {{ theme.colors.primary_glow }});">{{ theme.icons.main }}</span>
-      <div>
-        <div class="seasonal-banner-title" style="font-size: 1rem; font-weight: 800; color: {{ theme.colors.text }}; letter-spacing: 0.4px; display: flex; align-items: center; gap: 6px;">
-          <span>{{ theme.banner.title }}</span>
-          <span>{{ theme.icons.sub }}</span>
+  <!-- KHUNG ĐIỀU HÀNH & CHỦ ĐỀ LỄ HỘI HỢP NHẤT (ALL-IN-ONE UNIFIED HEADER CARD) -->
+  <div class="top-unified-card">
+    <!-- Hàng 1: Tiêu đề cửa hàng, Đồng hồ thời gian thực và Các nút chức năng -->
+    <div class="unified-top-bar">
+      <div class="unified-brand-clock">
+        <div class="brand-title">
+          <span class="floral-float">{{ theme.icons.main }}</span>
+          <span>Cửa Hàng • {{ theme.name }}</span>
+          <span class="floral-float">{{ theme.icons.sub }}</span>
         </div>
-        <div class="seasonal-banner-sub" style="font-size: 0.83rem; color: {{ theme.colors.text_muted }}; margin-top: 2px;">
-          {{ theme.banner.sub }}
+
+        <div class="clock-badge">
+          <span style="font-size: 0.95rem;">{{ theme.icons.clock }}</span>
+          <span id="vn-live-clock" class="clock-time">--:--:--</span>
+          <span id="vn-live-date" class="clock-date" style="color: {{ theme.colors.text_muted }}; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
+          <span class="clock-zone">Giờ VN</span>
         </div>
       </div>
+
+      <div class="top-header-actions">
+        <button type="button" class="top-btn" onclick="toggleAiChatPopup()" style="background: {{ theme.colors.primary_gradient }}; border: 1px solid {{ theme.colors.border_focus }}; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px {{ theme.colors.primary_glow }};">
+          {{ theme.icons.bot }} Hỏi AI
+        </button>
+
+        {% if is_admin %}
+          <button type="button" class="top-btn" onclick="openThemePickerModal()" style="background: rgba(255,255,255,0.12); border: 1.5px solid var(--border-focus); color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+            🎨 Đổi Giao Diện
+          </button>
+          <span class="admin-badge" style="background: {{ theme.colors.primary_glow }}; border: 1.5px solid var(--border-focus); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+            👑 Admin
+          </span>
+          <a href="/admin-logout" class="top-btn" style="background: {{ theme.colors.primary_glow }}; color: {{ theme.colors.highlight }}; border: 1px solid var(--border-focus); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+            Thoát
+          </a>
+        {% else %}
+          <button type="button" class="top-btn" onclick="openAdminModal()" style="background: {{ theme.colors.card_bg }}; border: 1.5px solid {{ theme.colors.border }}; color: {{ theme.colors.text }}; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+            🔐 Quản Trị
+          </button>
+        {% endif %}
+      </div>
     </div>
-    <span class="seasonal-banner-badge" style="font-size: 0.78rem; font-weight: 700; background: {{ theme.colors.primary_gradient }}; color: #fff; padding: 4px 12px; border-radius: 20px; box-shadow: 0 2px 8px {{ theme.colors.primary_glow }};">
-      {{ theme.banner.badge }}
-    </span>
+
+    <!-- Hàng 2: Lời chúc & Không khí lễ hội theo mùa -->
+    <div class="unified-banner-body">
+      <div class="unified-banner-left">
+        <span class="seasonal-banner-icon">{{ theme.icons.main }}</span>
+        <div style="flex: 1;">
+          <div class="seasonal-banner-title">
+            <span>{{ theme.banner.title }}</span>
+            <span>{{ theme.icons.sub }}</span>
+          </div>
+          <div class="seasonal-banner-sub">
+            {{ theme.banner.sub }}
+          </div>
+        </div>
+      </div>
+      <span class="seasonal-banner-badge">
+        {{ theme.banner.badge }}
+      </span>
+    </div>
   </div>
 
   <header>
