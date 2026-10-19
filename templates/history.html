@@ -443,6 +443,7 @@
     <form action="/history" method="GET" class="filter-grid">
       <div class="form-group">
         <label>Lọc theo Kỳ (Hết tháng ngày 7):</label>
+        {% if is_admin %}
         <select name="cycle">
           <option value="{{ curr_cycle_key }}" {% if selected_cycle == curr_cycle_key %}selected{% endif %}>
             🌟 Kỳ Hiện Tại ({{ curr_cycle_label }})
@@ -460,6 +461,15 @@
           </optgroup>
           {% endif %}
         </select>
+        {% else %}
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="text" value="🌟 Kỳ Hiện Tại ({{ curr_cycle_label }})" readonly style="background: #100c22; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; color: #fed7aa; font-weight: 700; font-size: 0.9rem; flex: 1; cursor: not-allowed;" title="Nhân viên chỉ xem kỳ hiện tại">
+          <button type="button" onclick="openAdminModal()" style="white-space: nowrap; background: #1f183c; border: 1px solid #433872; color: #fca5a5; padding: 10px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;" title="Đăng nhập Admin để tra cứu các kỳ cũ hoặc toàn bộ lịch sử">
+            🔐 Mở khóa
+          </button>
+        </div>
+        <input type="hidden" name="cycle" value="{{ curr_cycle_key }}">
+        {% endif %}
       </div>
 
       <div class="form-group">
@@ -495,7 +505,9 @@
       <span style="font-size: 1.15rem;">📅</span>
       <span><strong>Quy định chu kỳ tháng:</strong> Đến <strong>hết ngày 7</strong> là chốt tháng. Từ <strong>ngày 8</strong> trở đi hệ thống tự động làm mới (reset) bảng về 0 ca nghỉ cho kỳ mới!</span>
     </div>
-    {% if selected_cycle != curr_cycle_key %}
+    {% if not is_admin %}
+      <span style="color: #94a3b8; font-size: 0.78rem;">🔒 <em>Chỉ Admin mới có quyền xem lại các kỳ cũ hoặc toàn bộ lịch sử</em></span>
+    {% elif selected_cycle != curr_cycle_key %}
       <a href="/history" style="color: #fb923c; font-weight: 800; text-decoration: underline; font-size: 0.8rem;">⬅️ Về Kỳ Hiện Tại</a>
     {% endif %}
   </div>

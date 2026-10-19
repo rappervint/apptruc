@@ -494,10 +494,13 @@ def history():
     today_str = today.strftime('%Y-%m-%d')
     curr_cycle_key, curr_cycle_label, curr_start_d, curr_end_d = get_leave_cycle(today)
 
-    # Mặc định: Lọc theo Kỳ hiện tại (từ ngày 8 gần nhất đến ngày 7 tiếp theo)
-    # Nếu người dùng chọn 'all': Xem toàn bộ lịch sử
+    admin_logged_in = is_admin()
+
+    # QUY ĐỊNH PHÂN QUYỀN:
+    # - Nhân viên thường: BẮT BUỘC chỉ xem Kỳ hiện tại (từ ngày 8 gần nhất đến ngày 7 tiếp theo).
+    # - Chỉ Admin: Mới được quyền chọn các kỳ cũ hoặc xem toàn bộ lịch sử ('all').
     selected_cycle = request.args.get('cycle')
-    if selected_cycle is None:
+    if not admin_logged_in or selected_cycle is None:
         selected_cycle = curr_cycle_key
 
     selected_member = request.args.get('member', '').strip()
