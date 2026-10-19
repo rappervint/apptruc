@@ -503,24 +503,24 @@
   <div style="margin-bottom: 14px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; padding: 10px 16px; font-size: 0.82rem; color: #fed7aa; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
     <div style="display: flex; align-items: center; gap: 8px;">
       <span style="font-size: 1.15rem;">📅</span>
-      <span><strong>Quy định chu kỳ tháng:</strong> Đến <strong>hết ngày 7</strong> là chốt tháng. Từ <strong>ngày 8</strong> trở đi hệ thống tự động làm mới (reset) bảng về 0 ca nghỉ cho kỳ mới!</span>
+      <span><strong>Quy định chu kỳ tháng:</strong> Ngày 7 hết tháng làm việc. Trong <strong>ngày 7 và ngày 8</strong>, nhân viên vẫn xem được kỳ vừa rồi để đối soát. Sang <strong>00:00 ngày 9</strong> hệ thống mới chính thức đóng kỳ cũ và làm mới (reset) bảng về 0 ca nghỉ!</span>
     </div>
     {% if not is_admin %}
       <span style="color: #94a3b8; font-size: 0.78rem;">🔒 <em>Chỉ Admin mới có quyền xem lại các kỳ cũ hoặc toàn bộ lịch sử</em></span>
     {% elif selected_cycle != curr_cycle_key %}
-      <a href="/history" style="color: #fb923c; font-weight: 800; text-decoration: underline; font-size: 0.8rem;">⬅️ Về Kỳ Hiện Tại</a>
+      <a href="/history" style="color: #fb923c; font-weight: 800; text-decoration: underline; font-size: 0.8rem;">⬅️ Về Kỳ Đang Xem</a>
     {% endif %}
   </div>
 
-  {% if is_cutoff_day %}
-  <!-- BANNER ĐẶC BIỆT DÀNH RIÊNG CHO NGÀY 7 ĐỂ ANH EM ĐỐI SOÁT PHẢN ÁNH -->
+  {% if is_review_phase %}
+  <!-- BANNER ĐẶC BIỆT DÀNH CHO GIAI ĐOẠN ĐỐI SOÁT (NGÀY 7 & NGÀY 8) -->
   <div style="margin-bottom: 18px; background: linear-gradient(135deg, rgba(234, 88, 12, 0.25), rgba(180, 83, 9, 0.35)); border: 1.5px solid #ea580c; border-radius: 12px; padding: 12px 18px; color: #ffedd5; box-shadow: 0 4px 18px rgba(234, 88, 12, 0.3);">
     <div style="display: flex; align-items: center; gap: 10px;">
       <span style="font-size: 1.5rem;">🔔</span>
       <div>
-        <strong style="font-size: 0.95rem; color: #fed7aa;">HÔM NAY LÀ NGÀY 7 (NGÀY CHỐT THÁNG):</strong>
+        <strong style="font-size: 0.95rem; color: #fed7aa;">HÔM NAY LÀ NGÀY {{ review_day }} (GIAI ĐOẠN ĐỐI SOÁT CUỐI THÁNG):</strong>
         <div style="font-size: 0.85rem; margin-top: 3px; color: #e2e8f0; line-height: 1.4;">
-          Anh em vui lòng kiểm tra kỹ lại toàn bộ danh sách ngày nghỉ của mình ở bảng bên dưới. Nếu thấy có sai sót hoặc thiếu/thừa ca nghỉ, <strong>hãy báo ngay cho Quản lý / Admin trong hôm nay</strong> trước khi bước sang ngày mai (ngày 8 - hệ thống sẽ làm mới cho tháng tiếp theo)!
+          Dù ngày 7 đã kết thúc tháng làm việc, anh em vẫn có trọn vẹn <strong>ngày 7 và ngày 8</strong> để kiểm tra kỹ lại toàn bộ danh sách ngày nghỉ của mình ở bảng bên dưới. Nếu thấy có sai sót hoặc thiếu/thừa ca nghỉ, <strong>hãy phản ánh ngay cho Quản lý / Admin</strong>! Đến <strong>đúng 00:00 ngày 9</strong>, hệ thống sẽ chính thức đóng kỳ cũ và làm mới bảng cho kỳ tiếp theo.
         </div>
       </div>
     </div>

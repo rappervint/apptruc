@@ -458,10 +458,8 @@ def index():
 
 def get_leave_cycle(d):
     """
-    Quy định chu kỳ tháng của cửa hàng:
-    - Ngày 7 hàng tháng là hết tháng.
-    - Chu kỳ tháng: từ ngày 8 tháng trước đến hết ngày 7 tháng này.
-    - Sau ngày 7 (từ ngày 8 trở đi): Tự động bắt đầu chu kỳ mới (reset lại số ngày nghỉ).
+    Quy định chu kỳ tháng của ca nghỉ:
+    - Bắt đầu từ ngày 8 tháng trước đến hết ngày 7 tháng này.
     Trả về: (cycle_key, cycle_label, start_date, end_date)
     """
     if d.day >= 8:
@@ -485,19 +483,50 @@ def get_leave_cycle(d):
     cycle_label = f"Kỳ {start_d.strftime('%d/%m')} - {end_d.strftime('%d/%m/%Y')}"
     return cycle_key, cycle_label, start_d, end_d
 
+def get_current_view_cycle(today):
+    """
+    Quy định hiển thị bảng cho nhân viên:
+    - Đến ngày 7 là hết tháng làm việc.
+    - Trong ngày 7 và cả ngày 8: Nhân viên vẫn được xem bảng ngày nghỉ của kỳ vừa rồi để đối soát, phản ánh nếu có sai sót.
+    - Sang 00:00 ngày 9: Bảng của kỳ cũ chính thức khép lại và ẩn đi đối với nhân viên thường (chỉ Admin mới xem lại được),
+      và bảng của nhân viên tự động làm mới (reset về 0 ngày nghỉ) để tích lũy cho chu kỳ mới!
+    """
+    if today.day <= 8:
+        # Vẫn xem kỳ kết thúc vào ngày 7 tháng này
+        if today.month == 1:
+            start_d = date(today.year - 1, 12, 8)
+            end_d = date(today.year, 1, 7)
+            cycle_key = f"{today.year-1}-12"
+        else:
+            start_d = date(today.year, today.month - 1, 8)
+            end_d = date(today.year, today.month, 7)
+            cycle_key = f"{today.year}-{today.month-1:02d}"
+    else:
+        # Từ ngày 9 trở đi: Sang chu kỳ mới bắt đầu từ ngày 8 tháng này
+        start_d = date(today.year, today.month, 8)
+        if today.month == 12:
+            end_d = date(today.year + 1, 1, 7)
+            cycle_key = f"{today.year}-12"
+        else:
+            end_d = date(today.year, today.month + 1, 7)
+            cycle_key = f"{today.year}-{today.month:02d}"
+
+    cycle_label = f"Kỳ {start_d.strftime('%d/%m')} - {end_d.strftime('%d/%m/%Y')}"
+    return cycle_key, cycle_label, start_d, end_d
+
 @app.route('/history')
 def history():
-    """Trang tra cứu lịch sử xin nghỉ theo chu kỳ cửa hàng (hết tháng vào ngày 7)"""
+    """Trang tra cứu lịch sử xin nghỉ theo chu kỳ cửa hàng (reset vào 00:00 ngày 9)"""
     cleanup_and_advance_checkpoint()
     
     today = get_vn_today()
     today_str = today.strftime('%Y-%m-%d')
-    curr_cycle_key, curr_cycle_label, curr_start_d, curr_end_d = get_leave_cycle(today)
+    curr_cycle_key, curr_cycle_label, curr_start_d, curr_end_d = get_current_view_cycle(today)
 
     admin_logged_in = is_admin()
 
     # QUY ĐỊNH PHÂN QUYỀN:
-    # - Nhân viên thường: BẮT BUỘC chỉ xem Kỳ hiện tại (từ ngày 8 gần nhất đến ngày 7 tiếp theo).
+    # - Nhân viên thường: BẮT BUỘC chỉ xem Kỳ hiển thị hiện hành (ngày 7 & 8 vẫn xem kỳ vừa rồi, 00:00 ngày 9 mới reset kỳ mới).
     # - Chỉ Admin: Mới được quyền chọn các kỳ cũ hoặc xem toàn bộ lịch sử ('all').
     selected_cycle = request.args.get('cycle')
     if not admin_logged_in or selected_cycle is None:
@@ -648,7 +677,8 @@ def history():
                            stats_by_member=stats_by_member,
                            total_leaves=len(history_list),
                            is_admin=is_admin(),
-                           is_cutoff_day=(today.day == 7),
+                           is_review_phase=(today.day in [7, 8]),
+                           review_day=today.day,
                            audit_logs=audit_logs)
 
 @app.route('/admin-login', methods=['POST'])
