@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+  <title>Lịch Trực Vệ Sinh 7H30 & Quản Lý Nghỉ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #f97316;
+      --primary-gradient: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+      --accent-gradient: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+      --today-gradient: linear-gradient(135deg, #c2410c 0%, #ea580c 55%, #7c2d12 100%);
+      --tomorrow-gradient: linear-gradient(135deg, #581c87 0%, #7e22ce 55%, #3b0764 100%);
+      --bg: #0b0914;
+      --card-bg: #151128;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #2e2652;
+      --border-focus: #f97316;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.4);
+      --shadow-md: 0 6px 18px rgba(0,0,0,0.5);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.7), 0 0 20px rgba(249, 115, 22, 0.2);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+    }
+
+    body {
+      background: radial-gradient(circle at 15% 15%, rgba(126, 34, 206, 0.2) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 85%, rgba(234, 88, 12, 0.18) 0%, transparent 45%),
+                  radial-gradient(circle at 50% 50%, rgba(88, 28, 135, 0.12) 0%, transparent 60%),
+                  #0b0914;
+      background-attachment: fixed;
+      color: var(--text);
+      padding: 12px 14px;
+      max-width: 860px;
+      margin: 0 auto;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Halloween Animations */
+    @keyframes eerieFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(2deg); }
+    }
+    .spooky-float {
+      display: inline-block;
+      animation: eerieFloat 3.5s ease-in-out infinite;
+    }
+    @keyframes spookyGlow {
+      0%, 100% { text-shadow: 0 0 10px rgba(249, 115, 22, 0.5), 0 0 24px rgba(249, 115, 22, 0.25); }
+      50% { text-shadow: 0 0 18px rgba(249, 115, 22, 0.85), 0 0 36px rgba(249, 115, 22, 0.45); }
+    }
+    .halloween-glow-text {
+      animation: spookyGlow 3s ease-in-out infinite;
+    }
+
+    /* Top Bar Header */
+    .top-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 10px 16px;
+      background: rgba(21, 17, 40, 0.92);
+      backdrop-filter: blur(10px);
+      border-radius: 30px;
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 15px rgba(249, 115, 22, 0.15);
+    }
+    .brand-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: #fb923c;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+    }
+    .clock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #120e24;
+      border: 1px solid #3d3368;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: #fed7aa;
+    }
+    .clock-badge .clock-time {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #fb923c;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.5px;
+    }
+    .clock-badge .clock-zone {
+      font-size: 0.68rem;
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+      color: #fff;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
+    /* Page Header */
+    header {
+      text-align: center;
+      margin-bottom: 22px;
+      animation: fadeInDown 0.35s ease-out;
+    }
+    h1 {
+      font-size: 1.65rem;
+      color: #ffedd5;
+      margin-bottom: 4px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+
+    /* Tab Navigation */
+    .tab-container {
+      display: flex;
+      background: #110d22;
+      padding: 5px;
+      border-radius: 14px;
+      margin-bottom: 22px;
+      gap: 5px;
+      border: 1px solid #2d254f;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px 14px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+    }
+    .tab-btn:hover {
+      color: #fed7aa;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(234, 88, 12, 0.45);
+      transform: translateY(-1px);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .tab-badge {
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 12px;
+      background: #7c2d12;
+      color: #fed7aa;
+      font-weight: 700;
+    }
+    .tab-badge.badge-alert {
+      background: #dc2626;
+      color: #fff;
+      animation: pulseAlert 2s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.08); }
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active {
+      display: block;
+      animation: tabFadeIn 0.25s ease-out;
+    }
+
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Cards (Hôm nay / Ngày mai) */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 540px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+
+    .hero-card {
+      position: relative;
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      color: #fff;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .hero-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(249, 115, 22, 0.35);
+    }
+    .hero-today {
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 55%, #7c2d12 100%);
+      border: 1px solid rgba(253, 186, 116, 0.45);
+      box-shadow: 0 10px 30px rgba(234, 88, 12, 0.4), 0 0 20px rgba(249, 115, 22, 0.25);
+    }
+    .hero-tomorrow {
+      background: linear-gradient(135deg, #581c87 0%, #7e22ce 55%, #3b0764 100%);
+      border: 1px solid rgba(216, 180, 254, 0.4);
+      box-shadow: 0 10px 30px rgba(126, 34, 206, 0.4), 0 0 20px rgba(168, 85, 247, 0.25);
+    }
+    .hero-label {
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.95;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      color: #fed7aa;
+    }
+    .hero-tomorrow .hero-label {
+      color: #e9d5ff;
+    }
+    .hero-name {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 16px rgba(255,255,255,0.2);
+    }
+    .hero-meta {
+      font-size: 0.88rem;
+      opacity: 0.92;
+      font-weight: 600;
+      color: #ffedd5;
+    }
+    .hero-tomorrow .hero-meta {
+      color: #f3e8ff;
+    }
+    .hero-alert {
+      margin-top: 10px;
+      padding: 6px 10px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(4px);
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .badge-holiday-box {
+      background: rgba(185, 28, 28, 0.85);
+      color: #fee2e2;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      margin-top: 6px;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+
+    /* Action bar shortcuts */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 1.08rem;
+      font-weight: 800;
+      margin: 24px 0 12px;
+      color: #fed7aa;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-shadow: 0 0 8px rgba(249, 115, 22, 0.25);
+    }
+
+    /* Cards & Action Box */
+    .action-box {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 22px;
+      border: 1px solid var(--border);
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-md);
+      transition: box-shadow 0.2s ease;
+    }
+    .action-box:hover {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(249, 115, 22, 0.1);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    label {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    select, input[type="date"], input[type="text"] {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+      background: #0f0c1e;
+      color: var(--text);
+    }
+    select:focus, input[type="date"]:focus, input[type="text"]:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.28);
+    }
+    select option, optgroup {
+      background: #151128;
+      color: #f8fafc;
+    }
+
+    /* Date Picker Card & Range Grid */
+    .date-picker-card {
+      background: #110d22;
+      border: 1.5px solid #332a5a;
+      border-radius: 12px;
+      padding: 14px 14px 12px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .date-range-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .date-range-grid .form-group {
+      margin-bottom: 0;
+      min-width: 0;
+    }
+    .date-range-grid label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .date-range-grid input[type="date"] {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+      height: 44px;
+      padding: 10px 12px;
+      border: 1.5px solid #3d3368;
+      border-radius: var(--radius-sm);
+      background: #0f0c1e;
+      color: var(--text);
+    }
+    .date-range-grid input[type="date"]::-webkit-date-and-time-value {
+      text-align: left;
+    }
+
+    /* Quick Suggestion Chips */
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .chip {
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #1f1839;
+      border: 1px solid #433672;
+      padding: 5px 11px;
+      border-radius: 18px;
+      cursor: pointer;
+      color: #fed7aa;
+      transition: all 0.15s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .chip:hover {
+      background: #ea580c;
+      color: #ffffff;
+      border-color: #f97316;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.45);
+      transform: translateY(-1px);
+    }
+    .chip:active {
+      transform: scale(0.96);
+      background: #c2410c;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 18px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: scale(0.99);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.45);
+      border: 1px solid rgba(248, 113, 113, 0.4);
+    }
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(234, 88, 12, 0.45);
+      border: 1px solid rgba(253, 186, 116, 0.4);
+    }
+    .btn-dark {
+      background: #1f1839;
+      color: #e2e8f0;
+      border: 1px solid #433672;
+    }
+    .btn-light {
+      background: #1b1534;
+      color: #fed7aa;
+      border: 1.5px solid #3d3368;
+    }
+    .btn-light:hover {
+      background: #251d46;
+      border-color: #ea580c;
+    }
+    .cancel-btn {
+      background: rgba(220, 38, 38, 0.25);
+      border: 1px solid rgba(248, 113, 113, 0.5);
+      color: #fca5a5;
+      padding: 4px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 700;
+      transition: all 0.18s ease;
+    }
+    .cancel-btn:hover {
+      background: rgba(220, 38, 38, 0.45);
+      color: #fff;
+    }
+
+    /* Alert Boxes */
+    .alert-box {
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      animation: alertFadeIn 0.22s ease-out;
+      box-sizing: border-box;
+      word-break: break-word;
+      width: 100%;
+    }
+    @keyframes alertFadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.16);
+      border: 1.5px solid rgba(245, 158, 11, 0.45);
+      color: #fef3c7;
+    }
+    .alert-danger {
+      background: rgba(220, 38, 38, 0.2);
+      border: 1.5px solid rgba(239, 68, 68, 0.5);
+      color: #fee2e2;
+    }
+    .alert-info {
+      background: rgba(147, 51, 234, 0.2);
+      border: 1.5px solid rgba(168, 85, 247, 0.5);
+      color: #f3e8ff;
+    }
+    .alert-success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1.5px solid rgba(16, 185, 129, 0.5);
+      color: #d1fae5;
+    }
+
+    /* Tables */
+    .table-container {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    th {
+      background: #110d22;
+      color: #fb923c;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      text-shadow: 0 0 6px rgba(249, 115, 22, 0.3);
+    }
+    tr {
+      transition: background-color 0.15s ease;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background-color: rgba(249, 115, 22, 0.08); }
+    tr.tr-conflict { background-color: rgba(180, 83, 9, 0.22) !important; }
+
+    /* Tags & Badges */
+    .tag-duty {
+      background: rgba(234, 88, 12, 0.2);
+      color: #fdba74;
+      border: 1px solid rgba(234, 88, 12, 0.5);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 800;
+      display: inline-block;
+      font-size: 0.92rem;
+      box-shadow: 0 0 8px rgba(234, 88, 12, 0.25);
+    }
+    .tag-leave {
+      background: rgba(225, 29, 72, 0.25);
+      color: #fca5a5;
+      border: 1px solid rgba(225, 29, 72, 0.5);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-block;
+      margin: 2px 0;
+    }
+    .tag-shift-auto {
+      background: rgba(147, 51, 234, 0.25);
+      color: #e9d5ff;
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      display: inline-block;
+      margin-top: 3px;
+    }
+    .tag-nonduty {
+      background: rgba(234, 179, 8, 0.22);
+      color: #fde047;
+      border: 1px solid rgba(234, 179, 8, 0.4);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-first {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1.5px solid rgba(16, 185, 129, 0.5);
+      color: #6ee7b7;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-later {
+      background: rgba(239, 68, 68, 0.22);
+      border: 1.5px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-block;
+      line-height: 1.35;
+    }
+    .badge-ok {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      padding: 4px 9px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    /* Collapsible Holiday Box */
+    details.holiday-settings {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    details.holiday-settings summary {
+      padding: 16px 20px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fed7aa;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      list-style: none;
+      transition: background 0.2s ease;
+    }
+    details.holiday-settings summary::-webkit-details-marker { display: none; }
+    details.holiday-settings summary:hover { background: #1c1635; }
+    details.holiday-settings summary::after {
+      content: "➕";
+      font-size: 0.85rem;
+      transition: transform 0.2s ease;
+    }
+    details.holiday-settings[open] summary::after {
+      content: "➖";
+    }
+    details.holiday-settings .holiday-content {
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+      animation: tabFadeIn 0.2s ease;
+    }
+
+    /* Floating Chat Bubble & Popup Window */
+    .ai-fab-btn {
+      position: fixed !important;
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+      right: calc(16px + env(safe-area-inset-right, 0px)) !important;
+      height: 52px !important;
+      padding: 0 16px 0 12px !important;
+      border-radius: 30px !important;
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #7c2d12 100%) !important;
+      color: #ffffff !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      box-shadow: 0 6px 24px rgba(234, 88, 12, 0.65), 0 0 20px rgba(249, 115, 22, 0.4) !important;
+      cursor: pointer !important;
+      z-index: 99999 !important;
+      border: 2.5px solid #fed7aa !important;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease !important;
+      user-select: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      touch-action: manipulation !important;
+      animation: fabPulse 3s infinite ease-in-out;
+    }
+    .ai-fab-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+      display: inline-block;
+      animation: eerieFloat 3s ease-in-out infinite;
+    }
+    .ai-fab-text {
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+    @keyframes fabPulse {
+      0%, 100% { box-shadow: 0 6px 20px rgba(234, 88, 12, 0.55), 0 0 15px rgba(249, 115, 22, 0.3); }
+      50% { box-shadow: 0 8px 30px rgba(249, 115, 22, 0.8), 0 0 0 7px rgba(249, 115, 22, 0.22); }
+    }
+    .ai-fab-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 10px 32px rgba(249, 115, 22, 0.85) !important;
+    }
+    .ai-fab-btn:active {
+      transform: scale(0.94);
+    }
+    .ai-fab-badge {
+      position: absolute;
+      top: -2px;
+      right: 2px;
+      width: 13px;
+      height: 13px;
+      background: #22c55e;
+      border-radius: 50%;
+      border: 2px solid #151128;
+    }
+
+    .ai-chat-popup {
+      display: none;
+      position: fixed !important;
+      bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+      right: calc(16px + env(safe-area-inset-right, 0px)) !important;
+      width: 360px !important;
+      max-width: calc(100vw - 32px) !important;
+      height: 500px !important;
+      max-height: calc(100vh - 100px) !important;
+      background: #140f28 !important;
+      border-radius: 18px !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(249, 115, 22, 0.25) !important;
+      border: 1.5px solid #433672 !important;
+      z-index: 999999 !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    
+    @media (max-width: 600px) {
+      .ai-chat-popup {
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        min-height: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        position: fixed !important;
+        z-index: 999999 !important;
+      }
+      .ai-popup-header {
+        padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px !important;
+      }
+      .ai-popup-footer {
+        padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+      .action-box {
+        padding: 16px 14px;
+        border-radius: 14px;
+        margin-bottom: 18px;
+      }
+      .date-picker-card {
+        padding: 12px 10px 10px;
+      }
+      .date-range-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+      }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92) translateY(12px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .ai-popup-header {
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 55%, #7c2d12 100%);
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(253, 186, 116, 0.3);
+    }
+    .ai-popup-messages {
+      flex: 1;
+      padding: 12px 14px;
+      overflow-y: auto;
+      background: #0d0a1b;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .ai-popup-footer {
+      padding: 10px 12px;
+      background: #140f28;
+      border-top: 1px solid #332a5a;
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar với Đồng hồ thời gian thực Giờ Việt Nam & Nút Admin -->
+  <div class="top-header-bar">
+    <div class="brand-title">
+      <span class="spooky-float">🎃</span>
+      <span>Cửa Hàng • Halloween 2026</span>
+      <span class="spooky-float">🦇</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="clock-badge">
+        <span style="font-size: 0.95rem;">🕯️</span>
+        <span id="vn-live-clock" class="clock-time">--:--:--</span>
+        <span id="vn-live-date" style="color: #cbd5e1; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
+        <span class="clock-zone">Giờ VN</span>
+      </div>
+
+      <button type="button" onclick="toggleAiChatPopup()" style="background: linear-gradient(135deg, #c2410c, #ea580c); border: 1px solid #f97316; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(234,88,12,0.45);">
+        🎃 Hỏi AI
+      </button>
+
+      {% if is_admin %}
+        <span style="background: rgba(220, 38, 38, 0.25); border: 1.5px solid #ef4444; color: #fca5a5; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+          👑 Admin
+        </span>
+        <a href="/admin-logout" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+          Thoát
+        </a>
+      {% else %}
+        <button type="button" onclick="openAdminModal()" style="background: #1e1837; border: 1.5px solid #433872; color: #e2e8f0; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+          🔐 Quản Trị
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <header>
+    {% if active_tab == 'leaves' %}
+      <h1 id="page-title" class="halloween-glow-text">🎃 HÔM NAY AI NGHỈ 👻</h1>
+      <p class="subtitle" id="page-subtitle">
+        {% if today_leaves %}
+          Hôm nay có: <strong style="color:#f87171;">{{ today_leaves | map(attribute="member_name") | join(", ") }}</strong> xin nghỉ
+        {% else %}
+          Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🍬)
+        {% endif %}
+      </p>
+    {% else %}
+      <h1 id="page-title" class="halloween-glow-text">🎃 HÔM NAY AI TRỰC 🦇</h1>
+      <p class="subtitle" id="page-subtitle">Người trực chính 7h30: <strong style="color:#fdba74;">{{ today_duty.assigned if today_duty else '---' }}</strong> 🧹</p>
+    {% endif %}
+  </header>
+
+  <!-- TAB SWITCHER -->
+  <div class="tab-container">
+    <button type="button" class="tab-btn active" id="tab-btn-schedule" onclick="switchTab('schedule')">
+      📅 Lịch Trực Vệ Sinh 🧹
+    </button>
+    <button type="button" class="tab-btn" id="tab-btn-leaves" onclick="switchTab('leaves')">
+      📝 Xin Nghỉ & Lịch Nghỉ 🎃
+      {% if future_leaves_count > 0 %}
+        <span class="tab-badge {% if has_any_conflict %}badge-alert{% endif %}">{{ future_leaves_count }}</span>
+      {% endif %}
+    </button>
+    <a href="/history" class="tab-btn" style="color: #cbd5e1;">
+      📜 Lịch Sử Nghỉ ↗ 🦇
+    </a>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 1: LỊCH TRỰC VỆ SINH                                           -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="tab-content active" id="tab-content-schedule">
+    
+    <!-- Hai thẻ to trọng tâm cho hôm nay và ngày mai -->
+    <div class="cards-grid">
+      <div class="hero-card hero-today">
+        <div>
+          <div class="hero-label">🎃 Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
+          {% if today_duty and today_duty.is_holiday %}
+            <div class="badge-holiday-box">{{ today_duty.holiday_reason }}</div>
+          {% elif today_duty and today_duty.assigned %}
+            <div class="hero-name">{{ today_duty.assigned }}</div>
+            <div class="hero-meta">{{ today_duty.weekday_vn }} • 7h30 sáng</div>
+          {% else %}
+            <div class="hero-name">---</div>
+          {% endif %}
+        </div>
+        {% if today_duty and today_duty.skipped_for_duty %}
+          <div class="hero-alert">
+            ⚡ Đã đôn ca (do {% for s in today_duty.skipped_for_duty %}{{ s.member_name }}{% if not loop.last %}, {% endif %}{% endfor %} xin nghỉ)
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="hero-card hero-tomorrow">
+        <div>
+          <div class="hero-label">🦇 Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
+          {% if tomorrow_duty and tomorrow_duty.is_holiday %}
+            <div class="badge-holiday-box">{{ tomorrow_duty.holiday_reason }}</div>
+          {% elif tomorrow_duty and tomorrow_duty.assigned %}
+            <div class="hero-name">{{ tomorrow_duty.assigned }}</div>
+            <div class="hero-meta">{{ tomorrow_duty.weekday_vn }} • 7h30 sáng</div>
+          {% else %}
+            <div class="hero-name">---</div>
+          {% endif %}
+        </div>
+        {% if tomorrow_duty and tomorrow_duty.skipped_for_duty %}
+          <div class="hero-alert">
+            ⚡ Đã đôn ca (do {% for s in tomorrow_duty.skipped_for_duty %}{{ s.member_name }}{% if not loop.last %}, {% endif %}{% endfor %} xin nghỉ)
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Phím tắt nhanh -->
+    <div class="action-bar">
+      <a href="/history" class="btn btn-light" style="width: auto; padding: 10px 16px; font-size: 0.88rem;">
+        📜 Xem Lịch Sử Nghỉ Toàn Cửa Hàng
+      </a>
+      <button type="button" onclick="switchTab('leaves')" class="btn btn-primary" style="width: auto; padding: 10px 18px; font-size: 0.9rem;">
+        ➕ Bạn muốn xin nghỉ? Bấm vào đây
+      </button>
+    </div>
+
+    <!-- Bảng danh sách lịch dự kiến 21 ngày tới -->
+    <div class="section-title">
+      <span>Lịch Dự Kiến Các Ngày Tới</span>
+      <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">8 anh em xoay tua vòng tròn</span>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Ngày</th>
+            <th>Trực chính (7h30)</th>
+            <th>Ghi chú & Người xin nghỉ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in schedule %}
+          <tr {% if row.leaves and row.leaves|length > 1 %}class="tr-conflict"{% endif %}>
+            <td style="white-space: nowrap;">
+              <strong>{{ row.display_date }}</strong><br>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">{{ row.weekday_vn }}</span>
+            </td>
+            <td>
+              {% if row.is_holiday %}
+                <span style="background: #fef2f2; color: #b91c1c; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.88rem;">{{ row.holiday_reason }}</span>
+              {% else %}
+                <span class="tag-duty">{{ row.assigned }}</span>
+                {% if row.skipped_for_duty %}
+                  <br><span class="tag-shift-auto">⚡ Đã đôn ca thay thế</span>
+                {% endif %}
+              {% endif %}
+            </td>
+            <td>
+              {% if row.leaves %}
+                {% for l in row.leaves %}
+                  <div class="tag-leave">
+                    🏖️ <strong>{{ l.member_name }}</strong>{% if not l.is_duty_member %} <span class="tag-nonduty">Không trực</span>{% elif row.leaves|length > 1 %} <span style="font-size:0.75rem; font-weight:700; color:{% if l.is_first %}#16a34a{% else %}#dc2626{% endif %};">({% if l.is_first %}Xin trước{% else %}Xin sau{% endif %})</span>{% endif %}: {{ l.reason }}
+                  </div>
+                {% endfor %}
+                {% if row.leaves|length > 1 %}
+                  <div style="font-size: 0.78rem; color: #dc2626; font-weight: 700; margin-top: 3px;">
+                    ⚠️ Trùng lịch: <strong>{{ row.leaves[0].member_name }}</strong> đã xin nghỉ trước
+                  </div>
+                {% endif %}
+              {% else %}
+                <span style="color: #cbd5e1;">-</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Cài đặt ngày nghỉ của tiệm (dạng thu gọn collapsible) -->
+    <details class="holiday-settings">
+      <summary>
+        {% if is_admin %}
+          ⚙️ Cài đặt ngày tiệm đóng cửa / Nghỉ lễ (Quyền Admin)
+        {% else %}
+          🏢 Xem lịch ngày tiệm đóng cửa / Nghỉ lễ
+        {% endif %}
+      </summary>
+      <div class="holiday-content">
+        {% if is_admin %}
+          <form action="/add-holiday" method="POST" style="margin-top: 16px;">
+            <div class="date-picker-card" style="margin-top: 14px;">
+              <div class="date-range-grid">
+                <div class="form-group">
+                  <label>📅 Từ ngày:</label>
+                  <input type="date" name="start_date" id="holiday_start_date" required onchange="syncHolidayEndDate()">
+                </div>
+                <div class="form-group">
+                  <label>📅 Đến ngày <span style="font-weight: normal; color: #64748b; font-size: 0.8rem;">(chọn nếu nghỉ nhiều ngày)</span>:</label>
+                  <input type="date" name="end_date" id="holiday_end_date">
+                </div>
+              </div>
+              <div class="quick-chips" style="margin-top: 10px;">
+                <span class="chip" onclick="setQuickHolidayRange(1)">⚡ 1 ngày</span>
+                <span class="chip" onclick="setQuickHolidayRange(2)">✨ 2 ngày</span>
+                <span class="chip" onclick="setQuickHolidayRange(3)">🌟 3 ngày</span>
+                <span class="chip" onclick="setQuickHolidayRange(7)">🧧 Nghỉ Tết (7 ngày)</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Lý do nghỉ (Tùy chọn):</label>
+              <input type="text" name="reason" placeholder="VD: Nghỉ Tết Âm Lịch, Du lịch công ty, Lễ 30/4 - 1/5...">
+            </div>
+            <button type="submit" class="btn btn-dark" style="width: auto; padding: 10px 22px;">
+              ➕ Lưu Các Ngày Tiệm Nghỉ
+            </button>
+          </form>
+        {% else %}
+          <div style="padding: 12px 16px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; margin-top: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 0.88rem; color: #475569; display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.15rem;">🔒</span>
+              <span>Chỉ <strong>Quản trị viên (Admin)</strong> mới có quyền cài đặt hoặc xóa ngày tiệm đóng cửa.</span>
+            </div>
+            <button type="button" class="btn btn-light" style="padding: 5px 12px; font-size: 0.78rem; width: auto;" onclick="openAdminModal()">
+              🔑 Đăng nhập Admin
+            </button>
+          </div>
+        {% endif %}
+
+        {% if holidays_list %}
+        <div style="margin-top: 22px; border-top: 1px dashed var(--border); padding-top: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 0.88rem; font-weight: 800; color: #1e293b;">
+              📌 Danh sách các ngày tiệm đã cài đặt đóng cửa ({{ holidays_list|length }} ngày):
+            </div>
+            {% if is_admin %}
+            <form action="/clear-all-holidays" method="POST" style="margin: 0;" onsubmit="return confirm('⚠️ CẢNH BÁO ADMIN: Bạn có chắc chắn muốn XÓA TẤT CẢ {{ holidays_list|length }} ngày đóng cửa của tiệm và mở lại hoạt động cho toàn bộ các ngày này không?')">
+              <button type="submit" class="cancel-btn" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 10px; font-size: 0.76rem; font-weight: 700; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Xóa toàn bộ các ngày nghỉ tiệm đang cài đặt">
+                🗑️ Xóa tất cả ({{ holidays_list|length }} ngày)
+              </button>
+            </form>
+            {% endif %}
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            {% for h in holidays_list %}
+            <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px;">
+              <div>
+                <strong style="color: #b91c1c;">📅 {{ h.holiday_date }}</strong>
+                <span style="color: #475569; font-size: 0.86rem; margin-left: 8px;">— {{ h.reason }}</span>
+              </div>
+              {% if is_admin %}
+              <form action="/remove-holiday" method="POST" style="margin: 0;" onsubmit="return confirm('Mở lại hoạt động cho ngày {{ h.holiday_date }}?')">
+                <input type="hidden" name="holiday_date" value="{{ h.holiday_date }}">
+                <button type="submit" class="cancel-btn" style="padding: 2px 8px; font-size: 0.74rem;">Xóa</button>
+              </form>
+              {% else %}
+              <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 700; background: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">🔒 Đóng cửa</span>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+          {% if not is_admin %}
+          <div style="text-align: center; padding: 16px; color: #94a3b8; font-size: 0.85rem;">
+            Hiện tiệm chưa có ngày nghỉ lễ hoặc đóng cửa nào sắp tới.
+          </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </details>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 2: XIN NGHỈ & THEO DÕI NGHỈ                                     -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-content-leaves">
+
+    <!-- FORM XIN NGHỈ -->
+    <div class="action-box">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+        <h2 style="font-size: 1.15rem; font-weight: 800; color: #fb923c; display: flex; align-items: center; gap: 8px; margin: 0; text-shadow: 0 0 10px rgba(249,115,22,0.4);">
+          <span>🎃</span> ĐĂNG KÝ XIN NGHỈ
+        </h2>
+        <div style="font-size: 0.78rem; font-weight: 700; color: #fed7aa; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.45); padding: 4px 10px; border-radius: 20px;">
+          ⚠️ Không nhận xin nghỉ Hôm nay, Ngày mai & Ngày mốt
+        </div>
+      </div>
+
+      <form action="/report-leave" method="POST" id="leave-form" onsubmit="return validateLeaveForm(event)">
+        <div class="form-group">
+          <label>👤 Chọn người xin nghỉ:</label>
+          <select name="member_name" id="member_select" required onchange="checkLiveConflict()">
+            <optgroup label="Anh em trực nhật 7h30 (8 người)">
+              {% for m in duty_members %}
+                <option value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </optgroup>
+            <optgroup label="Nhân sự không trực nhật (2 người)">
+              {% for m in non_duty_staff %}
+                <option value="{{ m }}">{{ m }} (Không trực nhật)</option>
+              {% endfor %}
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="date-picker-card">
+          <div style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+            <span>📌</span>
+            <span>Ngày đăng ký sớm nhất có thể nhận: <strong style="color: #fb923c;">{{ min_leave_date_display }}</strong> (cách 3 ngày để xếp trực nhật).</span>
+          </div>
+          <div class="date-range-grid">
+            <div class="form-group">
+              <label>📅 Từ ngày:</label>
+              <input type="date" name="leave_date" id="leave_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{{ min_leave_date_str }}" required onchange="syncLeaveEndDate(); checkLiveConflict();">
+            </div>
+            <div class="form-group">
+              <label>📅 Đến ngày <span style="font-weight: normal; color: #94a3b8; font-size: 0.8rem;">(chọn nếu nghỉ nhiều ngày)</span>:</label>
+              <input type="date" name="end_date" id="leave_end_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{{ min_leave_date_str }}" onchange="checkLiveConflict();">
+            </div>
+          </div>
+          <div class="quick-chips" style="margin-top: 10px;">
+            <span class="chip" onclick="setQuickLeaveDays(1)">⚡ 1 ngày</span>
+            <span class="chip" onclick="setQuickLeaveDays(2)">✨ 2 ngày liên tiếp</span>
+            <span class="chip" onclick="setQuickLeaveDays(3)">🌟 3 ngày liên tiếp</span>
+            <span class="chip" onclick="setQuickLeaveOffset(3, 1)">🎃 Sau 3 ngày</span>
+            <span class="chip" onclick="setQuickLeaveNextWeek()">🗓️ Thứ Hai tuần sau</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>📝 Lý do xin nghỉ (để anh em sắp xếp công việc):</label>
+          <input type="text" name="reason" id="leave_reason_input" placeholder="VD: Về quê, Đám tiệc, Khám bệnh, Việc gia đình..." value="Việc cá nhân" required>
+          <div class="quick-chips" style="margin-top: 6px;">
+            <span class="chip" onclick="setReason('Về quê')">🏠 Về quê</span>
+            <span class="chip" onclick="setReason('Việc gia đình')">👨‍👩‍👧 Việc gia đình</span>
+            <span class="chip" onclick="setReason('Đám tiệc')">🎉 Đám tiệc</span>
+            <span class="chip" onclick="setReason('Khám bệnh')">🏥 Khám bệnh</span>
+          </div>
+        </div>
+
+        <!-- VÙNG CẢNH BÁO TRỰC TIẾP (LIVE CONFLICT ALERT) -->
+        <div id="live-alert-container" style="display: none;"></div>
+
+        <button type="submit" class="btn btn-danger" style="margin-top: 6px;">
+          🚀 Xác Nhận Xin Nghỉ & Cập Nhật Lịch
+        </button>
+      </form>
+    </div>
+
+    <!-- BẢNG LIỆT KÊ TẤT CẢ CÁC CA XIN NGHỈ HIỆN HÀNH -->
+    <div class="section-title">
+      <div>
+        <span>📋 Bảng Theo Dõi Nghỉ (Hiện Tại & Sắp Tới)</span>
+        <div style="font-size: 0.8rem; font-weight: 500; color: #4ade80; margin-top: 2px;">
+          ✨ Tự động chuyển vào Lịch sử và xóa khỏi bảng khi đã qua ngày để tránh rối mắt
+        </div>
+      </div>
+      <span style="font-size: 0.82rem; font-weight: 800; color: #fed7aa; background: #1c1635; padding: 4px 12px; border-radius: 20px; border: 1px solid #3d3368;">
+        {{ leaves_summary|length }} ca sắp tới
+      </span>
+    </div>
+
+    <div class="table-container">
+      {% if leaves_summary %}
+      <table>
+        <thead>
+          <tr>
+            <th>Ngày nghỉ</th>
+            <th>Người nghỉ</th>
+            <th>Lý do</th>
+            <th>Trạng thái trùng ngày</th>
+            <th>Ảnh hưởng ca trực</th>
+            <th style="text-align: center;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in leaves_summary %}
+          <tr {% if item.has_conflict %}class="tr-conflict"{% endif %}>
+            <td style="white-space: nowrap;">
+              <strong>{{ item.display_date }}</strong><br>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.weekday_vn }}</span>
+            </td>
+            <td>
+              <strong style="font-size: 1rem; color: #fed7aa;">{{ item.member_name }}</strong>
+              {% if not item.is_duty_member %}
+                <span class="tag-nonduty" style="margin-left: 4px;">Không trực</span>
+              {% endif %}
+              {% if item.created_at %}
+                <br><span style="font-size: 0.75rem; color: #94a3b8;">Nộp lúc: {{ item.created_at }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <span>{{ item.reason }}</span>
+            </td>
+            <td>
+              {% if item.has_conflict %}
+                {% if item.is_first %}
+                  <div class="badge-first">
+                    🥇 <strong>ĐÃ XIN NGHỈ TRƯỚC</strong>
+                    {% if item.later_names_str %}
+                      <div style="font-size: 0.74rem; color: #86efac; font-weight: normal; margin-top: 2px;">
+                        ({{ item.later_names_str }} xin sau)
+                      </div>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <div class="badge-later">
+                    ⚠️ <strong>TRÙNG LỊCH:</strong><br>
+                    <span>👉 <strong>{{ item.earlier_names_str }}</strong> đã xin nghỉ trước</span>
+                  </div>
+                {% endif %}
+              {% else %}
+                <span class="badge-ok">✅ Không trùng ai</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if not item.is_duty_member %}
+                <span style="color: #94a3b8; font-size: 0.82rem;">— Không trực nhật</span>
+              {% elif item.is_duty_skip %}
+                <span class="tag-shift-auto" style="background:rgba(220, 38, 38, 0.25); color:#fca5a5; border-color:rgba(248, 113, 113, 0.4);">
+                  🔄 Đã đôn cho <strong>{{ item.replaced_by }}</strong> trực thay
+                </span>
+              {% else %}
+                <span style="color: #4ade80; font-size: 0.82rem; font-weight: 600;">Không trùng ca trực</span>
+              {% endif %}
+            </td>
+            <td style="text-align: center; white-space: nowrap;">
+              {% if is_admin %}
+                <button type="button" class="btn btn-light" style="padding: 3px 8px; font-size: 0.75rem; width: auto; display: inline-flex;" onclick="openEditModal('active', '', '{{ item.leave_date }}', '{{ item.member_name }}', '{{ item.reason }}')">
+                  ✏️ Sửa
+                </button>
+                <form action="/cancel-leave" method="POST" style="display: inline-block; margin-left: 2px;" onsubmit="return confirm('ADMIN: Bạn có chắc chắn muốn xóa ca nghỉ ngày {{ item.display_date }} của {{ item.member_name }}?')">
+                  <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
+                  <input type="hidden" name="member_name" value="{{ item.member_name }}">
+                  <input type="hidden" name="tab" value="leaves">
+                  <button type="submit" class="cancel-btn">Xóa</button>
+                </form>
+              {% elif item.can_cancel %}
+                <form action="/cancel-leave" method="POST" style="display: inline-block;" onsubmit="return confirm('Bạn có chắc muốn hủy đơn nghỉ ngày {{ item.display_date }}?')">
+                  <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
+                  <input type="hidden" name="member_name" value="{{ item.member_name }}">
+                  <input type="hidden" name="tab" value="leaves">
+                  <button type="submit" class="cancel-btn" title="Có thể hủy trong 15 phút sau khi nộp">
+                    Hủy (còn ~{{ item.minutes_left }}p)
+                  </button>
+                </form>
+              {% else %}
+                <span style="font-size: 0.74rem; color: #cbd5e1; font-weight: 700; background: #1c1635; border: 1px solid #3d3368; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px;" title="Đã quá 15 phút sau khi nộp. Chỉ Admin mới có quyền hủy/sửa đơn này.">
+                  🔒 Cố định
+                </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state" style="text-align: center; padding: 36px 16px; color: var(--text-muted);">
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">🎃</div>
+        <p><strong style="color: #fed7aa;">Hiện tại không có ai xin nghỉ sắp tới!</strong></p>
+        <p style="font-size: 0.85rem; margin-top: 4px; color: #cbd5e1;">Cả 10 anh em đều đang có lịch đi làm đầy đủ 🍬.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <script>
+    // Dữ liệu từ Backend Python
+    const leavesByDate = {{ leaves_by_date | tojson }};
+    const dutyByDate = {{ duty_by_date | tojson }};
+    const nonDutyStaff = {{ non_duty_staff | tojson }};
+    const holidaysByDate = {
+      {% for h in holidays_list %}
+        "{{ h.holiday_date }}": "{{ (h.reason or 'Tiệm nghỉ') | replace('"', '\\"') }}",
+      {% endfor %}
+    };
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      const activeContent = document.getElementById(`tab-content-${tabName}`);
+
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activeContent) activeContent.classList.add('active');
+
+      const pageTitle = document.getElementById('page-title');
+      const pageSubtitle = document.getElementById('page-subtitle');
+      if (tabName === 'schedule') {
+        if (pageTitle) pageTitle.innerHTML = '🎃 HÔM NAY AI TRỰC 🦇';
+        if (pageSubtitle) pageSubtitle.innerHTML = 'Người trực chính 7h30: <strong style="color:#fdba74;">{{ today_duty.assigned if today_duty else "---" }}</strong> 🧹';
+        document.title = 'Hôm Nay Ai Trực? — Halloween 2026';
+      } else if (tabName === 'leaves') {
+        if (pageTitle) pageTitle.innerHTML = '🎃 HÔM NAY AI NGHỈ 👻';
+        {% if today_leaves %}
+          const leaveNames = '{{ today_leaves | map(attribute="member_name") | join(", ") }}';
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay có: <strong style="color:#f87171;">' + leaveNames + '</strong> xin nghỉ';
+        {% else %}
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🍬)';
+        {% endif %}
+        document.title = 'Hôm Nay Ai Nghỉ? — Xin Nghỉ & Lịch Nghỉ (Halloween 2026)';
+      }
+    }
+
+    function setReason(text) {
+      const input = document.getElementById('leave_reason_input');
+      if (input) {
+        input.value = text;
+        input.focus();
+      }
+    }
+
+    function askAiDuty(questionText) {
+      const input = document.getElementById('ai-chat-input');
+      if (input) {
+        input.value = questionText;
+        sendAiChat();
+      }
+    }
+
+    function fillAiInput(text) {
+      const input = document.getElementById('ai-chat-input');
+      if (input) {
+        input.value = text;
+        input.focus();
+      }
+    }
+
+    async function sendAiChat() {
+      const input = document.getElementById('ai-chat-input');
+      const btn = document.getElementById('ai-chat-btn');
+      const container = document.getElementById('ai-chat-messages');
+      const badge = document.getElementById('ai-chat-engine-badge');
+      const question = input ? input.value.trim() : '';
+
+      if (!question || !container) return;
+      container.style.display = 'flex';
+
+      // 1. Hiển thị tin nhắn người dùng
+      const userBubble = document.createElement('div');
+      userBubble.style.cssText = 'display: flex; justify-content: flex-end; margin-bottom: 4px;';
+      userBubble.innerHTML = `<div style="background: linear-gradient(135deg, #c2410c, #ea580c); color: #fff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; max-width: 82%; line-height: 1.4; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-weight: 600;">${question}</div>`;
+      container.appendChild(userBubble);
+
+      input.value = '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳...';
+      }
+
+      // 2. Hiển thị bong bóng chờ phản hồi
+      const loadingBubble = document.createElement('div');
+      loadingBubble.id = 'ai-loading-bubble';
+      loadingBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
+      loadingBubble.innerHTML = `<span>🎃</span><div style="background: #1b1534; border: 1px solid #3d3368; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: #cbd5e1; font-style: italic;">Đang triệu hồi câu trả lời...</div>`;
+      container.appendChild(loadingBubble);
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const res = await fetch('/api/ai-chat-schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: question })
+        });
+        const data = await res.json();
+
+        if (loadingBubble && loadingBubble.parentNode) {
+          loadingBubble.parentNode.removeChild(loadingBubble);
+        }
+
+        // 3. Phân biệt: Báo nghỉ (Leave Intent) hay Trả lời tra cứu thông thường
+        const aiBubble = document.createElement('div');
+        aiBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
+
+        if (data.is_leave_intent) {
+          // Thẻ xác nhận tạo đơn xin nghỉ ngay trong khung chat
+          const conflictStyle = data.has_conflict ? 'background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.5); color:#fef3c7;' : 'background:rgba(16, 185, 129, 0.2); border:1px solid rgba(16, 185, 129, 0.5); color:#d1fae5;';
+          const datesPayload = encodeURIComponent(JSON.stringify(data.leave_dates || [data.leave_date]));
+          const btnLabel = (data.leave_dates && data.leave_dates.length > 1)
+            ? `🚀 Xác Nhận Tạo ${data.leave_dates.length} Ngày Luôn`
+            : '🚀 Xác Nhận Tạo Luôn';
+
+          aiBubble.innerHTML = `
+            <span>🎃</span>
+            <div style="background: #17122e; border: 1.5px solid #ea580c; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 10px rgba(249,115,22,0.2); max-width: 92%;">
+              <div style="font-weight: 800; color: #fb923c; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                <span>🎃 XÁC NHẬN BÁO NGHỈ</span>
+                <span style="font-size: 0.7rem; background: rgba(234,88,12,0.25); color: #fed7aa; border: 1px solid rgba(234,88,12,0.4); padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
+              </div>
+              <div style="margin-bottom: 6px;">
+                • Nhân viên: <strong style="color: #fdba74;">${data.member_name}</strong><br>
+                • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: #cbd5e1;">(${data.weekday_vn})</span><br>
+                • Lý do: <em>"${data.reason}"</em>
+              </div>
+              <div style="padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; font-size: 0.78rem; ${conflictStyle}">
+                ${data.conflict_note}
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" onclick="confirmLeaveFromChat('${data.member_name}', '${datesPayload}', '${encodeURIComponent(data.reason)}', this)" style="flex: 1; padding: 7px 10px; font-size: 0.8rem; background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 6px rgba(22,163,74,0.4);">
+                  ${btnLabel}
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          // Trả lời văn bản thông thường
+          aiBubble.innerHTML = `<span>🎃</span><div style="background: #191432; border: 1px solid #3d3368; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #f8fafc; line-height: 1.5; box-shadow: 0 2px 6px rgba(0,0,0,0.3); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
+        }
+        container.appendChild(aiBubble);
+
+        if (badge && data.engine) {
+          badge.textContent = `✨ ${data.engine}`;
+        }
+      } catch (err) {
+        if (loadingBubble && loadingBubble.parentNode) {
+          loadingBubble.parentNode.removeChild(loadingBubble);
+        }
+        const errBubble = document.createElement('div');
+        errBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
+        errBubble.innerHTML = `<span>⚠️</span><div style="background: rgba(220, 38, 38, 0.25); border: 1px solid rgba(248, 113, 113, 0.5); padding: 8px 12px; border-radius: 10px; font-size: 0.86rem; color: #fca5a5;">Lỗi: ${err}</div>`;
+        container.appendChild(errBubble);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = 'Gửi';
+        }
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    async function confirmLeaveFromChat(member, datesJsonEncoded, reasonEncoded, btnEl) {
+      const reason = decodeURIComponent(reasonEncoded);
+      let leaveDates = [];
+      try {
+        leaveDates = JSON.parse(decodeURIComponent(datesJsonEncoded));
+      } catch (e) {
+        leaveDates = [datesJsonEncoded];
+      }
+      if (!Array.isArray(leaveDates)) leaveDates = [leaveDates];
+
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = '⏳ Đang lưu...';
+      }
+
+      try {
+        const res = await fetch('/api/ai-confirm-leave', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            member_name: member,
+            leave_dates: leaveDates,
+            reason: reason
+          })
+        });
+        const data = await res.json();
+        const container = document.getElementById('ai-chat-messages');
+
+        if (data.success) {
+          if (btnEl) {
+            btnEl.parentNode.innerHTML = `<span style="font-size: 0.8rem; color: #16a34a; font-weight: 700;">✅ Đã tạo đơn thành công!</span>`;
+          }
+          if (container) {
+            const countStr = leaveDates.length > 1 ? `${leaveDates.length} ngày` : `ngày ${leaveDates[0]}`;
+            const successBubble = document.createElement('div');
+            successBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
+            successBubble.innerHTML = `<span>🎉</span><div style="background: #f0fdf4; border: 1px solid #86efac; padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; color: #166534;"><strong>Đã ghi nhận thành công!</strong> Ca nghỉ (${countStr}) của <strong>${member}</strong> đã được thêm vào hệ thống.<br><small style="color: #15803d;">Đang tự động làm mới trang...</small></div>`;
+            container.appendChild(successBubble);
+            container.scrollTop = container.scrollHeight;
+          }
+          setTimeout(() => {
+            window.location.href = '/?tab=leaves';
+          }, 1200);
+        } else {
+          alert(data.error || 'Có lỗi xảy ra khi tạo đơn nghỉ.');
+          if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = '🚀 Xác Nhận Tạo Luôn';
+          }
+        }
+      } catch (err) {
+        alert('Lỗi kết nối khi tạo đơn: ' + err);
+        if (btnEl) {
+          btnEl.disabled = false;
+          btnEl.innerHTML = '🚀 Xác Nhận Tạo Luôn';
+        }
+      }
+    }
+
+    function getDatesInRange(startStr, endStr) {
+      const dates = [];
+      const [sy, sm, sd] = startStr.split('-').map(Number);
+      const [ey, em, ed] = endStr.split('-').map(Number);
+      let cur = new Date(sy, sm - 1, sd);
+      const end = new Date(ey, em - 1, ed);
+      let count = 0;
+      while (cur <= end && count < 31) {
+        const y = cur.getFullYear();
+        const m = String(cur.getMonth() + 1).padStart(2, '0');
+        const d = String(cur.getDate()).padStart(2, '0');
+        dates.push(`${y}-${m}-${d}`);
+        cur.setDate(cur.getDate() + 1);
+        count++;
+      }
+      return dates;
+    }
+
+    function syncLeaveEndDate() {
+      const startDateInput = document.getElementById('leave_date_input');
+      const endDateInput = document.getElementById('leave_end_date_input');
+      if (startDateInput && endDateInput) {
+        endDateInput.min = startDateInput.value;
+        if (!endDateInput.value || endDateInput.value < startDateInput.value) {
+          endDateInput.value = startDateInput.value;
+        }
+      }
+    }
+
+    function setQuickLeaveOffset(offset, daysCount = 1) {
+      const isAdmin = {{ 'true' if is_admin else 'false' }};
+      if (!isAdmin && offset < 3) offset = 3;
+      const now = new Date();
+      now.setDate(now.getDate() + offset);
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const dateInput = document.getElementById('leave_date_input');
+      if (dateInput) {
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+      setQuickLeaveDays(daysCount);
+    }
+
+    function setQuickLeaveNextWeek() {
+      const now = new Date();
+      const day = now.getDay(); // 0 is Sunday, 1 is Monday...
+      let daysToAdd = (1 - day + 7) % 7;
+      if (daysToAdd < 3) daysToAdd += 7; // Phải cách ít nhất 3 ngày
+      setQuickLeaveOffset(daysToAdd, 1);
+    }
+
+    function validateLeaveForm(e) {
+      const dateInput = document.getElementById('leave_date_input');
+      const isAdmin = {{ 'true' if is_admin else 'false' }};
+      const minAllowed = '{{ min_leave_date_str }}';
+      if (!isAdmin && dateInput && dateInput.value < minAllowed) {
+        if (e) e.preventDefault();
+        alert('⛔ QUY ĐỊNH CỬA HÀNG:\nKhông được phép tự đăng ký xin nghỉ cận ngày (Hôm nay, Ngày mai và Ngày mốt) để anh em kịp sắp xếp công việc.\n\nTrường hợp đột xuất hoặc khẩn cấp, vui lòng liên hệ trực tiếp với Quản lý / Admin!');
+        return false;
+      }
+      return true;
+    }
+
+    function setQuickLeaveDate(offset) {
+      setQuickLeaveOffset(offset, 1);
+    }
+
+    function setQuickLeaveDays(daysCount) {
+      const startDateInput = document.getElementById('leave_date_input');
+      const endDateInput = document.getElementById('leave_end_date_input');
+      if (!startDateInput || !endDateInput) return;
+
+      let baseDate;
+      if (startDateInput.value) {
+        const parts = startDateInput.value.split('-').map(Number);
+        baseDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      } else {
+        baseDate = new Date();
+        const yyyy = baseDate.getFullYear();
+        const mm = String(baseDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(baseDate.getDate()).padStart(2, '0');
+        startDateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+
+      const targetDate = new Date(baseDate);
+      targetDate.setDate(targetDate.getDate() + (daysCount - 1));
+
+      const y = targetDate.getFullYear();
+      const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const d = String(targetDate.getDate()).padStart(2, '0');
+      endDateInput.value = `${y}-${m}-${d}`;
+      endDateInput.min = startDateInput.value;
+      checkLiveConflict();
+    }
+
+    function syncHolidayEndDate() {
+      const startDateInput = document.getElementById('holiday_start_date');
+      const endDateInput = document.getElementById('holiday_end_date');
+      if (startDateInput && endDateInput && !endDateInput.value) {
+        endDateInput.value = startDateInput.value;
+      }
+    }
+
+    function setQuickHolidayRange(daysCount) {
+      const startDateInput = document.getElementById('holiday_start_date');
+      const endDateInput = document.getElementById('holiday_end_date');
+      if (!startDateInput || !endDateInput) return;
+
+      let baseDate = new Date();
+      if (startDateInput.value) {
+        const parts = startDateInput.value.split('-');
+        baseDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      } else {
+        const yyyy = baseDate.getFullYear();
+        const mm = String(baseDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(baseDate.getDate()).padStart(2, '0');
+        startDateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+
+      const targetDate = new Date(baseDate);
+      targetDate.setDate(targetDate.getDate() + (daysCount - 1));
+
+      const y = targetDate.getFullYear();
+      const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const d = String(targetDate.getDate()).padStart(2, '0');
+      endDateInput.value = `${y}-${m}-${d}`;
+    }
+
+    function checkLiveConflict() {
+      const dateInput = document.getElementById('leave_date_input');
+      const endDateInput = document.getElementById('leave_end_date_input');
+      const memberSelect = document.getElementById('member_select');
+      const alertContainer = document.getElementById('live-alert-container');
+
+      if (!dateInput || !memberSelect || !alertContainer) return;
+
+      const startDateStr = dateInput.value;
+      let endDateStr = (endDateInput && endDateInput.value) ? endDateInput.value : startDateStr;
+      const selectedMember = memberSelect.value;
+
+      if (!startDateStr) {
+        alertContainer.style.display = 'none';
+        return;
+      }
+
+      if (endDateStr < startDateStr) {
+        endDateStr = startDateStr;
+      }
+
+      const dateList = getDatesInRange(startDateStr, endDateStr);
+      if (dateList.length === 0) dateList.push(startDateStr);
+
+      const conflicts = [];
+      const dutyNotes = [];
+      const holidayNotes = [];
+
+      dateList.forEach(dStr => {
+        // 1. Kiểm tra ngày tiệm nghỉ
+        if (typeof holidaysByDate !== 'undefined' && holidaysByDate[dStr]) {
+          holidayNotes.push({ date: dStr, reason: holidaysByDate[dStr] });
+        }
+
+        // 2. Kiểm tra người khác đã xin nghỉ
+        const existingOnDate = leavesByDate[dStr] || [];
+        const otherMembers = existingOnDate.filter(item => item.member_name !== selectedMember);
+        if (otherMembers.length > 0) {
+          conflicts.push({
+            date: dStr,
+            others: otherMembers
+          });
+        }
+
+        // 3. Kiểm tra trùng ca trực vệ sinh
+        if (!nonDutyStaff.includes(selectedMember)) {
+          if (dutyByDate[dStr] === selectedMember) {
+            dutyNotes.push(dStr);
+          }
+        }
+      });
+
+      let html = '';
+
+      const minAllowedStr = '{{ min_leave_date_str }}';
+      const isAdmin = {{ 'true' if is_admin else 'false' }};
+      const nearDates = dateList.filter(dStr => dStr < minAllowedStr);
+      let nearWarningHtml = '';
+      if (!isAdmin && nearDates.length > 0) {
+        const nearFmt = nearDates.map(d => d.split('-').reverse().slice(0, 2).join('/')).join(', ');
+        nearWarningHtml = `
+          <div class="alert-box alert-danger" style="border-left: 5px solid #dc2626; margin-bottom: 12px; background: #fef2f2; color: #991b1b;">
+            ⛔ <strong>KHÔNG ĐƯỢC PHÉP XIN NGHỈ CẬN NGÀY:</strong><br>
+            Bạn đang chọn ngày nghỉ cận: <strong>${nearFmt}</strong> (thuộc Hôm nay, Ngày mai hoặc Ngày mốt).<br>
+            Theo quy định, nhân viên không được tự đăng ký nghỉ cận ngày để anh em kịp sắp xếp công việc.<br>
+            👉 <em>Trường hợp khẩn cấp hoặc đột xuất, vui lòng <strong>liên hệ trực tiếp với Quản lý / Admin</strong>!</em>
+          </div>
+        `;
+      }
+
+      // Tóm tắt số ngày đăng ký
+      if (dateList.length > 1) {
+        const dStartFmt = dateList[0].split('-').reverse().join('/');
+        const dEndFmt = dateList[dateList.length - 1].split('-').reverse().join('/');
+        html += `
+          <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-weight: 600; font-size: 0.9rem;">
+            📅 Đang chọn xin nghỉ <strong>${dateList.length} ngày liên tiếp</strong> (từ <strong>${dStartFmt}</strong> đến <strong>${dEndFmt}</strong>)
+          </div>
+        `;
+      }
+
+      // 1. CẢNH BÁO TRÙNG LỊCH NGHỈ
+      if (conflicts.length > 0) {
+        let conflictDetails = conflicts.map(c => {
+          const dFmt = c.date.split('-').reverse().slice(0, 2).join('/');
+          const names = c.others.map(o => `<strong>${o.member_name}</strong> (lý do: <em>"${o.reason}"</em>)`).join(', ');
+          return `• Ngày <strong>${dFmt}</strong>: ${names}`;
+        }).join('<br>');
+
+        html += `
+          <div class="alert-box alert-warning" style="border-left: 5px solid #dc2626; margin-bottom: 12px;">
+            ⚠️ <strong>CẢNH BÁO TRÙNG LỊCH NGHỈ:</strong><br>
+            ${conflictDetails}<br>
+            👉 <strong>LƯU Ý:</strong> Nếu bạn gửi đơn, bạn sẽ là <strong>người xin nghỉ sau</strong> vào các ngày trên.
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="alert-box alert-success" style="padding: 10px 14px; margin-bottom: 12px;">
+            ✅ ${dateList.length > 1 ? 'Tất cả các ngày đã chọn' : 'Ngày này'} hiện chưa có ai xin nghỉ (Tránh được trùng lịch).
+          </div>
+        `;
+      }
+
+      // 2. LƯU Ý CA TRỰC
+      if (nonDutyStaff.includes(selectedMember)) {
+        html += `
+          <div class="alert-box" style="background: #fefce8; border: 1.5px solid #fde047; color: #854d0e; margin-bottom: 12px;">
+            ℹ️ <strong>NHÂN VIÊN KHÔNG TRỰC NHẬT:</strong><br>
+            Bạn thuộc nhóm không trực nhật vệ sinh sáng.<br>
+            Lịch xin nghỉ vẫn được ghi nhận vào bảng theo dõi và lưu lịch sử nghỉ của tiệm.
+          </div>
+        `;
+      } else if (dutyNotes.length > 0) {
+        const dutyDatesFmt = dutyNotes.map(d => d.split('-').reverse().slice(0, 2).join('/')).join(', ');
+        html += `
+          <div class="alert-box alert-info" style="margin-bottom: 12px;">
+            🔄 <strong>LƯU Ý CA TRỰC:</strong><br>
+            ${dutyNotes.length > 1 ? `Các ngày <strong>${dutyDatesFmt}</strong>` : `Ngày <strong>${dutyDatesFmt}</strong>`} đúng vào lượt <strong>trực vệ sinh 7h30 của bạn</strong>.<br>
+            Khi gửi đơn, hệ thống sẽ <strong>tự động đôn người tiếp theo</strong> lên trực thay.
+          </div>
+        `;
+      }
+
+      // 3. LƯU Ý TIỆM NGHỈ
+      if (holidayNotes.length > 0) {
+        const hDetails = holidayNotes.map(h => {
+          const dFmt = h.date.split('-').reverse().slice(0, 2).join('/');
+          return `• <strong>${dFmt}</strong>: Tiệm đóng cửa (${h.reason})`;
+        }).join('<br>');
+        html += `
+          <div class="alert-box" style="background: #f1f5f9; border: 1.5px solid #cbd5e1; color: #334155; margin-bottom: 12px;">
+            🏢 <strong>LƯU Ý NGÀY TIỆM NGHỈ:</strong><br>
+            ${hDetails}
+          </div>
+        `;
+      }
+
+      html = nearWarningHtml + html;
+      alertContainer.innerHTML = html;
+      alertContainer.style.display = 'block';
+
+      const submitBtn = document.querySelector('#leave-form button[type="submit"]');
+      if (submitBtn) {
+        if (!isAdmin && nearDates.length > 0) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+          submitBtn.title = 'Không được phép xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt)';
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+          submitBtn.title = '';
+        }
+      }
+    }
+
+    // Đồng hồ thời gian thực Giờ Việt Nam (Asia/Ho_Chi_Minh - UTC+7)
+    function updateVNClock() {
+      try {
+        const now = new Date();
+        const timeFormatter = new Intl.DateTimeFormat('vi-VN', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+        const dateFormatter = new Intl.DateTimeFormat('vi-VN', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        
+        const clockEl = document.getElementById('vn-live-clock');
+        const dateEl = document.getElementById('vn-live-date');
+        if (clockEl) clockEl.textContent = timeFormatter.format(now);
+        if (dateEl) dateEl.textContent = dateFormatter.format(now);
+      } catch (e) {
+        const now = new Date();
+        const clockEl = document.getElementById('vn-live-clock');
+        if (clockEl) clockEl.textContent = now.toLocaleTimeString('vi-VN');
+      }
+    }
+
+    // Khởi tạo tab khi tải trang
+    window.addEventListener('DOMContentLoaded', () => {
+      updateVNClock();
+      setInterval(updateVNClock, 1000);
+
+      const hash = window.location.hash;
+      const serverTab = '{{ active_tab }}';
+
+      if (hash === '#tab-leaves' || serverTab === 'leaves') {
+        switchTab('leaves');
+      } else {
+        switchTab('schedule');
+      }
+
+      checkLiveConflict();
+    });
+  </script>
+
+  <!-- BONG BÓNG CHAT AI NỔI (FLOATING CHAT BUBBLE) -->
+  <div class="ai-fab-btn" id="ai-fab-button" onclick="toggleAiChatPopup()" title="Hỏi nhanh trợ lý AI về lịch trực & ngày nghỉ">
+    <span class="ai-fab-icon">🎃</span>
+    <span class="ai-fab-text">AI Halloween</span>
+    <span class="ai-fab-badge"></span>
+  </div>
+
+  <!-- CỬA SỔ POPUP CHAT AI NHỎ GỌN -->
+  <div class="ai-chat-popup" id="ai-chat-popup">
+    <div class="ai-popup-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.25rem;">🎃</span>
+        <div>
+          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Ma Quái AI 👻</strong>
+          <span style="font-size: 0.72rem; opacity: 0.9; display: flex; align-items: center; gap: 4px;">
+            <span style="width: 6px; height: 6px; background: #fb923c; border-radius: 50%; display: inline-block;"></span> Halloween 2026 Edition
+          </span>
+        </div>
+      </div>
+      <button type="button" onclick="toggleAiChatPopup()" style="background: rgba(255,255,255,0.18); border: none; color: #fff; width: 26px; height: 26px; border-radius: 50%; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        ✕
+      </button>
+    </div>
+
+    <!-- Vùng tin nhắn chat -->
+    <div class="ai-popup-messages" id="ai-chat-messages">
+      <div style="display: flex; align-items: flex-start; gap: 8px;">
+        <span style="font-size: 1.1rem;">🎃</span>
+        <div style="background: #191432; border: 1px solid #3d3368; padding: 9px 13px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+          Xin chào! 🎃 Tôi là Trợ Lý Ma Quái AI (Halloween 2026). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc <strong>tạo đơn xin nghỉ bằng tin nhắn</strong>.<br>
+          <small style="color: #cbd5e1; margin-top: 4px; display: block;">
+            • Báo nghỉ: <em>"Vinh xin nghỉ ngày 25/10 việc gia đình"</em><br>
+            • Tra cứu: <em>"Hôm nay ai trực?"</em>, <em>"Mai có ai nghỉ không?"</em>
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thanh nhập câu hỏi -->
+    <div class="ai-popup-footer">
+      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ... 🎃" style="flex: 1; padding: 10px 14px; border: 1.5px solid #3d3368; background: #0f0c1e; color: #f8fafc; border-radius: 20px; font-size: 16px; outline: none; -webkit-text-size-adjust: 100%;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
+      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #c2410c, #ea580c); color: #fff; border: 1px solid #f97316; border-radius: 20px; cursor: pointer; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(234,88,12,0.4);">
+        Gửi
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL ĐĂNG NHẬP ADMIN -->
+  <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
+    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:360px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(249,115,22,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-size:1.1rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:6px;">
+          🔐 Quyền Quản Trị Admin
+        </h3>
+        <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
+      </div>
+      <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom:14px;">Nhập mật khẩu quản trị để chỉnh sửa hoặc xóa lịch nghỉ của cửa hàng.</p>
+      <form action="/admin-login" method="POST">
+        <input type="hidden" name="next_url" value="{{ request.url }}">
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; box-sizing:border-box; width:100%;">
+        </div>
+        <div style="display:flex; gap:8px; margin-top:16px;">
+          <button type="button" class="btn btn-light" style="flex:1;" onclick="closeAdminModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;">Đăng Nhập</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CHỈNH SỬA LỊCH NGHỈ CHO ADMIN -->
+  <div id="admin-edit-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
+    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:440px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(249,115,22,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-size:1.1rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:6px;">
+          ✏️ Sửa Thông Tin Lịch Nghỉ
+        </h3>
+        <button type="button" onclick="closeEditModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
+      </div>
+      <form action="/edit-leave" method="POST">
+        <input type="hidden" name="source" id="edit_source">
+        <input type="hidden" name="id" id="edit_id">
+        <input type="hidden" name="old_leave_date" id="edit_old_date">
+        <input type="hidden" name="old_member_name" id="edit_old_member">
+
+        <div class="form-group">
+          <label>Nhân viên xin nghỉ:</label>
+          <select name="new_member_name" id="edit_new_member" required>
+            <optgroup label="Anh em trực nhật 7h30 (8 người)">
+              {% for m in duty_members %}
+                <option value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </optgroup>
+            <optgroup label="Nhân sự không trực nhật (2 người)">
+              {% for m in non_duty_staff %}
+                <option value="{{ m }}">{{ m }} (Không trực nhật)</option>
+              {% endfor %}
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Ngày xin nghỉ:</label>
+          <input type="date" name="new_leave_date" id="edit_new_date" required>
+        </div>
+
+        <div class="form-group">
+          <label>Lý do xin nghỉ:</label>
+          <input type="text" name="new_reason" id="edit_new_reason" required>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:20px;">
+          <button type="button" class="btn btn-light" style="flex:1;" onclick="closeEditModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;">Lưu Thay Đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openAdminModal() {
+      const modal = document.getElementById('admin-login-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.querySelector('input[type="password"]')?.focus();
+      }
+    }
+    function closeAdminModal() {
+      const modal = document.getElementById('admin-login-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function openEditModal(source, id, leaveDate, memberName, reason) {
+      document.getElementById('edit_source').value = source;
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_old_date').value = leaveDate;
+      document.getElementById('edit_old_member').value = memberName;
+      document.getElementById('edit_new_date').value = leaveDate;
+      document.getElementById('edit_new_member').value = memberName;
+      document.getElementById('edit_new_reason').value = reason;
+
+      const modal = document.getElementById('admin-edit-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+    function closeEditModal() {
+      const modal = document.getElementById('admin-edit-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    let savedScrollY = 0;
+
+    function toggleAiChatPopup() {
+      const popup = document.getElementById('ai-chat-popup');
+      const messagesContainer = document.getElementById('ai-chat-messages');
+      if (!popup) return;
+
+      if (popup.style.display === 'flex') {
+        popup.style.display = 'none';
+        // Khôi phục trạng thái cuộn trang cho iOS & Android
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, savedScrollY);
+      } else {
+        savedScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+        popup.style.display = 'flex';
+
+        // Khóa cứng màn hình nền trên iOS Safari chống tự cuộn trang (iOS Scroll Lock)
+        if (window.innerWidth <= 600) {
+          document.body.style.position = 'fixed';
+          document.body.style.top = `-${savedScrollY}px`;
+          document.body.style.width = '100%';
+          document.body.style.overflow = 'hidden';
+        }
+        if (messagesContainer) {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+      }
+    }
+
+    // Tự động đẩy ô nhập lên trên bàn phím ảo của Safari iPhone & Android
+    if (window.visualViewport) {
+      function syncVisualViewport() {
+        const popup = document.getElementById('ai-chat-popup');
+        const messagesContainer = document.getElementById('ai-chat-messages');
+        
+        if (popup && popup.style.display === 'flex' && window.innerWidth <= 600) {
+          const isKeyboardOpen = window.innerHeight - window.visualViewport.height > 120;
+          
+          if (isKeyboardOpen) {
+            // Khi bàn phím bật lên: co chiều cao lại bằng đúng vùng nhìn thấy
+            popup.style.height = `${window.visualViewport.height}px`;
+            popup.style.top = `${window.visualViewport.offsetTop}px`;
+          } else {
+            // Khi bàn phím đóng: Giữ full toàn màn hình 100%
+            popup.style.height = '100dvh';
+            popup.style.top = '0px';
+          }
+
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        }
+      }
+
+      window.visualViewport.addEventListener('resize', syncVisualViewport);
+      window.visualViewport.addEventListener('scroll', syncVisualViewport);
+    }
+  </script>
+
+</body>
+</html>

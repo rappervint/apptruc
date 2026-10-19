@@ -31,6 +31,29 @@ def is_admin():
     """Kiểm tra xem người dùng hiện tại có đang đăng nhập quyền Admin không"""
     return session.get('is_admin') is True
 
+def get_current_theme():
+    """
+    Tự động chuyển đổi giao diện theo ngày Việt Nam (UTC+7):
+    - Đến hết ngày 25/10/2026: Giao diện Ngày Phụ Nữ Việt Nam 20/10.
+    - Sau ngày 25/10/2026 (từ 00:00 ngày 26/10/2026 trở đi): Tự động chuyển hoàn toàn sang giao diện Halloween 2026, xóa bỏ giao diện 20/10.
+    - Hỗ trợ tham số URL ?theme=halloween hoặc ?theme=women_day (hoặc ?theme=reset) để xem trước/kiểm thử.
+    """
+    theme_arg = request.args.get('theme')
+    if theme_arg in ('halloween', 'women_day'):
+        session['active_theme'] = theme_arg
+        return theme_arg
+    if theme_arg == 'reset':
+        session.pop('active_theme', None)
+
+    if session.get('active_theme') in ('halloween', 'women_day'):
+        return session['active_theme']
+
+    vn_today = get_vn_today()
+    if vn_today > date(2026, 10, 25):
+        return 'halloween'
+    return 'women_day'
+
+
 # 8 người cố định trực nhật vệ sinh 7h30 sáng
 DUTY_MEMBERS = ['Vinh', 'Dĩ', 'Ân', 'Bảo', 'Nguyên', 'Lợi', 'Thái', 'Duy']
 # 2 nhân viên tại cửa hàng không trực nhật nhưng vẫn báo xin nghỉ bình thường
@@ -436,7 +459,10 @@ def index():
     with get_db() as conn:
         holidays_list = conn.execute('SELECT holiday_date, reason FROM shop_holidays ORDER BY holiday_date ASC').fetchall()
 
-    return render_template('index.html', 
+    active_theme = get_current_theme()
+    template_file = 'index_halloween.html' if active_theme == 'halloween' else 'index.html'
+
+    return render_template(template_file, 
                            active_tab=active_tab,
                            today_duty=today_duty, 
                            tomorrow_duty=tomorrow_duty, 
@@ -663,7 +689,10 @@ def history():
                 ORDER BY id DESC LIMIT 50
             ''').fetchall()
 
-    return render_template('history.html',
+    active_theme = get_current_theme()
+    template_file = 'history_halloween.html' if active_theme == 'halloween' else 'history.html'
+
+    return render_template(template_file,
                            history_list=history_list,
                            selected_cycle=selected_cycle,
                            selected_member=selected_member,
