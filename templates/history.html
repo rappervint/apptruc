@@ -652,6 +652,8 @@
         </div>
       </form>
     </div>
+  </div>
+
   <!-- MODAL CHI TIẾT CÁC NGÀY NGHỈ CỦA NHÂN VIÊN -->
   <div id="member-leaves-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
     <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:18px; padding:20px; max-width:520px; width:100%; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 45px rgba(0,0,0,0.85), 0 0 25px rgba(249,115,22,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
@@ -675,25 +677,43 @@
     </div>
   </div>
 
+  <script id="leaves-data-json" type="application/json">
+    {{ history_list | tojson }}
+  </script>
+
   <script>
-    const allLeavesHistory = {{ history_list | tojson }};
+    let allLeavesHistory = [];
+    try {
+      const dataEl = document.getElementById('leaves-data-json');
+      if (dataEl) {
+        allLeavesHistory = JSON.parse(dataEl.textContent);
+      }
+    } catch (e) {
+      console.error('Error parsing leaves data:', e);
+    }
     const isAdmin = {{ 'true' if is_admin else 'false' }};
 
+    let currentActiveMemberLeaves = [];
+
     function showMemberLeaves(staffName) {
+      console.log('Opening leaves modal for:', staffName);
       const modal = document.getElementById('member-leaves-modal');
       const titleEl = document.getElementById('modal-member-title');
       const countEl = document.getElementById('modal-member-count');
       const bodyEl = document.getElementById('modal-member-body');
-      if (!modal || !bodyEl) return;
+      if (!modal || !bodyEl) {
+        console.error('Modal or modal body not found!');
+        return;
+      }
 
-      const memberLeaves = allLeavesHistory.filter(item => item.member_name === staffName);
+      currentActiveMemberLeaves = allLeavesHistory.filter(item => item.member_name === staffName);
 
       if (titleEl) titleEl.innerHTML = `<span>🎃</span> Lịch Nghỉ: <span style="color:#fb923c;">${staffName}</span>`;
-      if (countEl) countEl.textContent = `Tổng cộng: ${memberLeaves.length} ngày nghỉ đã ghi nhận`;
+      if (countEl) countEl.textContent = `Tổng cộng: ${currentActiveMemberLeaves.length} ngày nghỉ đã ghi nhận`;
 
       bodyEl.innerHTML = '';
 
-      if (memberLeaves.length === 0) {
+      if (currentActiveMemberLeaves.length === 0) {
         bodyEl.innerHTML = `
           <div style="text-align:center; padding:32px 14px; color:#cbd5e1;">
             <div style="font-size:2.2rem; margin-bottom:8px;">🍬</div>
@@ -702,7 +722,7 @@
           </div>
         `;
       } else {
-        memberLeaves.forEach(item => {
+        currentActiveMemberLeaves.forEach((item, index) => {
           const card = document.createElement('div');
           card.style.cssText = 'background:#110c22; border:1px solid #332a5a; border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:6px;';
 
@@ -714,7 +734,7 @@
           if (isAdmin) {
             actionHtml = `
               <div style="display:flex; gap:6px; margin-top:6px; align-items:center;">
-                <button type="button" class="btn btn-light" style="padding:3px 10px; font-size:0.76rem; width:auto;" onclick="closeMemberLeavesModal(); openEditModal('${item.source}', '${item.id}', '${item.leave_date}', '${item.member_name}', '${item.reason.replace(/'/g, "\\'")}')">
+                <button type="button" class="btn btn-light" style="padding:3px 10px; font-size:0.76rem; width:auto;" onclick="openEditModalByIndex(${index})">
                   ✏️ Sửa
                 </button>
                 <form action="/delete-history" method="POST" style="margin:0; display:inline;" onsubmit="return confirm('ADMIN: Xóa vĩnh viễn ca nghỉ ngày ${item.display_date} của ${item.member_name}?')">
@@ -752,7 +772,7 @@
               ${statusBadge}
             </div>
             <div style="font-size:0.86rem; color:#e2e8f0;">
-              <strong>Lý do:</strong> <em>"${item.reason}"</em>
+              <strong>Lý do:</strong> <em>"${item.reason || 'Việc cá nhân'}"</em>
             </div>
             ${item.created_at ? `<div style="font-size:0.75rem; color:#94a3b8;">🕒 Nộp lúc: ${item.created_at}</div>` : ''}
             ${actionHtml}
@@ -762,6 +782,13 @@
       }
 
       modal.style.display = 'flex';
+    }
+
+    function openEditModalByIndex(index) {
+      const item = currentActiveMemberLeaves[index];
+      if (!item) return;
+      closeMemberLeavesModal();
+      openEditModal(item.source, item.id, item.leave_date, item.member_name, item.reason || '');
     }
 
     function closeMemberLeavesModal() {
