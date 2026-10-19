@@ -1010,9 +1010,15 @@ def parse_with_rule_engine(text, today):
             except ValueError:
                 pass
                     
-        # Từ ngữ tương đối: hôm nay, mai, ngày mốt
+        # Từ ngữ tương đối: hôm nay, mai, ngày mốt (hỗ trợ cả kết hợp nhiều ngày liên tiếp)
         if not single_date:
-            if re.search(r'\b(hom nay|nay|hom ni)\b', norm_text):
+            if re.search(r'\b(tu\s+hom\s+nay\s+(?:den|toi|-)\s*(?:ngay\s*)?mot|hom\s+nay\s*(?:va|,)?\s*(?:ngay\s*)?mai\s*(?:va|,)\s*(?:ngay\s*)?mot)\b', norm_text):
+                found_dates = [today, today + timedelta(days=1), today + timedelta(days=2)]
+            elif re.search(r'\b(tu\s+hom\s+nay\s+(?:den|toi|-)\s*(?:ngay\s*)?mai|hom\s+nay\s*(?:va|,)\s*(?:ngay\s*)?mai)\b', norm_text):
+                found_dates = [today, today + timedelta(days=1)]
+            elif re.search(r'\b(tu\s+(?:ngay\s*)?mai\s+(?:den|toi|-)\s*(?:ngay\s*)?mot|(?:ngay\s*)?mai\s*(?:va|,)\s*(?:ngay\s*)?mot)\b', norm_text):
+                found_dates = [today + timedelta(days=1), today + timedelta(days=2)]
+            elif re.search(r'\b(hom nay|nay|hom ni)\b', norm_text):
                 single_date = today
             elif re.search(r'\b(ngay mai|mai)\b', norm_text):
                 single_date = today + timedelta(days=1)
@@ -1191,6 +1197,203 @@ def make_ai_chips(items, is_fill=False):
             f'{label}</button>'
         )
     return '<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:3px;">' + "".join(chips) + '</div>'
+
+def get_admin_leave_statistics(all_time=False, specific_member=None):
+    """
+    Thống kê chi tiết ngày nghỉ cho Admin:
+    - all_time=False: Trong chu kỳ hiện tại
+    - all_time=True: Toàn bộ lịch sử (leaves + leaves_history)
+    - specific_member: Lọc riêng 1 nhân viên nếu cần
+    """
+    today = get_vn_today()
+    curr_cycle_key, curr_cycle_label, curr_start_d, curr_end_d = get_current_view_cycle(today)
+    start_str = curr_start_d.strftime('%Y-%m-%d')
+    end_str = curr_end_d.strftime('%Y-%m-%d')
+
+    with get_db() as conn:
+        if all_time:
+            active_rows = conn.execute('SELECT leave_date, member_name, reason FROM leaves ORDER BY leave_date ASC').fetchall()
+            hist_rows = conn.execute('SELECT leave_date, member_name, reason FROM leaves_history ORDER BY leave_date ASC').fetchall()
+            period_label = "Toàn bộ lịch sử từ trước đến nay"
+        else:
+            active_rows = conn.execute('SELECT leave_date, member_name, reason FROM leaves WHERE leave_date >= ? AND leave_date <= ? ORDER BY leave_date ASC', (start_str, end_str)).fetchall()
+            hist_rows = conn.execute('SELECT leave_date, member_name, reason FROM leaves_history WHERE leave_date >= ? AND leave_date <= ? ORDER BY leave_date ASC', (start_str, end_str)).fetchall()
+            period_label = f"{curr_cycle_label} (từ {curr_start_d.strftime('%d/%m')} đến {curr_end_d.strftime('%d/%m/%Y')})"
+
+    combined = []
+    seen = set()
+    for r in list(active_rows) + list(hist_rows):
+        key = (r['leave_date'], r['member_name'])
+        if key not in seen:
+            seen.add(key)
+            combined.append(dict(r))
+
+    if specific_member:
+        member_leaves = [item for item in combined if item['member_name'] == specific_member]
+        return {
+            'specific_member': specific_member,
+            'period_label': period_label,
+            'count': len(member_leaves),
+            'leaves': member_leaves,
+            'is_all_time': all_time
+        }
+
+    # Thống kê toàn bộ
+    stats = {m: [] for m in ALL_STAFF}
+    for item in combined:
+        m = item['member_name']
+        if m in stats:
+            stats[m].append(item['leave_date'])
+
+    sorted_stats = sorted(stats.items(), key=lambda x: len(x[1]), reverse=True)
+    max_count = len(sorted_stats[0][1]) if sorted_stats else 0
+    top_members = [m for m, d in sorted_stats if len(d) == max_count and max_count > 0]
+    zero_members = [m for m, d in sorted_stats if len(d) == 0]
+    total_leaves = sum(len(d) for m, d in sorted_stats)
+
+    return {
+        'period_label': period_label,
+        'sorted_stats': sorted_stats,
+        'max_count': max_count,
+        'top_members': top_members,
+        'zero_members': zero_members,
+        'total_leaves': total_leaves,
+        'is_all_time': all_time
+    }
+
+def format_leave_statistics_response(stats_data):
+    if stats_data.get('specific_member'):
+        m = stats_data['specific_member']
+        cnt = stats_data['count']
+        p_label = stats_data['period_label']
+        leaves = stats_data['leaves']
+        duty_badge = "🧹 Trực nhật" if m in DUTY_MEMBERS else "🔧 Kỹ thuật viên"
+        
+        lines = [
+            f"📊 <strong>THỐNG KÊ NGÀY NGHỈ CỦA {m.upper()}</strong>",
+            f"• Vai trò: <strong>{duty_badge}</strong>",
+            f"• Thời gian: <em>{p_label}</em>",
+            f"• Tổng số ngày nghỉ: <strong style='font-size:1.05rem; color:#f59e0b;'>{cnt} ngày</strong><br>"
+        ]
+        if cnt == 0:
+            lines.append("🌟 <em>Nhân viên này chưa nghỉ ngày nào trong chu kỳ được chọn!</em>")
+        else:
+            lines.append("📋 <strong>Chi tiết các ca nghỉ:</strong>")
+            for item in leaves:
+                try:
+                    d_dt = datetime.strptime(item['leave_date'], '%Y-%m-%d')
+                    d_disp = d_dt.strftime('%d/%m/%Y')
+                except Exception:
+                    d_disp = item['leave_date']
+                lines.append(f"• 📅 <strong>{d_disp}</strong>: Lý do \"<em>{item['reason']}</em>\"")
+        
+        chips = make_ai_chips([
+            ("📊 Thống kê tất cả anh em", "Thống kê ai nghỉ nhiều nhất"),
+            ("👑 Cho nghỉ cận ngày", f"Cho {m} nghỉ hôm nay"),
+            ("🔔 Hôm nay ai trực?", "Hôm nay ai trực?"),
+        ])
+        return "<br>".join(lines) + chips
+
+    p_label = stats_data['period_label']
+    total = stats_data['total_leaves']
+    top_members = stats_data['top_members']
+    max_count = stats_data['max_count']
+    zero_members = stats_data['zero_members']
+    sorted_stats = stats_data['sorted_stats']
+    
+    lines = []
+    lines.append("📊 <strong>BẢNG THỐNG KÊ NGÀY NGHỈ NHÂN SỰ TRẦN BÌNH AUTO</strong>")
+    lines.append(f"📅 <em>{p_label} (Tổng cộng: <strong>{total}</strong> lượt nghỉ)</em><br>")
+    
+    if max_count > 0 and top_members:
+        top_str = ", ".join([f"<strong>{m}</strong>" for m in top_members])
+        lines.append(f"🏆 <strong>Top nghỉ nhiều nhất:</strong> {top_str} ({max_count} ngày)")
+    
+    if zero_members:
+        zero_str = ", ".join([f"<strong>{m}</strong>" for m in zero_members])
+        lines.append(f"🌟 <strong>Chưa nghỉ ngày nào ({len(zero_members)} người):</strong> {zero_str}")
+    
+    lines.append("<br>📋 <strong>Chi tiết từng thành viên:</strong>")
+    for idx, (member, dates) in enumerate(sorted_stats, 1):
+        duty_badge = "🧹" if member in DUTY_MEMBERS else "🔧"
+        count = len(dates)
+        if count == 0:
+            lines.append(f"• {idx}. {duty_badge} <strong>{member}</strong>: 0 ngày <span style='color:#10b981;'>✓ Đi làm đủ</span>")
+        else:
+            dates_disp = ", ".join([datetime.strptime(d, '%Y-%m-%d').strftime('%d/%m') for d in sorted(dates)[:5]])
+            if len(dates) > 5:
+                dates_disp += f" (+{len(dates)-5} ngày)"
+            lines.append(f"• {idx}. {duty_badge} <strong>{member}</strong>: <strong>{count}</strong> ngày <span style='color:#94a3b8; font-size:0.8rem;'>({dates_disp})</span>")
+
+    chips = make_ai_chips([
+        ("📊 Thống kê toàn bộ lịch sử", "Thống kê toàn bộ lịch sử"),
+        ("📊 Thống kê kỳ này", "Thống kê ngày nghỉ kỳ này"),
+        ("👑 Duyệt nghỉ cận ngày", "Tôi muốn cho nhân viên nghỉ"),
+        ("🎨 Đổi giao diện lễ hội", "Đổi giao diện ứng dụng"),
+    ])
+    return "<br>".join(lines) + chips
+
+def get_admin_capabilities_response():
+    chips = make_ai_chips([
+        ("👑 Cho Vinh nghỉ hôm nay", "Cho Vinh nghỉ hôm nay"),
+        ("📊 Ai nghỉ nhiều nhất kỳ này?", "Ai nghỉ nhiều nhất kỳ này?"),
+        ("🌟 Ai chưa nghỉ ngày nào?", "Ai chưa nghỉ ngày nào?"),
+        ("🎨 Đổi giao diện Tết", "Đổi giao diện Tết"),
+        ("🎨 Đổi giao diện Halloween", "Đổi giao diện Halloween"),
+    ])
+    return (
+        "👑 <strong>QUYỀN HẠN & ĐẶC QUYỀN CỦA QUẢN TRỊ VIÊN ADMIN TẠI TRẦN BÌNH AUTO:</strong><br><br>"
+        "<strong>1. 🚀 Duyệt Nghỉ Cận Ngày & Bất Kỳ Ngày Nào:</strong><br>"
+        "• Cho phép bất kỳ ai nghỉ <strong>Hôm nay, Ngày mai, Ngày mốt</strong> hoặc liên tiếp nhiều ngày không giới hạn (nhân viên thường bị giới hạn tối thiểu cách 3 ngày).<br>"
+        "• Nhắn trực tiếp với AI: <em>\"Cho Vinh nghỉ hôm nay\"</em>, <em>\"Admin duyệt cho Thái nghỉ mai và mốt\"</em>.<br><br>"
+        "<strong>2. 📊 Báo Cáo & Thống Kê Ngày Nghỉ Toàn Diện:</strong><br>"
+        "• Tra cứu tổng hợp ai nghỉ nhiều nhất, ai chưa nghỉ trong chu kỳ hoặc từ trước đến nay.<br>"
+        "• Nhắn với AI: <em>\"Ai nghỉ nhiều nhất kỳ này?\"</em> hoặc <em>\"Thống kê lịch sử nghỉ\"</em>.<br><br>"
+        "<strong>3. 🎨 Đổi Thử & Xem Giao Diện Ứng Dụng (Seasonal Themes):</strong><br>"
+        "• Xem trước và kích hoạt các bộ giao diện: Tết Nguyên Đán, Halloween, Noel Giáng Sinh, Chào Năm Mới...<br>"
+        "• Nhắn với AI: <em>\"Đổi giao diện Tết\"</em> hoặc <em>\"Đổi giao diện\"</em>.<br><br>"
+        "<strong>4. ✏️ Chỉnh Sửa & Xóa Lịch Sử Nghỉ:</strong><br>"
+        "• Toàn quyền sửa ngày, đổi người, hoặc xóa vĩnh viễn các ca nghỉ hiện tại và trong lịch sử.<br><br>"
+        "<strong>5. 📜 Xem Nhật Ký Vết (Audit Trail):</strong><br>"
+        "• Giám sát 50 thao tác gần nhất (ai thêm đơn, ai hủy đơn, ai đăng nhập admin...).<br>"
+        f"{chips}"
+    )
+
+def get_admin_theme_response(theme_choice=None):
+    theme_catalog_info = [
+        ('tet', '🌸 Tết Cổ Truyền', 'Tết Nguyên Đán Cổ Truyền'),
+        ('halloween', '🎃 Halloween', 'Đêm Hội Halloween'),
+        ('christmas', '🎄 Noel Giáng Sinh', 'Giáng Sinh Ấm Áp & Noel'),
+        ('new_year', '🥂 Chào Năm Mới', 'Chào Năm Mới & Countdown'),
+        ('mid_autumn', '🏮 Trung Thu', 'Tết Trung Thu Đoàn Viên'),
+        ('reset', '🔄 Tự Động / Mặc Định', 'Tự động theo thời gian thực')
+    ]
+    
+    if theme_choice:
+        if theme_choice == 'reset':
+            session.pop('active_theme', None)
+            return (
+                "🎨 <strong>ĐÃ CHUYỂN VỀ GIAO DIỆN TỰ ĐỘNG!</strong><br>"
+                "Hệ thống sẽ tự động cập nhật giao diện theo thời gian thực (ngày lễ, Tết).<br><br>"
+                "<button type=\"button\" onclick=\"window.location.href='/?theme=reset'\" style=\"padding:7px 14px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:#fff; border:none; border-radius:14px; font-weight:700; cursor:pointer;\">🔄 Áp Dụng Ngay (Tải lại trang)</button>"
+            )
+        elif theme_choice in THEMES_CATALOG:
+            session['active_theme'] = theme_choice
+            theme_name = THEMES_CATALOG[theme_choice]['name']
+            chips = make_ai_chips([(lbl, f"Đổi sang giao diện {lbl}") for k, lbl, _ in theme_catalog_info if k != theme_choice])
+            return (
+                f"🎨 <strong>ĐÃ KÍCH HOẠT GIAO DIỆN: {theme_name}!</strong><br>"
+                f"Hệ thống đã chuyển sang phong cách lễ hội mới.<br><br>"
+                f"<button type=\"button\" onclick=\"window.location.href='/?theme={theme_choice}'\" style=\"padding:8px 16px; background:linear-gradient(135deg, #16a34a, #15803d); color:#fff; border:none; border-radius:14px; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(22,163,74,0.4);\">✨ Bấm vào đây để tải lại trang với giao diện {theme_name}</button><br><br>"
+                f"Hoặc chọn đổi thử giao diện khác bên dưới:{chips}"
+            )
+
+    chips = make_ai_chips([(lbl, f"Đổi sang giao diện {lbl}") for k, lbl, _ in theme_catalog_info])
+    return (
+        "🎨 <strong>BỘ SƯU TẬP GIAO DIỆN THEO MÙA (TRẦN BÌNH AUTO):</strong><br>"
+        "Với quyền <strong>Quản Trị Admin</strong>, Sếp có thể bấm chọn ngay giao diện bên dưới để đổi thử trên toàn trang:<br>"
+        f"{chips}"
+    )
 
 def answer_schedule_query(query):
     query_clean = query.strip()
@@ -1533,26 +1736,123 @@ def api_ai_chat_schedule():
         return jsonify({'success': False, 'error': 'Vui lòng nhập câu hỏi'})
 
     q_norm = remove_accents(question.lower())
+    admin_mode = is_admin()
 
-    # 1. Kiểm tra các động từ / cụm từ thể hiện hành động XIN NGHỈ / BÁO NGHỈ:
-    has_leave_intent_verbs = bool(re.search(r'\b(xin\s+ngh[i|y]|muon\s+ngh[i|y]|can\s+ngh[i|y]|dinh\s+ngh[i|y]|tinh\s+ngh[i|y]|bao\s+ngh[i|y]|dang\s+ky\s+ngh[i|y]|ngh[i|y]\s+phep|cho\s+(?:toi|em|anh|minh|chau|tui)?\s*ngh[i|y]|xin\s+off|muon\s+off|bao\s+off)\b', q_norm))
+    # ═══════════════════════════════════════════════════════════════════
+    # 0. ĐẶC QUYỀN ADMIN: XỬ LÝ CÁC CÂU HỎI QUẢN TRỊ VIÊN
+    # ═══════════════════════════════════════════════════════════════════
+
+    # 0.1. Hỏi về Quyền hạn / Hướng dẫn Admin
+    if re.search(r'\b(admin\s+(?:lam|co\s+the|duoc|chuc\s+nang)|quyen\s+admin|chuc\s+nang\s+admin|huong\s+dan\s+admin|dac\s+quyen\s+admin|vai\s+tro\s+admin)\b', q_norm):
+        return jsonify({
+            'success': True,
+            'is_leave_intent': False,
+            'is_admin_mode': admin_mode,
+            'answer': get_admin_capabilities_response(),
+            'engine': 'Trợ lý Admin'
+        })
+
+    # 0.2. Thống kê ngày nghỉ / Lịch sử nghỉ của các thành viên
+    is_stats_query = bool(re.search(r'\b(thong\s+ke|ai\s+ngh[i|y]\s+nhieu\s+nhat|ai\s+ngh[i|y]\s+it\s+nhat|ai\s+chua\s+ngh[i|y]|lich\s+su\s+ngh[i|y]|tong\s+hop\s+ngh[i|y]|so\s+ngay\s+ngh[i|y]|bao\s+cao\s+ngh[i|y]|ai\s+off\s+nhieu\s+nhat)\b', q_norm))
+    if is_stats_query:
+        target_staff = None
+        for staff in sorted(ALL_STAFF, key=lambda s: len(s), reverse=True):
+            if re.search(r'\b' + re.escape(remove_accents(staff.lower())) + r'\b', q_norm):
+                target_staff = staff
+                break
+        is_all_time = bool(re.search(r'\b(toan\s+bo|tat\s+ca|tat\s+ca\s+cac\s+ky|lich\s+su|all)\b', q_norm))
+        stats_data = get_admin_leave_statistics(all_time=is_all_time, specific_member=target_staff)
+        ans = format_leave_statistics_response(stats_data)
+        return jsonify({
+            'success': True,
+            'is_leave_intent': False,
+            'is_admin_mode': admin_mode,
+            'answer': ans,
+            'engine': 'Thống kê Admin'
+        })
+
+    # 0.3. Đổi giao diện / Xem thử giao diện (Seasonal Themes)
+    is_theme_query = bool(re.search(r'\b(doi\s+giao\s+dien|xem\s+giao\s+dien|giao\s+dien|theme|doi\s+theme|mau\s+giao\s+dien|xem\s+thu\s+giao\s+dien)\b', q_norm))
+    if is_theme_query:
+        if not admin_mode:
+            chips = make_ai_chips([("🔔 Hôm nay ai trực?", "Hôm nay ai trực?"), ("🌱 Ngày mai ai trực?", "Ngày mai ai trực?")])
+            return jsonify({
+                'success': True,
+                'is_leave_intent': False,
+                'is_admin_mode': False,
+                'answer': (
+                    "🔒 <strong>QUYỀN QUẢN TRỊ ADMIN:</strong><br>"
+                    "Tính năng đổi thử giao diện theo mùa chỉ dành riêng cho Quản trị viên (Admin).<br>"
+                    f"👉 Bạn vui lòng cuộn xuống cuối trang và bấm nút <strong>Admin</strong> để đăng nhập quản trị nhé!{chips}"
+                ),
+                'engine': 'Trợ lý AI'
+            })
+        
+        chosen_theme = None
+        if re.search(r'\b(tet|nguyen\s+dan|xuan|am\s+lich)\b', q_norm):
+            chosen_theme = 'tet'
+        elif re.search(r'\b(halloween|ma\s+quai|bi\s+ngo)\b', q_norm):
+            chosen_theme = 'halloween'
+        elif re.search(r'\b(noel|giang\s+sinh|christmas)\b', q_norm):
+            chosen_theme = 'christmas'
+        elif re.search(r'\b(nam\s+moi|new\s+year|countdown|tet\s+tay)\b', q_norm):
+            chosen_theme = 'new_year'
+        elif re.search(r'\b(trung\s+thu|mid\s+autumn)\b', q_norm):
+            chosen_theme = 'mid_autumn'
+        elif re.search(r'\b(mac\s+dinh|tu\s+dong|reset|ban\s+dau|tro\s+ve)\b', q_norm):
+            chosen_theme = 'reset'
+        
+        return jsonify({
+            'success': True,
+            'is_leave_intent': False,
+            'is_admin_mode': True,
+            'answer': get_admin_theme_response(chosen_theme),
+            'engine': 'Quản lý Giao diện'
+        })
+
+    # 0.4. Nếu là câu chào hỏi và đang ở chế độ Admin:
+    if admin_mode and re.search(r'^(chao|xin chao|hello|hi|alo|ad|admin|bot|oi|hey)\b', q_norm):
+        chips = make_ai_chips([
+            ("👑 Cho nghỉ cận ngày", "Tôi muốn cho nhân viên nghỉ"),
+            ("📊 Ai nghỉ nhiều nhất kỳ này?", "Ai nghỉ nhiều nhất kỳ này?"),
+            ("🌟 Ai chưa nghỉ?", "Ai chưa nghỉ ngày nào?"),
+            ("🎨 Đổi giao diện lễ hội", "Đổi giao diện ứng dụng"),
+            ("👑 Quyền Admin làm gì?", "Admin có thể làm được những gì?"),
+            ("🔔 Hôm nay ai trực?", "Hôm nay ai trực?"),
+        ])
+        return jsonify({
+            'success': True,
+            'is_leave_intent': False,
+            'is_admin_mode': True,
+            'answer': (
+                "👋 <strong>Xin chào Sếp (Admin Trần Bình Auto)!</strong> 👑<br>"
+                "Bạn đang có <strong>Quyền Quản Trị Tối Cao</strong>. AI có thể giúp Sếp:<br>"
+                "• 🚀 Duyệt nghỉ cận ngày (hôm nay, mai, mốt, nhiều ngày liên tiếp).<br>"
+                "• 📊 Tra cứu thống kê ai nghỉ nhiều nhất, ai chưa nghỉ.<br>"
+                "• 🎨 Đổi thử giao diện ứng dụng (Tết, Halloween, Noel...).<br>"
+                f"Sếp cần kiểm tra hoặc điều phối gì ạ? 👇{chips}"
+            ),
+            'engine': 'Trợ lý Admin'
+        })
+
+    # ═══════════════════════════════════════════════════════════════════
+    # 1. NHẬN DIỆN Ý ĐỊNH BÁO NGHỈ / DUYỆT NGHỈ (LEAVE INTENT)
+    # ═══════════════════════════════════════════════════════════════════
+    has_leave_intent_verbs = bool(re.search(r'\b(xin\s+ngh[i|y]|muon\s+ngh[i|y]|can\s+ngh[i|y]|dinh\s+ngh[i|y]|tinh\s+ngh[i|y]|bao\s+ngh[i|y]|dang\s+ky\s+ngh[i|y]|ngh[i|y]\s+phep|cho\s+(?:toi|em|anh|minh|chau|tui)?\s*ngh[i|y]|xin\s+off|muon\s+off|bao\s+off|duyet\s+ngh[i|y]|phe\s+duyet\s+ngh[i|y]|dac\s+cach\s+ngh[i|y]|cho\s+ngh[i|y]|cho\s+phep\s+.*ngh[i|y])\b', q_norm))
     first_person_leave = bool(re.search(r'\b(toi|em|minh|chau|tui)\s+(muon|xin|can|dinh|tinh|se)?\s*ngh[i|y]\b', q_norm))
 
-    # 2. Nhận diện câu HỎI TRA CỨU thông thường về người nghỉ (Inquiry):
+    # Nhận diện câu hỏi tra cứu người nghỉ thông thường
     is_inquiry = bool(re.search(r'\b(co\s+ai\s+nghi|ai\s+nghi|ai\s+xin\s+nghi|co\s+nguoi\s+nghi|co\s+ai\s+off|ai\s+off|danh\s+sach\s+nghi|xem\s+nghi|khi\s+nao\s+nghi|ngay\s+nao\s+nghi|nghi\s+ngay\s+nao)\b', q_norm))
     is_asking_if_someone_leave = bool(re.search(r'\b(co\s+.*ngh[i|y]|ngh[i|y]\s+.*(?:khong|chua|\?))\b', q_norm)) and not (has_leave_intent_verbs or first_person_leave)
-
     is_pure_question = is_inquiry or is_asking_if_someone_leave
 
-    # 3. Kết luận: Có phải ý định BÁO NGHỈ / XIN NGHỈ không?
     has_staff_and_leave = bool(re.search(r'\bngh[i|y]\b', q_norm)) and any(remove_accents(s.lower()) in q_norm for s in ALL_STAFF)
     is_leave_statement = (has_leave_intent_verbs or first_person_leave or has_staff_and_leave) and not is_pure_question
 
-    # Nếu câu có dấu hiệu báo nghỉ
     if is_leave_statement:
         m_name, first_d, found_dates, reason, engine = ai_parse_message(question)
         today = get_vn_today()
-        # Quy định: Tối thiểu cách 3 ngày (Không nhận Hôm nay, Ngày mai và Ngày mốt)
+        # Quy định nhân viên: Tối thiểu cách 3 ngày (Không nhận Hôm nay, Ngày mai và Ngày mốt)
         min_allowed_date = today + timedelta(days=3)
         min_allowed_str = min_allowed_date.strftime('%Y-%m-%d')
         min_allowed_disp = min_allowed_date.strftime('%d/%m/%Y')
@@ -1565,11 +1865,17 @@ def api_ai_chat_schedule():
 
         if found_dates:
             past_dates = sorted([d for d in found_dates if d < today])
-            near_dates = sorted([d for d in found_dates if today <= d < min_allowed_date])
-            future_valid_dates = sorted([d for d in found_dates if d >= min_allowed_date])
+            if admin_mode:
+                # ĐẶC QUYỀN ADMIN: Cho phép duyệt bất kỳ ngày nào từ hôm nay trở đi (cận ngày, liên tiếp)
+                near_dates = []
+                valid_dates = sorted([d for d in found_dates if d >= today])
+            else:
+                near_dates = sorted([d for d in found_dates if today <= d < min_allowed_date])
+                future_valid_dates = sorted([d for d in found_dates if d >= min_allowed_date])
+                valid_dates = future_valid_dates
 
-            # TRƯỜNG HỢP 1: Chỉ chọn ngày cận (hoặc ngày quá khứ) -> TỪ CHỐI & BÁO LIÊN HỆ ADMIN
-            if near_dates and not future_valid_dates:
+            # TRƯỜNG HỢP 1 (Chỉ với Nhân viên thường): Chọn ngày cận -> Từ chối & hướng dẫn liên hệ Admin
+            if not admin_mode and near_dates and not valid_dates:
                 near_disp = ', '.join([d.strftime('%d/%m/%Y') for d in near_dates])
                 chips = make_ai_chips([
                     (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_prefix}xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
@@ -1580,6 +1886,7 @@ def api_ai_chat_schedule():
                 return jsonify({
                     'success': True,
                     'is_leave_intent': False,
+                    'is_admin_mode': False,
                     'answer': (
                         f"⛔ <strong>KHÔNG ĐƯỢC PHÉP XIN NGHỈ CẬN NGÀY!</strong><br>"
                         f"Theo quy định của Trần Bình Auto, bạn <strong>không được tự đăng ký xin nghỉ vào Hôm nay, Ngày mai và Ngày mốt</strong> "
@@ -1590,30 +1897,32 @@ def api_ai_chat_schedule():
                     'engine': engine
                 })
 
-            if not near_dates and not future_valid_dates and past_dates:
+            if not valid_dates and past_dates:
+                earliest_disp = today.strftime('%d/%m/%Y') if admin_mode else min_allowed_disp
                 chips = make_ai_chips([
-                    (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_prefix}xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
-                    (f"📅 Nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_prefix}xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}"),
+                    (f"📅 Nghỉ từ {earliest_disp}", f"{m_prefix}xin nghỉ ngày {earliest_disp}"),
                 ])
                 return jsonify({
                     'success': True,
                     'is_leave_intent': False,
-                    'answer': f"⚠️ Các ngày bạn yêu cầu đều đã ở trong quá khứ nên hệ thống không nhận đơn được nữa.<br>👉 Ngày xin nghỉ sớm nhất có thể nhận là từ <strong>{min_allowed_disp}</strong> ({min_allowed_w}).{chips}",
+                    'is_admin_mode': admin_mode,
+                    'answer': f"⚠️ Các ngày bạn yêu cầu đều đã ở trong quá khứ nên hệ thống không nhận đơn được nữa.<br>👉 Ngày xin nghỉ sớm nhất có thể nhận là từ <strong>{earliest_disp}</strong>.{chips}",
                     'engine': engine
                 })
 
-            # TRƯỜNG HỢP 2: Có các ngày hợp lệ từ min_allowed_date trở đi
-            valid_dates = future_valid_dates
+            # TRƯỜNG HỢP 2: Có các ngày hợp lệ
             leave_dates_str = [d.strftime('%Y-%m-%d') for d in valid_dates]
             display_dates = [f"{d.strftime('%d/%m/%Y')} ({weekday_vn.get(d.strftime('%A'), '')})" for d in valid_dates]
 
             near_warning_note = ""
-            if near_dates:
+            if not admin_mode and near_dates:
                 near_disp = ', '.join([d.strftime('%d/%m') for d in near_dates])
                 near_warning_note = f"• ⚠️ <strong>Các ngày cận ({near_disp})</strong>: Đã bị loại bỏ do quy định không nhận đơn Hôm nay, Ngày mai, Ngày mốt (vui lòng liên hệ Admin nếu cần nghỉ gấp)."
 
             if m_name:
                 conflict_notes = []
+                if admin_mode:
+                    conflict_notes.append("• 👑 <strong>ĐẶC QUYỀN ADMIN:</strong> Cho phép duyệt nghỉ cận ngày & liên tiếp theo thẩm quyền quản lý.")
                 if near_warning_note:
                     conflict_notes.append(near_warning_note)
                 has_any_conflict = False
@@ -1636,7 +1945,7 @@ def api_ai_chat_schedule():
                         if holiday_match:
                             conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: 🏢 Tiệm đóng cửa ({holiday_match['reason']}).")
                         elif my_existing:
-                            conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: ℹ️ Bạn đã đăng ký trước đó (Lý do cũ: <em>\"{my_existing['reason']}\"</em>) ➔ Sẽ cập nhật lý do mới.")
+                            conflict_notes.append(f"• <strong>{d.strftime('%d/%m')}</strong>: ℹ️ Đã có đơn trước đó (Lý do cũ: <em>\"{my_existing['reason']}\"</em>) ➔ Sẽ cập nhật lý do mới.")
                         elif existing_leaves:
                             has_any_conflict = True
                             names = ", ".join([f"<strong>{p['member_name']}</strong>" for p in existing_leaves])
@@ -1664,6 +1973,7 @@ def api_ai_chat_schedule():
                 return jsonify({
                     'success': True,
                     'is_leave_intent': True,
+                    'is_admin_mode': admin_mode,
                     'member_name': m_name,
                     'leave_date': leave_dates_str[0],
                     'leave_dates': leave_dates_str,
@@ -1672,7 +1982,7 @@ def api_ai_chat_schedule():
                     'reason': reason,
                     'has_conflict': has_any_conflict,
                     'conflict_note': summary_note,
-                    'engine': engine
+                    'engine': 'Trợ lý Admin' if admin_mode else engine
                 })
             else:
                 # Chưa biết tên nhân viên -> Hỏi lại kèm nút chọn tên
@@ -1684,56 +1994,98 @@ def api_ai_chat_schedule():
                     lbl = f"ngày <strong>{dates_disp}</strong>"
 
                 near_prefix = ""
-                if near_dates:
+                if not admin_mode and near_dates:
                     near_disp = ', '.join([d.strftime('%d/%m') for d in near_dates])
                     near_prefix = f"⚠️ <em>Lưu ý: Các ngày cận ({near_disp}) đã được loại bỏ do quy định không nhận đơn cận ngày.</em><br>"
 
-                chips = make_ai_chips([(f"👤 {m}", f"{m} xin nghỉ ngày {dates_disp}") for m in ALL_STAFF])
+                role_prompt = "Sếp muốn duyệt cho ai trong 10 anh em Trần Bình Auto nghỉ vậy ạ?" if admin_mode else "Bạn là ai trong 10 anh em Trần Bình Auto? Vui lòng bấm chọn tên của bạn bên dưới để tạo đơn ngay nhé:"
+                prefix_cmd = "Cho " if admin_mode else ""
+                chips = make_ai_chips([(f"👤 {m}", f"{prefix_cmd}{m} xin nghỉ ngày {dates_disp}") for m in ALL_STAFF])
                 return jsonify({
                     'success': True,
                     'is_leave_intent': False,
+                    'is_admin_mode': admin_mode,
                     'answer': (
                         f"{near_prefix}"
-                        f"📝 Trợ lý đã ghi nhận bạn muốn đăng ký xin nghỉ vào {lbl}.<br>"
-                        f"❓ Bạn là ai trong 10 anh em Trần Bình Auto? Vui lòng bấm chọn tên của bạn bên dưới để tạo đơn ngay nhé:{chips}"
+                        f"📝 Trợ lý đã ghi nhận muốn đăng ký nghỉ vào {lbl}.<br>"
+                        f"❓ {role_prompt}{chips}"
                     ),
                     'engine': engine
                 })
         else:
             # Không phát hiện được ngày nào
-            if m_name:
-                chips = make_ai_chips([
-                    (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
-                    (f"📅 Nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}"),
-                    (f"📅 Nghỉ 3 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ 3 ngày từ {min_allowed_date.strftime('%d/%m')}"),
-                    ("🗓️ Nghỉ tuần sau", f"{m_name} xin nghỉ tuần sau"),
-                ])
-                return jsonify({
-                    'success': True,
-                    'is_leave_intent': False,
-                    'answer': (
-                        f"❓ Bạn muốn đăng ký cho <strong>{m_name}</strong> xin nghỉ vào ngày nào vậy bạn?<br>"
-                        f"👉 Bạn có thể nhắn ngày hoặc bấm chọn nhanh bên dưới:<br>"
-                        f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay, Ngày mai và Ngày mốt. Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
-                    ),
-                    'engine': engine
-                })
+            if admin_mode:
+                if m_name:
+                    chips = make_ai_chips([
+                        (f"👑 Cho {m_name} nghỉ hôm nay", f"Cho {m_name} nghỉ hôm nay"),
+                        (f"👑 Cho {m_name} nghỉ ngày mai", f"Cho {m_name} nghỉ ngày mai"),
+                        (f"👑 Cho {m_name} nghỉ mai & mốt", f"Cho {m_name} nghỉ ngày mai và ngày mốt"),
+                        (f"👑 Cho {m_name} nghỉ 3 ngày", f"Cho {m_name} nghỉ 3 ngày từ ngày mai"),
+                    ])
+                    return jsonify({
+                        'success': True,
+                        'is_leave_intent': False,
+                        'is_admin_mode': True,
+                        'answer': (
+                            f"👑 <strong>Sếp muốn duyệt cho {m_name} nghỉ vào ngày nào ạ?</strong><br>"
+                            f"Admin có quyền duyệt nghỉ ngay hôm nay, ngày mai hoặc nhiều ngày liên tiếp:{chips}"
+                        ),
+                        'engine': 'Trợ lý Admin'
+                    })
+                else:
+                    chips = make_ai_chips([
+                        ("👑 Cho Vinh nghỉ hôm nay", "Cho Vinh nghỉ hôm nay"),
+                        ("👑 Cho Bảo Mập nghỉ ngày mai", "Cho Bảo Mập nghỉ ngày mai"),
+                        ("👑 Cho Thái nghỉ mai & mốt", "Cho Thái nghỉ ngày mai và ngày mốt"),
+                        ("👑 Cho Ân nghỉ 3 ngày", "Cho Ân nghỉ 3 ngày từ ngày mai"),
+                    ])
+                    return jsonify({
+                        'success': True,
+                        'is_leave_intent': False,
+                        'is_admin_mode': True,
+                        'answer': (
+                            "👑 <strong>Sếp muốn duyệt cho ai nghỉ và vào ngày nào ạ?</strong><br>"
+                            "Với quyền Quản Trị Admin, Sếp có thể cho bất kỳ ai nghỉ hôm nay, ngày mai, ngày mốt hoặc nhiều ngày liên tiếp không cần cách ngày.<br>"
+                            f"👉 Sếp có thể nhắn trực tiếp câu lệnh hoặc chọn gợi ý bên dưới:{chips}"
+                        ),
+                        'engine': 'Trợ lý Admin'
+                    })
             else:
-                chips = make_ai_chips([
-                    (f"👤 Vinh nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"Vinh xin nghỉ ngày {min_allowed_date.strftime('%d/%m')} việc bận"),
-                    (f"👤 Bảo Mập nghỉ 2 ngày", f"Bảo Mập xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')} khám bệnh"),
-                    (f"👤 Thái nghỉ tuần sau", "Thái xin nghỉ tuần sau việc riêng"),
-                ])
-                return jsonify({
-                    'success': True,
-                    'is_leave_intent': False,
-                    'answer': (
-                        "❓ Bạn muốn đăng ký xin nghỉ cho ai và vào ngày nào vậy bạn?<br>"
-                        "👉 Bạn có thể nhắn theo mẫu đầy đủ hoặc bấm chọn gợi ý bên dưới:<br>"
-                        f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay, Ngày mai và Ngày mốt. Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
-                    ),
-                    'engine': engine
-                })
+                if m_name:
+                    chips = make_ai_chips([
+                        (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
+                        (f"📅 Nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}"),
+                        (f"📅 Nghỉ 3 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ 3 ngày từ {min_allowed_date.strftime('%d/%m')}"),
+                        ("🗓️ Nghỉ tuần sau", f"{m_name} xin nghỉ tuần sau"),
+                    ])
+                    return jsonify({
+                        'success': True,
+                        'is_leave_intent': False,
+                        'is_admin_mode': False,
+                        'answer': (
+                            f"❓ Bạn muốn đăng ký cho <strong>{m_name}</strong> xin nghỉ vào ngày nào vậy bạn?<br>"
+                            f"👉 Bạn có thể nhắn ngày hoặc bấm chọn nhanh bên dưới:<br>"
+                            f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay, Ngày mai và Ngày mốt. Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
+                        ),
+                        'engine': engine
+                    })
+                else:
+                    chips = make_ai_chips([
+                        (f"👤 Vinh nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"Vinh xin nghỉ ngày {min_allowed_date.strftime('%d/%m')} việc bận"),
+                        (f"👤 Bảo Mập nghỉ 2 ngày", f"Bảo Mập xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')} khám bệnh"),
+                        (f"👤 Thái nghỉ tuần sau", "Thái xin nghỉ tuần sau việc riêng"),
+                    ])
+                    return jsonify({
+                        'success': True,
+                        'is_leave_intent': False,
+                        'is_admin_mode': False,
+                        'answer': (
+                            "❓ Bạn muốn đăng ký xin nghỉ cho ai và vào ngày nào vậy bạn?<br>"
+                            "👉 Bạn có thể nhắn theo mẫu đầy đủ hoặc bấm chọn gợi ý bên dưới:<br>"
+                            f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay, Ngày mai và Ngày mốt. Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
+                        ),
+                        'engine': engine
+                    })
 
     # Nếu không phải báo nghỉ hoặc chỉ là câu hỏi tra cứu
     answer, engine = answer_schedule_query(question)
@@ -1741,7 +2093,8 @@ def api_ai_chat_schedule():
         'success': True,
         'question': question,
         'answer': answer,
-        'engine': engine
+        'engine': engine,
+        'is_admin_mode': admin_mode
     })
 
 @app.route('/api/ai-confirm-leave', methods=['POST'])
@@ -1801,14 +2154,16 @@ def api_ai_confirm_leave():
 
     actor_name = f"Admin ({member_name})" if is_admin() else member_name
     dates_desc = f"{len(valid_dates)} ngày ({', '.join(valid_dates)})" if len(valid_dates) > 1 else valid_dates[0]
-    log_action('XIN NGHỈ (AI CHAT)', f"{member_name} đăng ký xin nghỉ {dates_desc} qua Trợ lý AI (Lý do: '{reason}')", actor=actor_name)
+    action_type = 'ADMIN DUYỆT NGHỈ' if is_admin() else 'XIN NGHỈ (AI CHAT)'
+    log_action(action_type, f"{actor_name} đã xác nhận ca nghỉ {dates_desc} qua Trợ lý AI (Lý do: '{reason}')", actor='Admin' if is_admin() else member_name)
 
     return jsonify({
         'success': True,
         'member_name': member_name,
         'leave_dates': valid_dates,
         'reason': reason,
-        'message': f"Đã ghi nhận thành công {len(valid_dates)} ngày nghỉ của {member_name}!"
+        'is_admin_mode': is_admin(),
+        'message': f"{'Admin đã phê duyệt' if is_admin() else 'Đã ghi nhận'} thành công {len(valid_dates)} ngày nghỉ của {member_name}!"
     })
 
 @app.route('/report-leave', methods=['POST'])

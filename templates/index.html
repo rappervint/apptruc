@@ -1539,20 +1539,26 @@
 
         <div class="date-picker-card">
           <div style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
-            <span>📌</span>
-            <span>Ngày đăng ký sớm nhất có thể nhận: <strong style="color: {{ theme.colors.primary }};">{{ min_leave_date_display }}</strong> (cách 3 ngày để xếp trực nhật).</span>
+            <span>ℹ️</span>
+            <span>Ngày đăng ký sớm nhất có thể nhận: <strong style="color: {{ theme.colors.primary }};">{% if is_admin %}Hôm nay (Đặc quyền Admin: Tự do chọn mọi ngày){% else %}{{ min_leave_date_display }} (cách 3 ngày để xếp trực nhật){% endif %}</strong>.</span>
           </div>
           <div class="date-range-grid">
             <div class="form-group">
               <label>📅 Từ ngày:</label>
-              <input type="date" name="leave_date" id="leave_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{{ min_leave_date_str }}" required onchange="syncLeaveEndDate(); checkLiveConflict();">
+              <input type="date" name="leave_date" id="leave_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" required onchange="syncLeaveEndDate(); checkLiveConflict();">
             </div>
             <div class="form-group">
               <label>📅 Đến ngày <span style="font-weight: normal; color: #94a3b8; font-size: 0.8rem;">(chọn nếu nghỉ nhiều ngày)</span>:</label>
-              <input type="date" name="end_date" id="leave_end_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{{ min_leave_date_str }}" onchange="checkLiveConflict();">
+              <input type="date" name="end_date" id="leave_end_date_input" min="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" value="{% if is_admin %}{{ today_date_str }}{% else %}{{ min_leave_date_str }}{% endif %}" onchange="checkLiveConflict();">
             </div>
           </div>
           <div class="quick-chips" style="margin-top: 10px;">
+            {% if is_admin %}
+            <span class="chip" onclick="setQuickLeaveOffset(0, 1)" style="border-color: #f59e0b; color: #fbbf24; font-weight: 700;">👑 Hôm nay</span>
+            <span class="chip" onclick="setQuickLeaveOffset(1, 1)" style="border-color: #f59e0b; color: #fbbf24; font-weight: 700;">👑 Ngày mai</span>
+            <span class="chip" onclick="setQuickLeaveOffset(2, 1)" style="border-color: #f59e0b; color: #fbbf24; font-weight: 700;">👑 Ngày mốt</span>
+            <span class="chip" onclick="setQuickLeaveOffset(0, 2)" style="border-color: #f59e0b; color: #fbbf24;">👑 Nay & Mai</span>
+            {% endif %}
             <span class="chip" onclick="setQuickLeaveDays(1)">⚡ 1 ngày</span>
             <span class="chip" onclick="setQuickLeaveDays(2)">✨ 2 ngày liên tiếp</span>
             <span class="chip" onclick="setQuickLeaveDays(3)">🌟 3 ngày liên tiếp</span>
@@ -1576,7 +1582,7 @@
         <div id="live-alert-container" style="display: none;"></div>
 
         <button type="submit" class="btn btn-danger" style="margin-top: 6px;">
-          🚀 Xác Nhận Xin Nghỉ & Cập Nhật Lịch
+          {% if is_admin %}👑 Admin Duyệt Nghỉ Ngay & Cập Nhật Lịch{% else %}🚀 Xác Nhận Xin Nghỉ & Cập Nhật Lịch{% endif %}
         </button>
       </form>
     </div>
@@ -1780,6 +1786,14 @@
       }
     }
 
+    function askAiQuestion(questionText) {
+      askAiDuty(questionText);
+    }
+
+    function switchTheme(themeKey) {
+      window.location.href = '/?theme=' + encodeURIComponent(themeKey);
+    }
+
     function fillAiInput(text) {
       const input = document.getElementById('ai-chat-input');
       if (input) {
@@ -1852,19 +1866,24 @@
           // Thẻ xác nhận tạo đơn xin nghỉ ngay trong khung chat
           const conflictStyle = data.has_conflict ? 'background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.5); color:#fef3c7;' : 'background:rgba(16, 185, 129, 0.2); border:1px solid rgba(16, 185, 129, 0.5); color:#d1fae5;';
           const datesPayload = encodeURIComponent(JSON.stringify(data.leave_dates || [data.leave_date]));
-          const btnLabel = (data.leave_dates && data.leave_dates.length > 1)
-            ? `🚀 Xác Nhận Tạo ${data.leave_dates.length} Ngày Luôn`
-            : '🚀 Xác Nhận Tạo Luôn';
+          const isAdminAction = data.is_admin_mode;
+          let btnLabel = (data.leave_dates && data.leave_dates.length > 1)
+            ? (isAdminAction ? `🚀 Admin Duyệt Nghỉ (${data.leave_dates.length} Ngày Luôn)` : `🚀 Xác Nhận Tạo ${data.leave_dates.length} Ngày Luôn`)
+            : (isAdminAction ? '🚀 Admin Duyệt Cho Nghỉ Ngay' : '🚀 Xác Nhận Tạo Luôn');
+
+          const cardBorder = isAdminAction ? 'border: 1.5px solid #f59e0b; box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 12px rgba(245,158,11,0.4);' : 'border: 1.5px solid {{ theme.colors.border_focus }}; box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 10px {{ theme.colors.primary_glow }};';
+          const cardTitle = isAdminAction ? '👑 ADMIN PHÊ DUYỆT ĐẶC CÁCH NGHỈ' : '{{ theme.icons.main }} XÁC NHẬN BÁO NGHỈ';
+          const btnGradient = isAdminAction ? 'background: linear-gradient(135deg, #d97706, #f59e0b); color: #000; font-weight: 800; box-shadow: 0 2px 8px rgba(245,158,11,0.5);' : 'background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; font-weight: 700; box-shadow: 0 2px 6px rgba(22,163,74,0.4);';
 
           aiBubble.innerHTML = `
-            <span>{{ theme.icons.bot }}</span>
-            <div style="background: {{ theme.colors.card_bg }}; border: 1.5px solid {{ theme.colors.border_focus }}; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #fff1f2; line-height: 1.45; box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 10px {{ theme.colors.primary_glow }}; max-width: 92%;">
-              <div style="font-weight: 800; color: {{ theme.colors.accent }}; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-                <span>{{ theme.icons.main }} XÁC NHẬN BÁO NGHỈ</span>
-                <span style="font-size: 0.7rem; background: {{ theme.colors.primary_glow }}; color: {{ theme.colors.text }}; border: 1px solid {{ theme.colors.border }}; padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
+            <span>${isAdminAction ? '👑' : '{{ theme.icons.bot }}'}</span>
+            <div style="background: {{ theme.colors.card_bg }}; ${cardBorder} padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #fff1f2; line-height: 1.45; max-width: 92%;">
+              <div style="font-weight: 800; color: ${isAdminAction ? '#fbbf24' : '{{ theme.colors.accent }}'}; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                <span>${cardTitle}</span>
+                <span style="font-size: 0.7rem; background: ${isAdminAction ? 'rgba(245,158,11,0.25)' : '{{ theme.colors.primary_glow }}'}; color: ${isAdminAction ? '#fef3c7' : '{{ theme.colors.text }}'}; border: 1px solid ${isAdminAction ? '#f59e0b' : '{{ theme.colors.border }}'}; padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
               </div>
               <div style="margin-bottom: 6px;">
-                • Nhân viên: <strong style="color: {{ theme.colors.accent }};">${data.member_name}</strong><br>
+                • Nhân viên: <strong style="color: ${isAdminAction ? '#fbbf24' : '{{ theme.colors.accent }}'};">${data.member_name}</strong><br>
                 • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: {{ theme.colors.highlight }};">(${data.weekday_vn})</span><br>
                 • Lý do: <em>"${data.reason}"</em>
               </div>
@@ -1872,7 +1891,7 @@
                 ${data.conflict_note}
               </div>
               <div style="display: flex; gap: 6px;">
-                <button type="button" onclick="confirmLeaveFromChat('${data.member_name}', '${datesPayload}', '${encodeURIComponent(data.reason)}', this)" style="flex: 1; padding: 7px 10px; font-size: 0.8rem; background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 6px rgba(22,163,74,0.4); touch-action: manipulation;">
+                <button type="button" onclick="confirmLeaveFromChat('${data.member_name}', '${datesPayload}', '${encodeURIComponent(data.reason)}', this)" style="flex: 1; padding: 7px 10px; font-size: 0.8rem; ${btnGradient} border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; touch-action: manipulation;">
                   ${btnLabel}
                 </button>
               </div>
@@ -2313,7 +2332,12 @@
       <div style="display: flex; align-items: center; gap: 8px;">
         <span style="font-size: 1.25rem;">{{ theme.icons.bot }}</span>
         <div>
-          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Trần Bình Auto AI {{ theme.icons.sub }}</strong>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Trần Bình Auto AI {{ theme.icons.sub }}</strong>
+            {% if is_admin %}
+            <span style="font-size: 0.65rem; background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; padding: 2px 7px; border-radius: 10px; font-weight: 800; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 0 8px rgba(245,158,11,0.5); letter-spacing: 0.5px;">👑 ADMIN</span>
+            {% endif %}
+          </div>
           <span style="font-size: 0.72rem; opacity: 0.9; display: flex; align-items: center; gap: 4px;">
             <span style="width: 6px; height: 6px; background: {{ theme.colors.primary }}; border-radius: 50%; display: inline-block;"></span> {{ theme.tag }}
           </span>
@@ -2326,6 +2350,32 @@
 
     <!-- Vùng tin nhắn chat -->
     <div class="ai-popup-messages" id="ai-chat-messages">
+      {% if is_admin %}
+      <div style="display: flex; align-items: flex-start; gap: 8px;">
+        <span style="font-size: 1.25rem;">👑</span>
+        <div style="background: {{ theme.colors.card_bg }}; border: 1.5px solid #f59e0b; padding: 11px 14px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.48; box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 10px rgba(245,158,11,0.25);">
+          <div style="font-weight: 800; color: #fbbf24; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+            <span>👑 CHẾ ĐỘ QUẢN TRỊ ADMIN TỐI CAO</span>
+            <span style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fef3c7; padding: 2px 6px; border-radius: 4px;">Toàn Quyền</span>
+          </div>
+          <div>Xin chào Sếp! AI đã nhận diện <strong>Quyền Quản Trị Tối Cao</strong> của bạn:</div>
+          <small style="color: #cbd5e1; margin-top: 5px; display: block; line-height: 1.45;">
+            • 🚀 <strong>Duyệt nghỉ cận ngày:</strong> Cho bất kỳ ai nghỉ hôm nay, ngày mai, ngày mốt hoặc liên tiếp mà không bị chặn 3 ngày.<br>
+            • 📊 <strong>Báo cáo & Thống kê:</strong> Ai nghỉ nhiều nhất, ai chưa nghỉ, lịch sử nghỉ.<br>
+            • 🎨 <strong>Đổi thử giao diện:</strong> Tết, Halloween, Noel...<br>
+            • 💡 Nhắn mẫu: <em>"Cho Vinh nghỉ hôm nay"</em> hoặc bấm gợi ý:
+          </small>
+          <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px;">
+            <button type="button" onclick="askAiDuty('Thống kê ngày nghỉ ai nghỉ nhiều nhất?')" style="display:inline-flex; align-items:center; padding:4px 9px; background:rgba(245,158,11,0.2); border:1px solid #f59e0b; color:#fef3c7; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;">📊 Ai nghỉ nhiều nhất?</button>
+            <button type="button" onclick="askAiDuty('Ai chưa nghỉ ngày nào trong chu kỳ này?')" style="display:inline-flex; align-items:center; padding:4px 9px; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#d1fae5; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;">🌟 Ai chưa nghỉ?</button>
+            <button type="button" onclick="askAiDuty('Đổi giao diện ứng dụng')" style="display:inline-flex; align-items:center; padding:4px 9px; background:rgba(168,85,247,0.2); border:1px solid #a855f7; color:#f3e8ff; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;">🎨 Đổi giao diện lễ hội</button>
+            <button type="button" onclick="askAiDuty('Admin có thể làm được những gì?')" style="display:inline-flex; align-items:center; padding:4px 9px; background:rgba(56,189,248,0.2); border:1px solid #38bdf8; color:#e0f2fe; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;">👑 Quyền Admin làm gì?</button>
+            <button type="button" onclick="askAiDuty('Cho Vinh nghỉ hôm nay')" style="display:inline-flex; align-items:center; padding:4px 9px; background:rgba(239,68,68,0.2); border:1px solid #ef4444; color:#fee2e2; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;">🚀 Cho nghỉ hôm nay</button>
+            <button type="button" onclick="askAiDuty('Hôm nay ai trực?')" style="display:inline-flex; align-items:center; padding:4px 9px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#e2e8f0; border-radius:12px; font-size:0.76rem; cursor:pointer;">🔔 Hôm nay ai trực?</button>
+          </div>
+        </div>
+      </div>
+      {% else %}
       <div style="display: flex; align-items: flex-start; gap: 8px;">
         <span style="font-size: 1.1rem;">{{ theme.icons.bot }}</span>
         <div style="background: {{ theme.colors.card_bg }}; border: 1px solid {{ theme.colors.border }}; padding: 9px 13px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
@@ -2336,6 +2386,7 @@
           </small>
         </div>
       </div>
+      {% endif %}
     </div>
 
     <!-- Thanh nhập câu hỏi -->
