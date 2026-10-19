@@ -884,6 +884,9 @@
       </button>
 
       {% if is_admin %}
+        <button type="button" onclick="openThemePickerModal()" style="background: rgba(255,255,255,0.12); border: 1.5px solid var(--border-focus); color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+          🎨 Đổi Giao Diện
+        </button>
         <span style="background: rgba(225, 29, 72, 0.25); border: 1.5px solid var(--border-focus); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
           👑 Admin
         </span>
@@ -939,13 +942,13 @@
       📅 Lịch Trực Vệ Sinh 🧹
     </button>
     <button type="button" class="tab-btn" id="tab-btn-leaves" onclick="switchTab('leaves')">
-      📝 Xin Nghỉ & Lịch Nghỉ 🌸
+      📝 Xin Nghỉ & Lịch Nghỉ {{ theme.icons.main }}
       {% if future_leaves_count > 0 %}
         <span class="tab-badge {% if has_any_conflict %}badge-alert{% endif %}">{{ future_leaves_count }}</span>
       {% endif %}
     </button>
-    <a href="/history" class="tab-btn" style="color: #fda4af;">
-      📜 Lịch Sử Nghỉ ↗ 🌷
+    <a href="/history" class="tab-btn" style="color: {{ theme.colors.accent }};">
+      📜 Lịch Sử Nghỉ ↗ {{ theme.icons.sub }}
     </a>
   </div>
 
@@ -958,7 +961,7 @@
     <div class="cards-grid">
       <div class="hero-card hero-today">
         <div>
-          <div class="hero-label">🌸 Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
+          <div class="hero-label">{{ theme.icons.main }} Hôm nay ({{ today_duty.display_date if today_duty else '' }})</div>
           {% if today_duty and today_duty.is_holiday %}
             <div class="badge-holiday-box">{{ today_duty.holiday_reason }}</div>
           {% elif today_duty and today_duty.assigned %}
@@ -977,7 +980,7 @@
 
       <div class="hero-card hero-tomorrow">
         <div>
-          <div class="hero-label">🌷 Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
+          <div class="hero-label">{{ theme.icons.sub }} Ngày mai ({{ tomorrow_duty.display_date if tomorrow_duty else '' }})</div>
           {% if tomorrow_duty and tomorrow_duty.is_holiday %}
             <div class="badge-holiday-box">{{ tomorrow_duty.holiday_reason }}</div>
           {% elif tomorrow_duty and tomorrow_duty.assigned %}
@@ -1162,8 +1165,8 @@
     <!-- FORM XIN NGHỈ -->
     <div class="action-box">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
-        <h2 style="font-size: 1.15rem; font-weight: 800; color: #fb7185; display: flex; align-items: center; gap: 8px; margin: 0; text-shadow: 0 0 10px rgba(244,63,94,0.4);">
-          <span>🌸</span> ĐĂNG KÝ XIN NGHỈ
+        <h2 style="font-size: 1.15rem; font-weight: 800; color: {{ theme.colors.accent }}; display: flex; align-items: center; gap: 8px; margin: 0; text-shadow: 0 0 10px {{ theme.colors.primary_glow }};">
+          <span>{{ theme.icons.main }}</span> ĐĂNG KÝ XIN NGHỈ
         </h2>
         <div style="font-size: 0.78rem; font-weight: 700; color: #ffe4e6; background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(244, 63, 94, 0.45); padding: 4px 10px; border-radius: 20px;">
           ⚠️ Không nhận xin nghỉ Hôm nay, Ngày mai & Ngày mốt
@@ -1190,7 +1193,7 @@
         <div class="date-picker-card">
           <div style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
             <span>📌</span>
-            <span>Ngày đăng ký sớm nhất có thể nhận: <strong style="color: #fb923c;">{{ min_leave_date_display }}</strong> (cách 3 ngày để xếp trực nhật).</span>
+            <span>Ngày đăng ký sớm nhất có thể nhận: <strong style="color: {{ theme.colors.primary }};">{{ min_leave_date_display }}</strong> (cách 3 ngày để xếp trực nhật).</span>
           </div>
           <div class="date-range-grid">
             <div class="form-group">
@@ -1206,7 +1209,7 @@
             <span class="chip" onclick="setQuickLeaveDays(1)">⚡ 1 ngày</span>
             <span class="chip" onclick="setQuickLeaveDays(2)">✨ 2 ngày liên tiếp</span>
             <span class="chip" onclick="setQuickLeaveDays(3)">🌟 3 ngày liên tiếp</span>
-            <span class="chip" onclick="setQuickLeaveOffset(3, 1)">🌸 Sau 3 ngày</span>
+            <span class="chip" onclick="setQuickLeaveOffset(3, 1)">{{ theme.icons.main }} Sau 3 ngày</span>
             <span class="chip" onclick="setQuickLeaveNextWeek()">🗓️ Thứ Hai tuần sau</span>
           </div>
         </div>
@@ -1340,9 +1343,9 @@
       </table>
       {% else %}
       <div class="empty-state" style="text-align: center; padding: 36px 16px; color: var(--text-muted);">
-        <div style="font-size: 2.2rem; margin-bottom: 8px;">🌸</div>
-        <p><strong style="color: #fda4af;">Hiện tại không có ai xin nghỉ sắp tới!</strong></p>
-        <p style="font-size: 0.85rem; margin-top: 4px; color: #ffe4e6;">Cả 10 anh em đều đang có lịch đi làm đầy đủ 💐.</p>
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">{{ theme.icons.main }}</div>
+        <p><strong style="color: {{ theme.colors.accent }};">Hiện tại không có ai xin nghỉ sắp tới!</strong></p>
+        <p style="font-size: 0.85rem; margin-top: 4px; color: {{ theme.colors.text_muted }};">Cả 10 anh em đều đang có lịch đi làm đầy đủ {{ theme.icons.sub }}.</p>
       </div>
       {% endif %}
     </div>
@@ -1373,18 +1376,18 @@
       const pageTitle = document.getElementById('page-title');
       const pageSubtitle = document.getElementById('page-subtitle');
       if (tabName === 'schedule') {
-        if (pageTitle) pageTitle.innerHTML = '🌸 HÔM NAY AI TRỰC 🌷';
-        if (pageSubtitle) pageSubtitle.innerHTML = 'Người trực chính 7h30: <strong style="color:#fda4af;">{{ today_duty.assigned if today_duty else "---" }}</strong> 🧹';
-        document.title = 'Hôm Nay Ai Trực? — Mừng 20/10';
+        if (pageTitle) pageTitle.innerHTML = '{{ theme.icons.main }} HÔM NAY AI TRỰC {{ theme.icons.sub }}';
+        if (pageSubtitle) pageSubtitle.innerHTML = 'Người trực chính 7h30: <strong style="color:{{ theme.colors.accent }};">{{ today_duty.assigned if today_duty else "---" }}</strong> 🧹';
+        document.title = 'Hôm Nay Ai Trực? — {{ theme.name }}';
       } else if (tabName === 'leaves') {
-        if (pageTitle) pageTitle.innerHTML = '💐 HÔM NAY AI NGHỈ 🌸';
+        if (pageTitle) pageTitle.innerHTML = '{{ theme.icons.sub }} HÔM NAY AI NGHỈ {{ theme.icons.main }}';
         {% if today_leaves %}
           const leaveNames = '{{ today_leaves | map(attribute="member_name") | join(", ") }}';
-          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay có: <strong style="color:#fb7185;">' + leaveNames + '</strong> xin nghỉ';
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay có: <strong style="color:{{ theme.colors.accent }};">' + leaveNames + '</strong> xin nghỉ';
         {% else %}
-          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🌸)';
+          if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm {{ theme.icons.main }})';
         {% endif %}
-        document.title = 'Hôm Nay Ai Nghỉ? — Mừng 20/10';
+        document.title = 'Hôm Nay Ai Nghỉ? — {{ theme.name }}';
       }
     }
 
@@ -1438,7 +1441,7 @@
       const loadingBubble = document.createElement('div');
       loadingBubble.id = 'ai-loading-bubble';
       loadingBubble.style.cssText = 'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;';
-      loadingBubble.innerHTML = `<span>💐</span><div style="background: #1e0d28; border: 1px solid #4a1f4e; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: #ffe4e6; font-style: italic;">Đang tìm câu trả lời...</div>`;
+      loadingBubble.innerHTML = `<span>{{ theme.icons.bot }}</span><div style="background: {{ theme.colors.card_bg }}; border: 1px solid {{ theme.colors.border }}; padding: 7px 12px; border-radius: 10px; font-size: 0.85rem; color: {{ theme.colors.text }}; font-style: italic;">Đang tìm câu trả lời...</div>`;
       container.appendChild(loadingBubble);
       container.scrollTop = container.scrollHeight;
 
@@ -1467,14 +1470,14 @@
             : '🚀 Xác Nhận Tạo Luôn';
 
           aiBubble.innerHTML = `
-            <span>🌸</span>
-            <div style="background: #1a0c24; border: 1.5px solid #f43f5e; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #fff1f2; line-height: 1.45; box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 10px rgba(244,63,94,0.25); max-width: 92%;">
-              <div style="font-weight: 800; color: #fda4af; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-                <span>🌸 XÁC NHẬN BÁO NGHỈ</span>
+            <span>{{ theme.icons.bot }}</span>
+            <div style="background: {{ theme.colors.card_bg }}; border: 1.5px solid {{ theme.colors.border_focus }}; padding: 10px 12px; border-radius: 12px; font-size: 0.86rem; color: #fff1f2; line-height: 1.45; box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 10px {{ theme.colors.primary_glow }}; max-width: 92%;">
+              <div style="font-weight: 800; color: {{ theme.colors.accent }}; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                <span>{{ theme.icons.main }} XÁC NHẬN BÁO NGHỈ</span>
                 <span style="font-size: 0.7rem; background: rgba(225,29,72,0.25); color: #ffe4e6; border: 1px solid rgba(244,63,94,0.4); padding: 2px 6px; border-radius: 4px; font-weight: 600;">✨ ${data.engine || 'AI'}</span>
               </div>
               <div style="margin-bottom: 6px;">
-                • Nhân viên: <strong style="color: #fda4af;">${data.member_name}</strong><br>
+                • Nhân viên: <strong style="color: {{ theme.colors.accent }};">${data.member_name}</strong><br>
                 • Thời gian: <strong>${data.display_date}</strong> <span style="font-size: 0.8rem; color: #fbcfe8;">(${data.weekday_vn})</span><br>
                 • Lý do: <em>"${data.reason}"</em>
               </div>
@@ -1490,7 +1493,7 @@
           `;
         } else {
           // Trả lời văn bản thông thường
-          aiBubble.innerHTML = `<span>🌸</span><div style="background: #1e0d28; border: 1px solid #4a1f4e; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #fff1f2; line-height: 1.5; box-shadow: 0 2px 6px rgba(0,0,0,0.3); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
+          aiBubble.innerHTML = `<span>{{ theme.icons.bot }}</span><div style="background: {{ theme.colors.card_bg }}; border: 1px solid {{ theme.colors.border }}; padding: 9px 13px; border-radius: 10px; font-size: 0.88rem; color: #fff1f2; line-height: 1.5; box-shadow: 0 2px 6px rgba(0,0,0,0.3); max-width: 90%;">${data.answer || 'Không thể lấy thông tin lúc này.'}</div>`;
         }
         container.appendChild(aiBubble);
 

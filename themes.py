@@ -571,3 +571,4 @@ def get_theme_for_date(check_date):
 def get_theme_by_key(key):
     """Lấy theme theo key cụ thể"""
     return THEMES_CATALOG.get(key, THEMES_CATALOG['women_day'])
+
