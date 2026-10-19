@@ -9,20 +9,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #f43f5e;
-      --primary-gradient: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #ec4899 100%);
-      --accent-gradient: linear-gradient(135deg, #ec4899 0%, #f472b6 50%, #fb7185 100%);
-      --today-gradient: linear-gradient(135deg, #be123c 0%, #e11d48 55%, #881337 100%);
-      --tomorrow-gradient: linear-gradient(135deg, #701a75 0%, #a21caf 55%, #4a044e 100%);
-      --bg: #0d0614;
-      --card-bg: #190c24;
-      --text: #fff1f2;
-      --text-muted: #f472b6;
-      --border: #3b1740;
-      --border-focus: #f43f5e;
+      --primary: {{ theme.colors.primary }};
+      --primary-hover: {{ theme.colors.primary_hover }};
+      --primary-gradient: {{ theme.colors.primary_gradient }};
+      --primary-glow: {{ theme.colors.primary_glow }};
+      --accent: {{ theme.colors.accent }};
+      --today-gradient: {{ theme.colors.primary_gradient }};
+      --tomorrow-gradient: linear-gradient(135deg, rgba(0,0,0,0.65), {{ theme.colors.card_bg }});
+      --bg: {{ theme.colors.bg }};
+      --card-bg: {{ theme.colors.card_bg }};
+      --text: {{ theme.colors.text }};
+      --text-muted: {{ theme.colors.text_muted }};
+      --border: {{ theme.colors.border }};
+      --border-focus: {{ theme.colors.border_focus }};
       --shadow-sm: 0 2px 4px rgba(0,0,0,0.4);
       --shadow-md: 0 6px 18px rgba(0,0,0,0.5);
-      --shadow-lg: 0 12px 32px rgba(0,0,0,0.7), 0 0 20px rgba(244, 63, 94, 0.25);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.7), 0 0 20px {{ theme.colors.primary_glow }};
       --radius: 16px;
       --radius-sm: 10px;
     }
@@ -36,10 +38,10 @@
     }
 
     body {
-      background: radial-gradient(circle at 15% 15%, rgba(225, 29, 72, 0.2) 0%, transparent 45%),
-                  radial-gradient(circle at 85% 85%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
-                  radial-gradient(circle at 50% 50%, rgba(162, 28, 175, 0.12) 0%, transparent 60%),
-                  #0d0614;
+      background: radial-gradient(circle at 15% 15%, {{ theme.colors.primary_glow }} 0%, transparent 45%),
+                  radial-gradient(circle at 85% 85%, {{ theme.colors.primary_glow }} 0%, transparent 50%),
+                  radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.4) 0%, transparent 60%),
+                  {{ theme.colors.bg }};
       background-attachment: fixed;
       color: var(--text);
       padding: 12px 14px;
@@ -864,70 +866,70 @@
   <!-- Top bar với Đồng hồ thời gian thực Giờ Việt Nam & Nút Admin -->
   <div class="top-header-bar">
     <div class="brand-title">
-      <span class="floral-float">🌸</span>
-      <span>Cửa Hàng • Mừng 20/10</span>
-      <span class="floral-float">💐</span>
+      <span class="floral-float">{{ theme.icons.main }}</span>
+      <span>Cửa Hàng • {{ theme.name }}</span>
+      <span class="floral-float">{{ theme.icons.sub }}</span>
     </div>
 
     <div style="display: flex; align-items: center; gap: 8px;">
       <div class="clock-badge">
-        <span style="font-size: 0.95rem;">🌷</span>
+        <span style="font-size: 0.95rem;">{{ theme.icons.clock }}</span>
         <span id="vn-live-clock" class="clock-time">--:--:--</span>
-        <span id="vn-live-date" style="color: #fbcfe8; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
+        <span id="vn-live-date" style="color: {{ theme.colors.text_muted }}; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
         <span class="clock-zone">Giờ VN</span>
       </div>
 
-      <button type="button" onclick="toggleAiChatPopup()" style="background: linear-gradient(135deg, #e11d48, #db2777); border: 1px solid #f43f5e; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(225,29,72,0.45);">
-        💐 Hỏi AI
+      <button type="button" onclick="toggleAiChatPopup()" style="background: {{ theme.colors.primary_gradient }}; border: 1px solid {{ theme.colors.border_focus }}; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px {{ theme.colors.primary_glow }};">
+        {{ theme.icons.bot }} Hỏi AI
       </button>
 
       {% if is_admin %}
-        <span style="background: rgba(225, 29, 72, 0.25); border: 1.5px solid #f43f5e; color: #fda4af; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+        <span style="background: rgba(225, 29, 72, 0.25); border: 1.5px solid var(--border-focus); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
           👑 Admin
         </span>
-        <a href="/admin-logout" style="background: rgba(225, 29, 72, 0.2); color: #fda4af; border: 1px solid #f43f5e; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+        <a href="/admin-logout" style="background: rgba(225, 29, 72, 0.2); color: {{ theme.colors.highlight }}; border: 1px solid var(--border-focus); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
           Thoát
         </a>
       {% else %}
-        <button type="button" onclick="openAdminModal()" style="background: #1e0d28; border: 1.5px solid #4a1f4e; color: #ffe4e6; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+        <button type="button" onclick="openAdminModal()" style="background: {{ theme.colors.card_bg }}; border: 1.5px solid {{ theme.colors.border }}; color: {{ theme.colors.text }}; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
           🔐 Quản Trị
         </button>
       {% endif %}
     </div>
   </div>
 
-  <!-- BANNER CHÚC MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10 -->
-  <div style="background: linear-gradient(135deg, rgba(225, 29, 72, 0.22), rgba(219, 39, 119, 0.28)); border: 1.5px solid rgba(244, 63, 94, 0.45); border-radius: 16px; padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 20px rgba(225, 29, 72, 0.2);">
+  <!-- BANNER CHỦ ĐỀ SỰ KIỆN THEO MÙA -->
+  <div style="background: linear-gradient(135deg, {{ theme.colors.primary_glow }}, rgba(0,0,0,0.55)); border: 1.5px solid {{ theme.colors.border_focus }}; border-radius: 16px; padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 20px {{ theme.colors.primary_glow }};">
     <div style="display: flex; align-items: center; gap: 12px;">
-      <span style="font-size: 1.9rem; filter: drop-shadow(0 2px 8px rgba(244,63,94,0.45));">💐</span>
+      <span style="font-size: 1.9rem; filter: drop-shadow(0 2px 8px {{ theme.colors.primary_glow }});">{{ theme.icons.main }}</span>
       <div>
-        <div style="font-size: 1rem; font-weight: 800; color: #ffe4e6; letter-spacing: 0.4px; display: flex; align-items: center; gap: 6px;">
-          <span>CHÀO MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10</span>
-          <span>🌸</span>
+        <div style="font-size: 1rem; font-weight: 800; color: {{ theme.colors.text }}; letter-spacing: 0.4px; display: flex; align-items: center; gap: 6px;">
+          <span>{{ theme.banner.title }}</span>
+          <span>{{ theme.icons.sub }}</span>
         </div>
-        <div style="font-size: 0.83rem; color: #fbcfe8; margin-top: 2px;">
-          Toàn thể anh em cửa hàng xin gửi lời chúc yêu thương đến các bà, các mẹ, người thương và toàn thể phái đẹp nhân ngày 20/10 luôn ngập tràn niềm vui, xinh đẹp và rạng rỡ! 💖
+        <div style="font-size: 0.83rem; color: {{ theme.colors.text_muted }}; margin-top: 2px;">
+          {{ theme.banner.sub }}
         </div>
       </div>
     </div>
-    <span style="font-size: 0.78rem; font-weight: 700; background: linear-gradient(135deg, #e11d48, #db2777); color: #fff; padding: 4px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(225,29,72,0.4);">
-      💝 Happy Vietnamese Women's Day
+    <span style="font-size: 0.78rem; font-weight: 700; background: {{ theme.colors.primary_gradient }}; color: #fff; padding: 4px 12px; border-radius: 20px; box-shadow: 0 2px 8px {{ theme.colors.primary_glow }};">
+      {{ theme.banner.badge }}
     </span>
   </div>
 
   <header>
     {% if active_tab == 'leaves' %}
-      <h1 id="page-title" class="floral-glow-text">💐 HÔM NAY AI NGHỈ 🌸</h1>
+      <h1 id="page-title" class="floral-glow-text">{{ theme.icons.main }} HÔM NAY AI NGHỈ {{ theme.icons.sub }}</h1>
       <p class="subtitle" id="page-subtitle">
         {% if today_leaves %}
-          Hôm nay có: <strong style="color:#fb7185;">{{ today_leaves | map(attribute="member_name") | join(", ") }}</strong> xin nghỉ
+          Hôm nay có: <strong style="color:{{ theme.colors.accent }};">{{ today_leaves | map(attribute="member_name") | join(", ") }}</strong> xin nghỉ
         {% else %}
-          Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm 🌸)
+          Hôm nay: <strong style="color:#4ade80;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm {{ theme.icons.sub }})
         {% endif %}
       </p>
     {% else %}
-      <h1 id="page-title" class="floral-glow-text">🌸 HÔM NAY AI TRỰC 🌷</h1>
-      <p class="subtitle" id="page-subtitle">Người trực chính 7h30: <strong style="color:#fda4af;">{{ today_duty.assigned if today_duty else '---' }}</strong> 🧹</p>
+      <h1 id="page-title" class="floral-glow-text">{{ theme.icons.main }} HÔM NAY AI TRỰC {{ theme.icons.sub }}</h1>
+      <p class="subtitle" id="page-subtitle">Người trực chính 7h30: <strong style="color:{{ theme.colors.accent }};">{{ today_duty.assigned if today_duty else '---' }}</strong> 🧹</p>
     {% endif %}
   </header>
 
@@ -1907,8 +1909,8 @@
 
   <!-- BONG BÓNG CHAT AI NỔI (FLOATING CHAT BUBBLE) -->
   <div class="ai-fab-btn" id="ai-fab-button" onclick="toggleAiChatPopup()" title="Hỏi nhanh trợ lý AI về lịch trực & ngày nghỉ">
-    <span class="ai-fab-icon">💐</span>
-    <span class="ai-fab-text">Hỏi AI 20/10</span>
+    <span class="ai-fab-icon">{{ theme.icons.bot }}</span>
+    <span class="ai-fab-text">{{ theme.tag }}</span>
     <span class="ai-fab-badge"></span>
   </div>
 
@@ -1916,11 +1918,11 @@
   <div class="ai-chat-popup" id="ai-chat-popup">
     <div class="ai-popup-header">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 1.25rem;">🌸</span>
+        <span style="font-size: 1.25rem;">{{ theme.icons.bot }}</span>
         <div>
-          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Cửa Hàng AI 💐</strong>
+          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Cửa Hàng AI {{ theme.icons.sub }}</strong>
           <span style="font-size: 0.72rem; opacity: 0.9; display: flex; align-items: center; gap: 4px;">
-            <span style="width: 6px; height: 6px; background: #fb7185; border-radius: 50%; display: inline-block;"></span> Mừng Ngày Phụ Nữ VN 20/10
+            <span style="width: 6px; height: 6px; background: {{ theme.colors.primary }}; border-radius: 50%; display: inline-block;"></span> {{ theme.tag }}
           </span>
         </div>
       </div>
@@ -1932,9 +1934,9 @@
     <!-- Vùng tin nhắn chat -->
     <div class="ai-popup-messages" id="ai-chat-messages">
       <div style="display: flex; align-items: flex-start; gap: 8px;">
-        <span style="font-size: 1.1rem;">🌸</span>
-        <div style="background: #190c24; border: 1px solid #4a1d48; padding: 9px 13px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
-          Xin chào! 🌸 Tôi là Trợ Lý Cửa Hàng AI (Mừng Ngày Phụ Nữ VN 20/10 💐). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc <strong>tạo đơn xin nghỉ bằng tin nhắn</strong>.<br>
+        <span style="font-size: 1.1rem;">{{ theme.icons.bot }}</span>
+        <div style="background: {{ theme.colors.card_bg }}; border: 1px solid {{ theme.colors.border }}; padding: 9px 13px; border-radius: 12px; font-size: 0.86rem; color: #f8fafc; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+          {{ theme.bot_intro }}<br>
           <small style="color: #cbd5e1; margin-top: 4px; display: block;">
             • Báo nghỉ: <em>"Vinh xin nghỉ ngày 25/10 việc gia đình"</em><br>
             • Tra cứu: <em>"Hôm nay ai trực?"</em>, <em>"Mai có ai nghỉ không?"</em>
@@ -1945,8 +1947,8 @@
 
     <!-- Thanh nhập câu hỏi -->
     <div class="ai-popup-footer">
-      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ... 🌸" style="flex: 1; padding: 10px 14px; border: 1.5px solid #4a1d48; background: #0f0614; color: #f8fafc; border-radius: 20px; font-size: 16px; outline: none; -webkit-text-size-adjust: 100%;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
-      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #e11d48, #f43f5e); color: #fff; border: 1px solid #fb7185; border-radius: 20px; cursor: pointer; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(244,63,94,0.4);">
+      <input type="text" id="ai-chat-input" placeholder="Hỏi lịch trực hoặc báo nghỉ... {{ theme.icons.main }}" style="flex: 1; padding: 10px 14px; border: 1.5px solid {{ theme.colors.border }}; background: {{ theme.colors.bg }}; color: #f8fafc; border-radius: 20px; font-size: 16px; outline: none; -webkit-text-size-adjust: 100%;" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendAiChat(); }">
+      <button type="button" id="ai-chat-btn" onclick="sendAiChat()" style="padding: 10px 16px; font-size: 0.9rem; background: {{ theme.colors.primary_gradient }}; color: #fff; border: 1px solid {{ theme.colors.border_focus }}; border-radius: 20px; cursor: pointer; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px {{ theme.colors.primary_glow }};">
         Gửi
       </button>
     </div>
@@ -1954,9 +1956,9 @@
 
   <!-- MODAL ĐĂNG NHẬP ADMIN -->
   <div id="admin-login-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
-    <div style="background:#190c24; border:1.5px solid #4a1d48; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:360px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px rgba(244,63,94,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+    <div style="background:{{ theme.colors.card_bg }}; border:1.5px solid {{ theme.colors.border }}; color:#f8fafc; border-radius:16px; padding:22px 18px; max-width:380px; width:100%; box-shadow:0 20px 45px rgba(0,0,0,0.8), 0 0 25px {{ theme.colors.primary_glow }}; animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:1.1rem; color:#fbcfe8; font-weight:800; display:flex; align-items:center; gap:6px;">
+        <h3 style="font-size:1.1rem; color:{{ theme.colors.highlight }}; font-weight:800; display:flex; align-items:center; gap:6px;">
           🔐 Quyền Quản Trị Admin
         </h3>
         <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
@@ -1965,13 +1967,29 @@
       <form action="/admin-login" method="POST">
         <input type="hidden" name="next_url" value="{{ request.url }}">
         <div class="form-group">
-          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; box-sizing:border-box; width:100%; background:#0f0614; color:#f8fafc; border:1.5px solid #4a1d48; border-radius:10px;">
+          <input type="password" name="password" placeholder="Nhập mật mã quản trị..." required style="padding:12px; font-size:1.05rem; letter-spacing:2px; text-align:center; box-sizing:border-box; width:100%; background:{{ theme.colors.bg }}; color:#f8fafc; border:1.5px solid {{ theme.colors.border }}; border-radius:10px;">
         </div>
         <div style="display:flex; gap:8px; margin-top:16px;">
           <button type="button" class="btn btn-light" style="flex:1;" onclick="closeAdminModal()">Hủy</button>
           <button type="submit" class="btn btn-primary" style="flex:2;">Đăng Nhập</button>
         </div>
       </form>
+
+      <!-- BỘ CHỌN ĐỔI GIAO DIỆN THEO MÙA DÀNH CHO ADMIN / TEST -->
+      <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed {{ theme.colors.border }};">
+        <label style="font-size: 0.78rem; font-weight: 700; color: {{ theme.colors.text_muted }}; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+          <span>🎨 Xem Thử 18 Giao Diện Dịp Lễ:</span>
+          <span style="font-size: 0.72rem; color: #4ade80;">{{ theme.name }}</span>
+        </label>
+        <select onchange="if(this.value) window.location.href='/?theme=' + this.value" style="padding: 8px 10px; font-size: 0.82rem; border-radius: 8px; width: 100%; background: {{ theme.colors.bg }}; color: #f8fafc; border: 1.5px solid {{ theme.colors.border }}; cursor: pointer; outline: none;">
+          <option value="reset">🌟 Tự Động Theo Ngày Thực Tế (Khuyên dùng)</option>
+          {% for k, t in all_themes.items() %}
+            <option value="{{ k }}" {% if theme.key == k %}selected{% endif %}>
+              {{ t.icons.main }} {{ t.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
   </div>
 

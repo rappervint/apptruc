@@ -6,6 +6,7 @@ import json
 import urllib.request
 from datetime import datetime, timedelta, date, timezone
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from themes import THEMES_CATALOG, get_theme_for_date, get_theme_by_key
 
 # Múi giờ Việt Nam (UTC+7)
 VN_TZ = timezone(timedelta(hours=7))
@@ -33,25 +34,30 @@ def is_admin():
 
 def get_current_theme():
     """
-    Tự động chuyển đổi giao diện theo ngày Việt Nam (UTC+7):
-    - Đến hết ngày 25/10/2026: Giao diện Ngày Phụ Nữ Việt Nam 20/10.
-    - Sau ngày 25/10/2026 (từ 00:00 ngày 26/10/2026 trở đi): Tự động chuyển hoàn toàn sang giao diện Halloween 2026, xóa bỏ giao diện 20/10.
-    - Hỗ trợ tham số URL ?theme=halloween hoặc ?theme=women_day (hoặc ?theme=reset) để xem trước/kiểm thử.
+    Xác định theme hiện hành:
+    - 1. Có query param ?theme=...: nếu hợp lệ thì lưu session, nếu là reset thì xóa session.
+    - 2. Đã lưu trong session: trả về theme đó.
+    - 3. Tự động theo thời gian thực (Giờ VN): so khớp lịch 12 tháng (đổi trước lễ vài ngày).
     """
     theme_arg = request.args.get('theme')
-    if theme_arg in ('halloween', 'women_day'):
-        session['active_theme'] = theme_arg
-        return theme_arg
     if theme_arg == 'reset':
         session.pop('active_theme', None)
+    elif theme_arg and theme_arg in THEMES_CATALOG:
+        session['active_theme'] = theme_arg
+        return THEMES_CATALOG[theme_arg]
 
-    if session.get('active_theme') in ('halloween', 'women_day'):
-        return session['active_theme']
+    active_key = session.get('active_theme')
+    if active_key and active_key in THEMES_CATALOG:
+        return THEMES_CATALOG[active_key]
 
     vn_today = get_vn_today()
-    if vn_today > date(2026, 10, 25):
-        return 'halloween'
-    return 'women_day'
+    return get_theme_for_date(vn_today)
+
+@app.context_processor
+def inject_theme():
+    """Tự động truyền theme và danh mục all_themes vào tất cả template HTML"""
+    current_theme = get_current_theme()
+    return dict(theme=current_theme, all_themes=THEMES_CATALOG)
 
 
 # 8 người cố định trực nhật vệ sinh 7h30 sáng
@@ -459,10 +465,7 @@ def index():
     with get_db() as conn:
         holidays_list = conn.execute('SELECT holiday_date, reason FROM shop_holidays ORDER BY holiday_date ASC').fetchall()
 
-    active_theme = get_current_theme()
-    template_file = 'index_halloween.html' if active_theme == 'halloween' else 'index.html'
-
-    return render_template(template_file, 
+    return render_template('index.html', 
                            active_tab=active_tab,
                            today_duty=today_duty, 
                            tomorrow_duty=tomorrow_duty, 
@@ -689,10 +692,7 @@ def history():
                 ORDER BY id DESC LIMIT 50
             ''').fetchall()
 
-    active_theme = get_current_theme()
-    template_file = 'history_halloween.html' if active_theme == 'halloween' else 'history.html'
-
-    return render_template(template_file,
+    return render_template('history.html',
                            history_list=history_list,
                            selected_cycle=selected_cycle,
                            selected_member=selected_member,

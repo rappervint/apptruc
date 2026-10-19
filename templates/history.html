@@ -9,15 +9,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #f43f5e;
-      --primary-gradient: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #ec4899 100%);
-      --secondary: #ec4899;
-      --accent: #e11d48;
-      --bg: #0d0614;
-      --card-bg: #190c24;
-      --text: #fff1f2;
-      --text-muted: #f472b6;
-      --border: #3b1740;
+      --primary: {{ theme.colors.primary }};
+      --primary-gradient: {{ theme.colors.primary_gradient }};
+      --secondary: {{ theme.colors.accent }};
+      --accent: {{ theme.colors.primary }};
+      --bg: {{ theme.colors.bg }};
+      --card-bg: {{ theme.colors.card_bg }};
+      --text: {{ theme.colors.text }};
+      --text-muted: {{ theme.colors.text_muted }};
+      --border: {{ theme.colors.border }};
       --success: #22c55e;
       --shadow-sm: 0 2px 4px rgba(0,0,0,0.4);
       --shadow-md: 0 6px 18px rgba(0,0,0,0.5);
@@ -27,9 +27,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
     body {
-      background: radial-gradient(circle at 15% 15%, rgba(225, 29, 72, 0.2) 0%, transparent 45%),
-                  radial-gradient(circle at 85% 85%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
-                  #0d0614;
+      background: radial-gradient(circle at 15% 15%, {{ theme.colors.primary_glow }} 0%, transparent 45%),
+                  radial-gradient(circle at 85% 85%, {{ theme.colors.primary_glow }} 0%, transparent 50%),
+                  {{ theme.colors.bg }};
       background-attachment: fixed;
       color: var(--text);
       padding: 16px;
@@ -407,25 +407,25 @@
 <body>
 
   <div class="top-bar">
-    <a href="/?tab=leaves" class="back-btn">⬅️ Quay lại Lịch Trực & Lịch Nghỉ 🌸</a>
+    <a href="/?tab=leaves" class="back-btn">⬅️ Quay lại Lịch Trực & Lịch Nghỉ {{ theme.icons.main }}</a>
     
     <div style="display: flex; align-items: center; gap: 8px;">
       <div class="clock-badge">
-        <span style="font-size: 0.95rem;">🌷</span>
+        <span style="font-size: 0.95rem;">{{ theme.icons.clock }}</span>
         <span id="vn-live-clock" class="clock-time">--:--:--</span>
         <span id="vn-live-date" style="color: #cbd5e1; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
         <span class="clock-zone">Giờ VN</span>
       </div>
 
       {% if is_admin %}
-        <span style="background: rgba(244, 63, 94, 0.25); border: 1.5px solid #f43f5e; color: #fecdd3; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px;">
+        <span style="background: rgba(244, 63, 94, 0.25); border: 1.5px solid var(--primary); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px;">
           👑 Admin
         </span>
-        <a href="/admin-logout" style="background: rgba(244, 63, 94, 0.2); color: #fecdd3; border: 1px solid #f43f5e; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
+        <a href="/admin-logout" style="background: rgba(244, 63, 94, 0.2); color: {{ theme.colors.highlight }}; border: 1px solid var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
           Thoát
         </a>
       {% else %}
-        <button type="button" onclick="openAdminModal()" style="background: #210d2c; border: 1px solid #5c2456; color: #fbcfe8; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+        <button type="button" onclick="openAdminModal()" style="background: {{ theme.colors.card_bg }}; border: 1px solid {{ theme.colors.border }}; color: {{ theme.colors.text }}; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
           🔐 Quản Trị
         </button>
       {% endif %}
@@ -435,8 +435,8 @@
   </div>
 
   <header>
-    <h1 class="floral-glow-text">📜 LỊCH SỬ XIN NGHỈ 🌸</h1>
-    <p class="subtitle">Tra cứu toàn diện các ca xin nghỉ của anh em cửa hàng (Mừng Ngày Phụ Nữ VN 20/10 💐)</p>
+    <h1 class="floral-glow-text">📜 LỊCH SỬ XIN NGHỈ {{ theme.icons.main }}</h1>
+    <p class="subtitle">Tra cứu toàn diện các ca xin nghỉ của anh em cửa hàng ({{ theme.tag }})</p>
   </header>
 
   <!-- BỘ LỌC TÌM KIẾM -->
