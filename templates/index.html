@@ -861,7 +861,7 @@
       📅 Lịch Trực Vệ Sinh
     </button>
     <button type="button" class="tab-btn" id="tab-btn-leaves" onclick="switchTab('leaves')">
-      📝 Xin Nghỉ & Báo Nghỉ
+      📝 Xin Nghỉ & Lịch Nghỉ
       {% if future_leaves_count > 0 %}
         <span class="tab-badge {% if has_any_conflict %}badge-alert{% endif %}">{{ future_leaves_count }}</span>
       {% endif %}
@@ -1306,7 +1306,7 @@
         {% else %}
           if (pageSubtitle) pageSubtitle.innerHTML = 'Hôm nay: <strong style="color:#16a34a;">Không có ai nghỉ</strong> (Cả 10 anh em đều đi làm)';
         {% endif %}
-        document.title = 'Hôm Nay Ai Nghỉ? — Báo Nghỉ & Theo Dõi';
+        document.title = 'Hôm Nay Ai Nghỉ? — Xin Nghỉ & Lịch Nghỉ';
       }
     }
 
