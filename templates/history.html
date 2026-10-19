@@ -258,17 +258,24 @@
     }
     .stat-item {
       background: #100c22;
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 12px 10px;
       text-align: center;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
     }
     .stat-item:hover {
       background: #1c1538;
       border-color: #ea580c;
-      transform: translateY(-2px);
-      box-shadow: 0 0 10px rgba(249, 115, 22, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(234, 88, 12, 0.35);
+    }
+    .stat-item:active {
+      transform: scale(0.96);
     }
     .stat-name {
       font-size: 0.88rem;
@@ -474,7 +481,12 @@
   <!-- THỐNG KÊ SỐ NGÀY NGHỈ THEO TỪNG NHÂN SỰ -->
   <div class="stats-card">
     <div class="stats-title">
-      <span>📊 Thống Kê Số Lần Xin Nghỉ ({% if selected_month %}Tháng {{ selected_month }}{% else %}Tất Cả Thời Gian{% endif %})</span>
+      <div>
+        <span>📊 Thống Kê Số Lần Xin Nghỉ ({% if selected_month %}Tháng {{ selected_month }}{% else %}Tất Cả Thời Gian{% endif %})</span>
+        <div style="font-size: 0.8rem; color: #fb923c; font-weight: normal; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+          <span>👉</span> <em>Nhấp vào thẻ của ai để xem chi tiết các ngày người đó đã nghỉ</em>
+        </div>
+      </div>
       <span style="font-size: 0.82rem; font-weight: 700; color: #fed7aa; background: #1c1538; border: 1px solid #3d3368; padding: 4px 10px; border-radius: 14px;">
         Tổng cộng: {{ total_leaves }} lượt
       </span>
@@ -482,7 +494,7 @@
 
     <div class="stats-grid">
       {% for staff in all_staff %}
-      <div class="stat-item">
+      <div class="stat-item" onclick="showMemberLeaves('{{ staff }}')" title="Nhấp để xem danh sách ngày nghỉ của {{ staff }}">
         <div class="stat-name">{{ staff }}</div>
         <div class="stat-count">{{ stats_by_member[staff] }}</div>
         <div class="stat-role">
@@ -491,94 +503,6 @@
       </div>
       {% endfor %}
     </div>
-  </div>
-
-  <!-- BẢNG LỊCH SỬ TOÀN BỘ -->
-  <div class="table-container">
-    {% if history_list %}
-    <table>
-      <thead>
-        <tr>
-          <th>Ngày nghỉ</th>
-          <th>Nhân viên</th>
-          <th>Phân loại</th>
-          <th>Lý do xin nghỉ</th>
-          <th>Thời gian nộp đơn</th>
-          <th>Trạng thái</th>
-          <th style="text-align: center;">Thao tác</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in history_list %}
-        <tr>
-          <td style="white-space: nowrap;">
-            <strong>{{ item.display_date }}</strong><br>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.weekday_vn }}</span>
-          </td>
-          <td>
-            <strong style="font-size: 1rem; color: #fed7aa;">{{ item.member_name }}</strong>
-          </td>
-          <td>
-            {% if item.is_duty_staff %}
-              <span class="tag-duty-member">Trực nhật 7h30</span>
-            {% else %}
-              <span class="tag-nonduty-member">Không trực nhật</span>
-            {% endif %}
-          </td>
-          <td>
-            <span>{{ item.reason }}</span>
-          </td>
-          <td>
-            <span style="font-size: 0.82rem; color: #94a3b8;">{{ item.created_at if item.created_at else '—' }}</span>
-          </td>
-          <td>
-            {% if item.is_past %}
-              <span class="badge-past">Đã nghỉ (Quá khứ)</span>
-            {% else %}
-              <span class="badge-upcoming">Sắp tới</span>
-            {% endif %}
-          </td>
-          <td style="text-align: center; white-space: nowrap;">
-            {% if is_admin %}
-              <button type="button" class="btn btn-light" style="padding: 3px 8px; font-size: 0.75rem; width: auto; display: inline-flex; margin-right: 2px;" onclick="openEditModal('{{ item.source }}', '{{ item.id }}', '{{ item.leave_date }}', '{{ item.member_name }}', '{{ item.reason }}')">
-                ✏️ Sửa
-              </button>
-              <form action="/delete-history" method="POST" style="display: inline-block;" onsubmit="return confirm('ADMIN: Bạn có chắc chắn muốn XÓA VĨNH VIỄN ca nghỉ ngày {{ item.display_date }} của {{ item.member_name }}?')">
-                <input type="hidden" name="id" value="{{ item.id }}">
-                <input type="hidden" name="source" value="{{ item.source }}">
-                <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
-                <input type="hidden" name="member_name" value="{{ item.member_name }}">
-                <button type="submit" class="del-btn">Xóa</button>
-              </form>
-            {% else %}
-              {% if item.can_cancel %}
-                <form action="/delete-history" method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đăng ký nghỉ ngày {{ item.display_date }} của {{ item.member_name }} không?')">
-                  <input type="hidden" name="id" value="{{ item.id }}">
-                  <input type="hidden" name="source" value="{{ item.source }}">
-                  <input type="hidden" name="leave_date" value="{{ item.leave_date }}">
-                  <input type="hidden" name="member_name" value="{{ item.member_name }}">
-                  <button type="submit" class="del-btn" title="Có thể hủy trong 15 phút sau khi nộp">
-                    Hủy (còn ~{{ item.minutes_left }}p)
-                  </button>
-                </form>
-              {% else %}
-                <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" title="Ca nghỉ đã chốt hoặc quá hạn 15 phút. Chỉ Admin mới có quyền sửa/xóa.">
-                  🔒 Đã chốt
-                </span>
-              {% endif %}
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="empty-state">
-      <div class="empty-state-icon">📂</div>
-      <p><strong>Không tìm thấy dữ liệu xin nghỉ nào!</strong></p>
-      <p style="font-size: 0.85rem; margin-top: 4px;">Chưa có ca xin nghỉ nào thỏa mãn điều kiện lọc.</p>
-    </div>
-    {% endif %}
   </div>
 
   <!-- BẢNG NHẬT KÝ VẾT (AUDIT LOGS) DÀNH RIÊNG CHO ADMIN -->
@@ -728,9 +652,130 @@
         </div>
       </form>
     </div>
+  <!-- MODAL CHI TIẾT CÁC NGÀY NGHỈ CỦA NHÂN VIÊN -->
+  <div id="member-leaves-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(11,9,20,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
+    <div style="background:#17122e; border:1.5px solid #433872; color:#f8fafc; border-radius:18px; padding:20px; max-width:520px; width:100%; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 45px rgba(0,0,0,0.85), 0 0 25px rgba(249,115,22,0.25); animation:tabFadeIn 0.2s ease; box-sizing:border-box;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid #332a5a; padding-bottom:10px;">
+        <div>
+          <h3 id="modal-member-title" style="font-size:1.15rem; color:#fed7aa; font-weight:800; display:flex; align-items:center; gap:8px; margin:0;">
+            🎃 Lịch Nghỉ Của ...
+          </h3>
+          <span id="modal-member-count" style="font-size:0.8rem; color:#cbd5e1; margin-top:3px; display:block;"></span>
+        </div>
+        <button type="button" onclick="closeMemberLeavesModal()" style="border:none; background:transparent; font-size:1.3rem; cursor:pointer; color:#94a3b8; padding:2px 6px;">✕</button>
+      </div>
+
+      <div id="modal-member-body" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px; padding-right:4px;">
+        <!-- Danh sách chi tiết các ngày nghỉ được điền qua JS -->
+      </div>
+
+      <div style="margin-top:14px; border-top:1px solid #332a5a; padding-top:12px; display:flex; justify-content:flex-end;">
+        <button type="button" class="btn btn-light" style="width:auto; padding:8px 20px;" onclick="closeMemberLeavesModal()">Đóng</button>
+      </div>
+    </div>
   </div>
 
   <script>
+    const allLeavesHistory = {{ history_list | tojson }};
+    const isAdmin = {{ 'true' if is_admin else 'false' }};
+
+    function showMemberLeaves(staffName) {
+      const modal = document.getElementById('member-leaves-modal');
+      const titleEl = document.getElementById('modal-member-title');
+      const countEl = document.getElementById('modal-member-count');
+      const bodyEl = document.getElementById('modal-member-body');
+      if (!modal || !bodyEl) return;
+
+      const memberLeaves = allLeavesHistory.filter(item => item.member_name === staffName);
+
+      if (titleEl) titleEl.innerHTML = `<span>🎃</span> Lịch Nghỉ: <span style="color:#fb923c;">${staffName}</span>`;
+      if (countEl) countEl.textContent = `Tổng cộng: ${memberLeaves.length} ngày nghỉ đã ghi nhận`;
+
+      bodyEl.innerHTML = '';
+
+      if (memberLeaves.length === 0) {
+        bodyEl.innerHTML = `
+          <div style="text-align:center; padding:32px 14px; color:#cbd5e1;">
+            <div style="font-size:2.2rem; margin-bottom:8px;">🍬</div>
+            <strong style="color:#fed7aa; font-size:1rem;">${staffName} chưa xin nghỉ ngày nào!</strong>
+            <p style="font-size:0.85rem; color:#94a3b8; margin-top:4px;">Chăm chỉ đi làm đầy đủ 100% trong khoảng thời gian này.</p>
+          </div>
+        `;
+      } else {
+        memberLeaves.forEach(item => {
+          const card = document.createElement('div');
+          card.style.cssText = 'background:#110c22; border:1px solid #332a5a; border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:6px;';
+
+          const statusBadge = item.is_past
+            ? `<span style="font-size:0.74rem; background:#1c1538; color:#cbd5e1; border:1px solid #3d3368; padding:2px 7px; border-radius:6px; font-weight:600;">Đã qua</span>`
+            : `<span style="font-size:0.74rem; background:rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.5); padding:2px 7px; border-radius:6px; font-weight:700;">Sắp tới</span>`;
+
+          let actionHtml = '';
+          if (isAdmin) {
+            actionHtml = `
+              <div style="display:flex; gap:6px; margin-top:6px; align-items:center;">
+                <button type="button" class="btn btn-light" style="padding:3px 10px; font-size:0.76rem; width:auto;" onclick="closeMemberLeavesModal(); openEditModal('${item.source}', '${item.id}', '${item.leave_date}', '${item.member_name}', '${item.reason.replace(/'/g, "\\'")}')">
+                  ✏️ Sửa
+                </button>
+                <form action="/delete-history" method="POST" style="margin:0; display:inline;" onsubmit="return confirm('ADMIN: Xóa vĩnh viễn ca nghỉ ngày ${item.display_date} của ${item.member_name}?')">
+                  <input type="hidden" name="id" value="${item.id}">
+                  <input type="hidden" name="source" value="${item.source}">
+                  <input type="hidden" name="leave_date" value="${item.leave_date}">
+                  <input type="hidden" name="member_name" value="${item.member_name}">
+                  <button type="submit" class="del-btn">🗑️ Xóa</button>
+                </form>
+              </div>
+            `;
+          } else if (item.can_cancel) {
+            actionHtml = `
+              <div style="margin-top:6px;">
+                <form action="/delete-history" method="POST" style="margin:0; display:inline;" onsubmit="return confirm('Bạn có chắc muốn hủy đăng ký nghỉ ngày ${item.display_date}?')">
+                  <input type="hidden" name="id" value="${item.id}">
+                  <input type="hidden" name="source" value="${item.source}">
+                  <input type="hidden" name="leave_date" value="${item.leave_date}">
+                  <input type="hidden" name="member_name" value="${item.member_name}">
+                  <button type="submit" class="del-btn" title="Có thể hủy trong 15 phút sau khi nộp">
+                    🗑️ Hủy (còn ~${item.minutes_left}p)
+                  </button>
+                </form>
+              </div>
+            `;
+          }
+
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-weight:800; font-size:0.95rem; color:#fed7aa; display:flex; align-items:center; gap:6px;">
+                <span>📅</span>
+                <span>${item.display_date}</span>
+                <span style="font-size:0.8rem; color:#94a3b8; font-weight:normal;">(${item.weekday_vn})</span>
+              </div>
+              ${statusBadge}
+            </div>
+            <div style="font-size:0.86rem; color:#e2e8f0;">
+              <strong>Lý do:</strong> <em>"${item.reason}"</em>
+            </div>
+            ${item.created_at ? `<div style="font-size:0.75rem; color:#94a3b8;">🕒 Nộp lúc: ${item.created_at}</div>` : ''}
+            ${actionHtml}
+          `;
+          bodyEl.appendChild(card);
+        });
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeMemberLeavesModal() {
+      const modal = document.getElementById('member-leaves-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    window.addEventListener('click', function(e) {
+      const modal = document.getElementById('member-leaves-modal');
+      if (e.target === modal) {
+        closeMemberLeavesModal();
+      }
+    });
+
     function openAdminModal() {
       const modal = document.getElementById('admin-login-modal');
       if (modal) {
