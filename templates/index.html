@@ -86,15 +86,29 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap;
     }
-    .unified-brand-clock {
+    .app-page-footer {
+      margin-top: 30px;
+      margin-bottom: 24px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, {{ theme.colors.card_bg }} 0%, rgba(10, 8, 20, 0.8) 100%);
+      border: 1.5px solid {{ theme.colors.border }};
+      border-radius: 18px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
       flex-wrap: wrap;
+      gap: 14px;
+      color: {{ theme.colors.text_muted }};
+      font-size: 0.85rem;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
     }
-    .top-header-actions {
+    .footer-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer-actions {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -924,12 +938,8 @@
         gap: 8px !important;
       }
       .unified-top-bar {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 8px !important;
-      }
-      .unified-brand-clock {
         display: flex !important;
+        flex-direction: row !important;
         align-items: center !important;
         justify-content: space-between !important;
         width: 100% !important;
@@ -950,22 +960,31 @@
       .clock-badge .clock-date {
         display: none !important;
       }
-      .top-header-actions {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-end !important;
-        gap: 6px !important;
-        width: 100% !important;
-        flex-wrap: wrap !important;
-      }
       .top-btn {
-        padding: 5px 10px !important;
-        font-size: 0.75rem !important;
+        padding: 6px 12px !important;
+        font-size: 0.78rem !important;
         border-radius: 16px !important;
       }
       .admin-badge {
-        font-size: 0.74rem !important;
-        padding: 3px 8px !important;
+        font-size: 0.76rem !important;
+        padding: 4px 10px !important;
+      }
+      .app-page-footer {
+        padding: 14px 12px !important;
+        margin-top: 20px !important;
+        margin-bottom: 32px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        text-align: center !important;
+      }
+      .footer-info {
+        justify-content: center !important;
+        font-size: 0.78rem !important;
+      }
+      .footer-actions {
+        justify-content: center !important;
+        width: 100% !important;
       }
       .unified-banner-body {
         border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -1209,43 +1228,19 @@
 
   <!-- KHUNG ĐIỀU HÀNH & CHỦ ĐỀ LỄ HỘI HỢP NHẤT (ALL-IN-ONE UNIFIED HEADER CARD) -->
   <div class="top-unified-card">
-    <!-- Hàng 1: Tiêu đề cửa hàng, Đồng hồ thời gian thực và Các nút chức năng -->
+    <!-- Hàng 1: Tiêu đề thương hiệu và Đồng hồ thời gian thực -->
     <div class="unified-top-bar">
-      <div class="unified-brand-clock">
-        <div class="brand-title">
-          <span class="floral-float">{{ theme.icons.main }}</span>
-          <span>Cửa Hàng • {{ theme.name }}</span>
-          <span class="floral-float">{{ theme.icons.sub }}</span>
-        </div>
-
-        <div class="clock-badge">
-          <span style="font-size: 0.95rem;">{{ theme.icons.clock }}</span>
-          <span id="vn-live-clock" class="clock-time">--:--:--</span>
-          <span id="vn-live-date" class="clock-date" style="color: {{ theme.colors.text_muted }}; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
-          <span class="clock-zone">Giờ VN</span>
-        </div>
+      <div class="brand-title">
+        <span class="floral-float">{{ theme.icons.main }}</span>
+        <span>Trần Bình Auto • {{ theme.name }}</span>
+        <span class="floral-float">{{ theme.icons.sub }}</span>
       </div>
 
-      <div class="top-header-actions">
-        <button type="button" class="top-btn" onclick="toggleAiChatPopup()" style="background: {{ theme.colors.primary_gradient }}; border: 1px solid {{ theme.colors.border_focus }}; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px {{ theme.colors.primary_glow }};">
-          {{ theme.icons.bot }} Hỏi AI
-        </button>
-
-        {% if is_admin %}
-          <button type="button" class="top-btn" onclick="openThemePickerModal()" style="background: rgba(255,255,255,0.12); border: 1.5px solid var(--border-focus); color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-            🎨 Đổi Giao Diện
-          </button>
-          <span class="admin-badge" style="background: {{ theme.colors.primary_glow }}; border: 1.5px solid var(--border-focus); color: {{ theme.colors.highlight }}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
-            👑 Admin
-          </span>
-          <a href="/admin-logout" class="top-btn" style="background: {{ theme.colors.primary_glow }}; color: {{ theme.colors.highlight }}; border: 1px solid var(--border-focus); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-decoration: none;">
-            Thoát
-          </a>
-        {% else %}
-          <button type="button" class="top-btn" onclick="openAdminModal()" style="background: {{ theme.colors.card_bg }}; border: 1.5px solid {{ theme.colors.border }}; color: {{ theme.colors.text }}; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-            🔐 Quản Trị
-          </button>
-        {% endif %}
+      <div class="clock-badge">
+        <span style="font-size: 0.95rem;">{{ theme.icons.clock }}</span>
+        <span id="vn-live-clock" class="clock-time">--:--:--</span>
+        <span id="vn-live-date" class="clock-date" style="color: {{ theme.colors.text_muted }}; font-size: 0.78rem; font-weight: 600;">--/--/----</span>
+        <span class="clock-zone">Giờ VN</span>
       </div>
     </div>
 
@@ -1353,7 +1348,7 @@
     <!-- Phím tắt nhanh -->
     <div class="action-bar">
       <a href="/history" class="btn btn-light" style="width: auto; padding: 10px 16px; font-size: 0.88rem;">
-        📜 Xem Lịch Sử Nghỉ Toàn Cửa Hàng
+        📜 Xem Lịch Sử Nghỉ Trần Bình Auto
       </a>
       <button type="button" onclick="switchTab('leaves')" class="btn btn-primary" style="width: auto; padding: 10px 18px; font-size: 0.9rem;">
         ➕ Bạn muốn xin nghỉ? Bấm vào đây
@@ -1704,6 +1699,32 @@
 
   </div>
 
+  <!-- FOOTER DƯỚI CÙNG TRANG VỚI NÚT QUẢN TRỊ ADMIN -->
+  <footer class="app-page-footer">
+    <div class="footer-info">
+      <span style="font-size: 1.1rem;">{{ theme.icons.main }}</span>
+      <span><strong>Trần Bình Auto</strong> • Hệ Thống Trực Nhật & Quản Lý Lịch Nghỉ</span>
+    </div>
+
+    <div class="footer-actions">
+      {% if is_admin %}
+        <button type="button" class="top-btn" onclick="openThemePickerModal()" style="background: rgba(255,255,255,0.12); border: 1.5px solid var(--border-focus); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); touch-action: manipulation;">
+          🎨 Đổi Giao Diện
+        </button>
+        <span class="admin-badge" style="background: {{ theme.colors.primary_glow }}; border: 1.5px solid var(--border-focus); color: {{ theme.colors.highlight }}; font-size: 0.8rem; font-weight: 800; padding: 5px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+          👑 Admin
+        </span>
+        <a href="/admin-logout" class="top-btn" style="background: {{ theme.colors.primary_glow }}; color: {{ theme.colors.highlight }}; border: 1px solid var(--border-focus); padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; text-decoration: none; touch-action: manipulation;">
+          Thoát
+        </a>
+      {% else %}
+        <button type="button" class="top-btn" onclick="openAdminModal()" style="background: {{ theme.colors.card_bg }}; border: 1.5px solid {{ theme.colors.border }}; color: {{ theme.colors.text }}; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); touch-action: manipulation;">
+          🔐 Quản Trị Admin
+        </button>
+      {% endif %}
+    </div>
+  </footer>
+
   <script>
     // Dữ liệu từ Backend Python
     const leavesByDate = {{ leaves_by_date | tojson }};
@@ -2003,7 +2024,7 @@
       const minAllowed = '{{ min_leave_date_str }}';
       if (!isAdmin && dateInput && dateInput.value < minAllowed) {
         if (e) e.preventDefault();
-        alert('⛔ QUY ĐỊNH CỬA HÀNG:\nKhông được phép tự đăng ký xin nghỉ cận ngày (Hôm nay, Ngày mai và Ngày mốt) để anh em kịp sắp xếp công việc.\n\nTrường hợp đột xuất hoặc khẩn cấp, vui lòng liên hệ trực tiếp với Quản lý / Admin!');
+        alert('⛔ QUY ĐỊNH TRẦN BÌNH AUTO:\nKhông được phép tự đăng ký xin nghỉ cận ngày (Hôm nay, Ngày mai và Ngày mốt) để anh em kịp sắp xếp công việc.\n\nTrường hợp đột xuất hoặc khẩn cấp, vui lòng liên hệ trực tiếp với Quản lý / Admin!');
         return false;
       }
       return true;
@@ -2292,7 +2313,7 @@
       <div style="display: flex; align-items: center; gap: 8px;">
         <span style="font-size: 1.25rem;">{{ theme.icons.bot }}</span>
         <div>
-          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Cửa Hàng AI {{ theme.icons.sub }}</strong>
+          <strong style="font-size: 0.92rem; display: block; line-height: 1.2;">Trợ Lý Trần Bình Auto AI {{ theme.icons.sub }}</strong>
           <span style="font-size: 0.72rem; opacity: 0.9; display: flex; align-items: center; gap: 4px;">
             <span style="width: 6px; height: 6px; background: {{ theme.colors.primary }}; border-radius: 50%; display: inline-block;"></span> {{ theme.tag }}
           </span>
@@ -2335,7 +2356,7 @@
         </h3>
         <button type="button" onclick="closeAdminModal()" style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#94a3b8;">✕</button>
       </div>
-      <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom:14px;">Nhập mật khẩu quản trị để chỉnh sửa hoặc xóa lịch nghỉ của cửa hàng.</p>
+      <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom:14px;">Nhập mật khẩu quản trị để chỉnh sửa hoặc xóa lịch nghỉ của Trần Bình Auto.</p>
       <form action="/admin-login" method="POST">
         <input type="hidden" name="next_url" value="{{ request.url }}">
         <div class="form-group">

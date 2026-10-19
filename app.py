@@ -62,9 +62,9 @@ def inject_theme():
 
 # 8 người cố định trực nhật vệ sinh 7h30 sáng
 DUTY_MEMBERS = ['Vinh', 'Dĩ', 'Ân', 'Bảo', 'Nguyên', 'Lợi', 'Thái', 'Duy']
-# 2 nhân viên tại cửa hàng không trực nhật nhưng vẫn báo xin nghỉ bình thường
+# 2 nhân viên tại Trần Bình Auto không trực nhật nhưng vẫn báo xin nghỉ bình thường
 NON_DUTY_STAFF = ['Bảo Mập', 'Phát']
-# Danh sách tất cả 10 nhân sự tại cửa hàng
+# Danh sách tất cả 10 nhân sự tại Trần Bình Auto
 ALL_STAFF = DUTY_MEMBERS + NON_DUTY_STAFF
 
 # Mốc bắt đầu gốc: Nguyên (index 4) trực ngày 16/10/2026
@@ -545,7 +545,7 @@ def get_current_view_cycle(today):
 
 @app.route('/history')
 def history():
-    """Trang tra cứu lịch sử xin nghỉ theo chu kỳ cửa hàng (reset vào 00:00 ngày 9)"""
+    """Trang tra cứu lịch sử xin nghỉ theo chu kỳ Trần Bình Auto (reset vào 00:00 ngày 9)"""
     cleanup_and_advance_checkpoint()
     
     today = get_vn_today()
@@ -1074,7 +1074,7 @@ def parse_with_ollama(text, today):
         return None, None, [], None
 
     prompt = f"""
-Bạn là trợ lý AI trích xuất thông tin xin nghỉ việc cho cửa hàng.
+Bạn là trợ lý AI trích xuất thông tin xin nghỉ việc cho Trần Bình Auto.
 Hôm nay là: {today.strftime('%Y-%m-%d')} ({today.strftime('%A')}).
 Danh sách 10 nhân sự hợp lệ: {', '.join(ALL_STAFF)}.
 Tin nhắn của nhân viên: "{text}"
@@ -1229,7 +1229,7 @@ def answer_schedule_query(query):
         leaves_ctx = "\n".join(leaves_lines) if leaves_lines else "Hiện không có ai xin nghỉ."
 
         prompt = f"""
-Bạn là trợ lý AI quản lý lịch trực nhật vệ sinh 7h30 sáng và theo dõi ngày nghỉ tại cửa hàng.
+Bạn là trợ lý AI quản lý lịch trực nhật vệ sinh 7h30 sáng và theo dõi ngày nghỉ tại Trần Bình Auto.
 Hôm nay là: {today.strftime('%d/%m/%Y')} ({weekday_vn_map.get(today.strftime('%A'))}).
 Danh sách 8 người trực nhật: {', '.join(DUTY_MEMBERS)}.
 Nhân sự không trực nhật: {', '.join(NON_DUTY_STAFF)}.
@@ -1434,7 +1434,7 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
         if not leaves_summary:
             return "🌴 Hiện tại cả 10 anh em đều đang có lịch đi làm đầy đủ, <strong>không có ai xin nghỉ</strong> sắp tới!", engine
         lines = [f"• 👤 <strong>{item['member_name']}</strong> nghỉ ngày <strong>{item['display_date']}</strong> ({item['weekday_vn']}) — Lý do: <em>{item['reason']}</em>" for item in leaves_summary[:6]]
-        return f"📋 Danh sách các ca xin nghỉ sắp tới tại cửa hàng ({len(leaves_summary)} ca):<br>" + "<br>".join(lines), engine
+        return f"📋 Danh sách các ca xin nghỉ sắp tới tại Trần Bình Auto ({len(leaves_summary)} ca):<br>" + "<br>".join(lines), engine
 
     # ═══════════════════════════════════════════════════════════════════
     # NHÓM 2: CÂU HỎI VỀ TRỰC NHẬT (DUTY INQUIRY)
@@ -1442,7 +1442,7 @@ Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trê
     # 2.1. Hỏi về 1 nhân viên cụ thể trực ngày nào
     if found_member:
         if found_member in NON_DUTY_STAFF:
-            return f"ℹ️ <strong>{found_member}</strong> thuộc nhóm nhân sự không trực nhật vệ sinh 7h30 sáng tại cửa hàng.", engine
+            return f"ℹ️ <strong>{found_member}</strong> thuộc nhóm nhân sự không trực nhật vệ sinh 7h30 sáng tại Trần Bình Auto.", engine
 
         my_duties = [s for s in schedule if s.get('assigned') == found_member]
         if not my_duties:
@@ -1582,7 +1582,7 @@ def api_ai_chat_schedule():
                     'is_leave_intent': False,
                     'answer': (
                         f"⛔ <strong>KHÔNG ĐƯỢC PHÉP XIN NGHỈ CẬN NGÀY!</strong><br>"
-                        f"Theo quy định của cửa hàng, bạn <strong>không được tự đăng ký xin nghỉ vào Hôm nay, Ngày mai và Ngày mốt</strong> "
+                        f"Theo quy định của Trần Bình Auto, bạn <strong>không được tự đăng ký xin nghỉ vào Hôm nay, Ngày mai và Ngày mốt</strong> "
                         f"(ngày bạn chọn: <strong>{near_disp}</strong>) để tránh thiếu hụt nhân sự và kịp sắp xếp trực nhật.<br>"
                         f"👉 Ngày đăng ký sớm nhất có thể nhận là từ <strong>{min_allowed_disp}</strong> ({min_allowed_w}).<br>"
                         f"📞 <em>Trường hợp có việc khẩn cấp hoặc đột xuất, bạn vui lòng <strong>liên hệ trực tiếp với Quản lý / Admin</strong> để được xử lý nhé!</em>{chips}"
@@ -1695,7 +1695,7 @@ def api_ai_chat_schedule():
                     'answer': (
                         f"{near_prefix}"
                         f"📝 Trợ lý đã ghi nhận bạn muốn đăng ký xin nghỉ vào {lbl}.<br>"
-                        f"❓ Bạn là ai trong 10 anh em cửa hàng? Vui lòng bấm chọn tên của bạn bên dưới để tạo đơn ngay nhé:{chips}"
+                        f"❓ Bạn là ai trong 10 anh em Trần Bình Auto? Vui lòng bấm chọn tên của bạn bên dưới để tạo đơn ngay nhé:{chips}"
                     ),
                     'engine': engine
                 })
@@ -1779,7 +1779,7 @@ def api_ai_confirm_leave():
             near_fmt = ', '.join([datetime.strptime(d, '%Y-%m-%d').strftime('%d/%m/%Y') for d in invalid_near_dates])
             return jsonify({
                 'success': False,
-                'error': f'⛔ Không được phép xin nghỉ cận ngày ({near_fmt}). Cửa hàng không nhận đơn nghỉ Hôm nay, Ngày mai và Ngày mốt. Vui lòng liên hệ trực tiếp với Admin nếu có việc khẩn cấp!'
+                'error': f'⛔ Không được phép xin nghỉ cận ngày ({near_fmt}). Trần Bình Auto không nhận đơn nghỉ Hôm nay, Ngày mai và Ngày mốt. Vui lòng liên hệ trực tiếp với Admin nếu có việc khẩn cấp!'
             })
 
     valid_dates = [d for d in leave_dates if d and d >= today_str]

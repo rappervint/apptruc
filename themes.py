@@ -13,7 +13,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🎆', 'sub': '🥂', 'bot': '🍾', 'clock': '⏰', 'float': '✨'},
         'banner': {
             'title': 'CHÀO ĐÓN NĂM MỚI RỰC RỠ • VẠN SỰ NHƯ Ý',
-            'sub': 'Cửa hàng chúc toàn thể anh em một năm mới tràn đầy sức khỏe, hạnh phúc và bứt phá thành công! 🥂🎉',
+            'sub': 'Trần Bình Auto chúc toàn thể anh em một năm mới tràn đầy sức khỏe, hạnh phúc và bứt phá thành công! 🥂🎉',
             'badge': '🎉 New Year Edition'
         },
         'colors': {
@@ -30,7 +30,7 @@ THEMES_CATALOG = {
             'text_muted': '#94a3b8',
             'highlight': '#fef08a'
         },
-        'bot_intro': 'Xin chào! 🎆 Tôi là Trợ Lý Cửa Hàng (Phiên bản Chào Năm Mới). Chúc bạn một năm mới an khang thịnh vượng!'
+        'bot_intro': 'Xin chào! 🎆 Tôi là Trợ Lý Trần Bình Auto (Phiên bản Chào Năm Mới). Chúc bạn một năm mới an khang thịnh vượng!'
     },
 
     # 2. TẾT NGUYÊN ĐÁN (11/01 - 05/02)
@@ -41,7 +41,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🌸', 'sub': '🌼', 'bot': '🧧', 'clock': '🏮', 'float': '🧧'},
         'banner': {
             'title': 'MỪNG XUÂN MỚI • VẠN SỰ NHƯ Ý',
-            'sub': 'Kính chúc anh em cửa hàng và gia đình năm mới Bình An - Thịnh Vượng - Tài Lộc Đầy Nhà! 🧧✨',
+            'sub': 'Kính chúc anh em Trần Bình Auto và gia đình năm mới Bình An - Thịnh Vượng - Tài Lộc Đầy Nhà! 🧧✨',
             'badge': '🌸 Happy Lunar New Year'
         },
         'colors': {
@@ -58,7 +58,7 @@ THEMES_CATALOG = {
             'text_muted': '#fca5a5',
             'highlight': '#fde047'
         },
-        'bot_intro': 'Dạ xin chào! 🧧 Em là Trợ Lý Cửa Hàng (Mừng Xuân Mới). Bạn cần tra cứu ca trực hay báo xin nghỉ Tết?'
+        'bot_intro': 'Dạ xin chào! 🧧 Em là Trợ Lý Trần Bình Auto (Mừng Xuân Mới). Bạn cần tra cứu ca trực hay báo xin nghỉ Tết?'
     },
 
     # 3. LỄ TÌNH NHÂN VALENTINE (06/02 - 18/02)
@@ -69,7 +69,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🍫', 'sub': '🌹', 'bot': '💖', 'clock': '💝', 'float': '💌'},
         'banner': {
             'title': 'MÙA YÊU THƯƠNG • HAPPY VALENTINE',
-            'sub': 'Chúc toàn thể anh em cửa hàng luôn ngập tràn tình yêu thương, hạnh phúc bên một nửa của mình! 💖🍫',
+            'sub': 'Chúc toàn thể anh em Trần Bình Auto luôn ngập tràn tình yêu thương, hạnh phúc bên một nửa của mình! 💖🍫',
             'badge': '🌹 Sweet Valentine'
         },
         'colors': {
@@ -86,7 +86,7 @@ THEMES_CATALOG = {
             'text_muted': '#fecdd3',
             'highlight': '#ffe4e6'
         },
-        'bot_intro': 'Xin chào! 💖 Tôi là Trợ Lý Cửa Hàng (Mùa Yêu Thương Valentine). Tôi có thể giúp gì cho bạn hôm nay?'
+        'bot_intro': 'Xin chào! 💖 Tôi là Trợ Lý Trần Bình Auto (Mùa Yêu Thương Valentine). Tôi có thể giúp gì cho bạn hôm nay?'
     },
 
     # 4. MÙA XUÂN TƯƠI MỚI (19/02 - 28/02)
@@ -97,7 +97,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🌿', 'sub': '🌱', 'bot': '🍀', 'clock': '🍃', 'float': '✨'},
         'banner': {
             'title': 'MÙA XUÂN KHỞI SẮC • NĂNG LƯỢNG TRÀN ĐẦY',
-            'sub': 'Đầu năm phấn khởi, làm việc hăng say cùng anh em cửa hàng phát triển vững mạnh! 🌿✨',
+            'sub': 'Đầu năm phấn khởi, làm việc hăng say cùng anh em Trần Bình Auto phát triển vững mạnh! 🌿✨',
             'badge': '🍀 Fresh Spring'
         },
         'colors': {
@@ -125,7 +125,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🌷', 'sub': '💐', 'bot': '🌸', 'clock': '🌺', 'float': '🎀'},
         'banner': {
             'title': 'CHÀO MỪNG NGÀY QUỐC TẾ PHỤ NỮ 8/3',
-            'sub': 'Toàn thể anh em cửa hàng xin gửi lời chúc yêu thương nhất đến các mẹ, người thương và toàn thể phái đẹp! 🌷💖',
+            'sub': 'Toàn thể anh em Trần Bình Auto xin gửi lời chúc yêu thương nhất đến các mẹ, người thương và toàn thể phái đẹp! 🌷💖',
             'badge': '💐 Mừng 8/3 Rạng Rỡ'
         },
         'colors': {
@@ -142,7 +142,7 @@ THEMES_CATALOG = {
             'text_muted': '#e9d5ff',
             'highlight': '#f5d0fe'
         },
-        'bot_intro': 'Xin chào! 🌷 Tôi là Trợ Lý Cửa Hàng (Mừng Quốc Tế Phụ Nữ 8/3). Chúc các chị em luôn xinh đẹp và rạng ngời!'
+        'bot_intro': 'Xin chào! 🌷 Tôi là Trợ Lý Trần Bình Auto (Mừng Quốc Tế Phụ Nữ 8/3). Chúc các chị em luôn xinh đẹp và rạng ngời!'
     },
 
     # 6. THÁNG 3 BỨT PHÁ (16/03 - 05/04)
@@ -153,7 +153,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🚀', 'sub': '⭐', 'bot': '💼', 'clock': '⏱️', 'float': '✨'},
         'banner': {
             'title': 'BỨT PHÁ MỤC TIÊU • ĐOÀN KẾT VỮNG TIẾN',
-            'sub': 'Cùng anh em cửa hàng nỗ lực làm việc hăng say, phục vụ khách hàng tận tâm và chu đáo! ⭐💪',
+            'sub': 'Cùng anh em Trần Bình Auto nỗ lực làm việc hăng say, phục vụ khách hàng tận tâm và chu đáo! ⭐💪',
             'badge': '⭐ Tinh Thần Chuyên Nghiệp'
         },
         'colors': {
@@ -170,7 +170,7 @@ THEMES_CATALOG = {
             'text_muted': '#bae6fd',
             'highlight': '#7dd3fc'
         },
-        'bot_intro': 'Xin chào! 🚀 Tôi là Trợ Lý Cửa Hàng. Hãy cùng nhau hoàn thành xuất sắc công việc hôm nay nhé!'
+        'bot_intro': 'Xin chào! 🚀 Tôi là Trợ Lý Trần Bình Auto. Hãy cùng nhau hoàn thành xuất sắc công việc hôm nay nhé!'
     },
 
     # 7. ĐẠI LỄ 30/4 & 1/5 & GIỖ TỔ (06/04 - 05/05)
@@ -198,7 +198,7 @@ THEMES_CATALOG = {
             'text_muted': '#fecdd3',
             'highlight': '#fef08a'
         },
-        'bot_intro': 'Xin chào! 🇻🇳 Tôi là Trợ Lý Cửa Hàng (Mừng Đại Lễ 30/4 - 1/5). Bạn muốn kiểm tra lịch trực hay ngày nghỉ lễ?'
+        'bot_intro': 'Xin chào! 🇻🇳 Tôi là Trợ Lý Trần Bình Auto (Mừng Đại Lễ 30/4 - 1/5). Bạn muốn kiểm tra lịch trực hay ngày nghỉ lễ?'
     },
 
     # 8. MÙA HÈ RỰC RỠ (06/05 - 10/06)
@@ -209,7 +209,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🌊', 'sub': '🌴', 'bot': '☀️', 'clock': '🍹', 'float': '🏄'},
         'banner': {
             'title': 'CHÀO HÈ RỰC RỠ • NĂNG ĐỘNG & SẢNG KHOÁI',
-            'sub': 'Giải nhiệt mùa hè cùng anh em cửa hàng, phục vụ khách hàng chu đáo và tràn đầy nhiệt huyết! 🌊🌴☀️',
+            'sub': 'Giải nhiệt mùa hè cùng anh em Trần Bình Auto, phục vụ khách hàng chu đáo và tràn đầy nhiệt huyết! 🌊🌴☀️',
             'badge': '🌴 Cool Summer'
         },
         'colors': {
@@ -237,7 +237,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🏡', 'sub': '👨‍👩‍👧', 'bot': '☕', 'clock': '🧡', 'float': '💖'},
         'banner': {
             'title': 'MỪNG NGÀY GIA ĐÌNH VIỆT NAM 28/6',
-            'sub': 'Gia đình là điểm tựa vững chắc nhất. Chúc tổ ấm của toàn thể anh em cửa hàng luôn bình an và ngập tràn tiếng cười! 🏡💖',
+            'sub': 'Gia đình là điểm tựa vững chắc nhất. Chúc tổ ấm của toàn thể anh em Trần Bình Auto luôn bình an và ngập tràn tiếng cười! 🏡💖',
             'badge': '👨‍👩‍👧 Tình Thân Gắn Kết'
         },
         'colors': {
@@ -254,7 +254,7 @@ THEMES_CATALOG = {
             'text_muted': '#c7d2fe',
             'highlight': '#c7d2fe'
         },
-        'bot_intro': 'Xin chào! 🏡 Tôi là Trợ Lý Cửa Hàng (Mừng Ngày Gia Đình Việt Nam). Chúc bạn và gia đình luôn hạnh phúc!'
+        'bot_intro': 'Xin chào! 🏡 Tôi là Trợ Lý Trần Bình Auto (Mừng Ngày Gia Đình Việt Nam). Chúc bạn và gia đình luôn hạnh phúc!'
     },
 
     # 10. MÙA MƯA NHIỆT ĐỚI & CHILL (06/07 - 10/08)
@@ -282,7 +282,7 @@ THEMES_CATALOG = {
             'text_muted': '#99f6e4',
             'highlight': '#5eead4'
         },
-        'bot_intro': 'Chào bạn! 🌦️ Tôi là Trợ Lý Cửa Hàng. Hôm nay trời mát mẻ, chúc bạn một ngày làm việc hiệu quả!'
+        'bot_intro': 'Chào bạn! 🌦️ Tôi là Trợ Lý Trần Bình Auto. Hôm nay trời mát mẻ, chúc bạn một ngày làm việc hiệu quả!'
     },
 
     # 11. MÙA THU LÃNG MẠN (11/08 - 25/08)
@@ -293,7 +293,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🍁', 'sub': '🍂', 'bot': '🍵', 'clock': '🌾', 'float': '🍂'},
         'banner': {
             'title': 'GẮN KẾT MÙA THU • HƯƠNG SẮC DỊU DÀNG',
-            'sub': 'Gió thu se lạnh mang theo sự bình yên. Chúc anh em cửa hàng một mùa thu tràn ngập niềm vui và ấm áp! 🍁🍵',
+            'sub': 'Gió thu se lạnh mang theo sự bình yên. Chúc anh em Trần Bình Auto một mùa thu tràn ngập niềm vui và ấm áp! 🍁🍵',
             'badge': '🍂 Mùa Thu Dịu Êm'
         },
         'colors': {
@@ -338,7 +338,7 @@ THEMES_CATALOG = {
             'text_muted': '#fecdd3',
             'highlight': '#fef08a'
         },
-        'bot_intro': 'Xin chào! 🇻🇳 Tôi là Trợ Lý Cửa Hàng (Mừng Quốc Khánh 2/9). Chúc bạn kỳ nghỉ lễ tràn ngập niềm vui!'
+        'bot_intro': 'Xin chào! 🇻🇳 Tôi là Trợ Lý Trần Bình Auto (Mừng Quốc Khánh 2/9). Chúc bạn kỳ nghỉ lễ tràn ngập niềm vui!'
     },
 
     # 13. TẾT TRUNG THU (08/09 - 30/09)
@@ -377,7 +377,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🌸', 'sub': '💐', 'bot': '🌸', 'clock': '🌷', 'float': '💐'},
         'banner': {
             'title': 'CHÀO MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10',
-            'sub': 'Toàn thể anh em cửa hàng xin gửi lời chúc yêu thương đến các bà, các mẹ, người thương và toàn thể phái đẹp nhân ngày 20/10 luôn ngập tràn niềm vui, xinh đẹp và rạng rỡ! 💖',
+            'sub': 'Toàn thể anh em Trần Bình Auto xin gửi lời chúc yêu thương đến các bà, các mẹ, người thương và toàn thể phái đẹp nhân ngày 20/10 luôn ngập tràn niềm vui, xinh đẹp và rạng rỡ! 💖',
             'badge': '💝 Happy Women\'s Day'
         },
         'colors': {
@@ -394,7 +394,7 @@ THEMES_CATALOG = {
             'text_muted': '#fbcfe8',
             'highlight': '#fda4af'
         },
-        'bot_intro': 'Xin chào! 🌸 Tôi là Trợ Lý Cửa Hàng AI (Mừng Ngày Phụ Nữ VN 20/10 💐). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc tạo đơn xin nghỉ bằng tin nhắn.'
+        'bot_intro': 'Xin chào! 🌸 Tôi là Trợ Lý Trần Bình Auto AI (Mừng Ngày Phụ Nữ VN 20/10 💐). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc tạo đơn xin nghỉ bằng tin nhắn.'
     },
 
     # 15. LỄ HỘI HALLOWEEN (26/10 - 03/11)
@@ -450,7 +450,7 @@ THEMES_CATALOG = {
             'text_muted': '#bae6fd',
             'highlight': '#7dd3fc'
         },
-        'bot_intro': 'Xin chào! 📖 Tôi là Trợ Lý Cửa Hàng (Mừng Ngày Nhà Giáo VN 20/11). Chúc bạn một ngày làm việc ý nghĩa!'
+        'bot_intro': 'Xin chào! 📖 Tôi là Trợ Lý Trần Bình Auto (Mừng Ngày Nhà Giáo VN 20/11). Chúc bạn một ngày làm việc ý nghĩa!'
     },
 
     # 17. BLACK FRIDAY & SIÊU SALE (21/11 - 30/11)
@@ -461,7 +461,7 @@ THEMES_CATALOG = {
         'icons': {'main': '⚡', 'sub': '🔥', 'bot': '🏷️', 'clock': '⚡', 'float': '🔥'},
         'banner': {
             'title': 'SIÊU SALE BLACK FRIDAY • BỨT PHÁ DOANH SỐ',
-            'sub': 'Mùa mua sắm lớn nhất năm! Chúc anh em cửa hàng bão đơn, năng lượng bốc lửa và phục vụ hết mình! ⚡🔥🏷️',
+            'sub': 'Mùa mua sắm lớn nhất năm! Chúc anh em Trần Bình Auto bão đơn, năng lượng bốc lửa và phục vụ hết mình! ⚡🔥🏷️',
             'badge': '⚡ Cyber Super Sale'
         },
         'colors': {
@@ -478,7 +478,7 @@ THEMES_CATALOG = {
             'text_muted': '#a1a1aa',
             'highlight': '#f43f5e'
         },
-        'bot_intro': 'Xin chào! ⚡ Tôi là Trợ Lý Cửa Hàng (Black Friday Edition). Sẵn sàng đồng hành cùng anh em chiến hết mình!'
+        'bot_intro': 'Xin chào! ⚡ Tôi là Trợ Lý Trần Bình Auto (Black Friday Edition). Sẵn sàng đồng hành cùng anh em chiến hết mình!'
     },
 
     # 18. GIÁNG SINH NOEL (01/12 - 25/12)
@@ -489,7 +489,7 @@ THEMES_CATALOG = {
         'icons': {'main': '🎄', 'sub': '❄️', 'bot': '🎅', 'clock': '🔔', 'float': '❄️'},
         'banner': {
             'title': 'GIÁNG SINH AN LÀNH • MERRY CHRISTMAS',
-            'sub': 'Chúc toàn thể anh em cửa hàng và gia đình một mùa Giáng Sinh an lành, ấm áp và tràn ngập niềm vui! 🎄🎅❄️',
+            'sub': 'Chúc toàn thể anh em Trần Bình Auto và gia đình một mùa Giáng Sinh an lành, ấm áp và tràn ngập niềm vui! 🎄🎅❄️',
             'badge': '🎅 Merry Christmas'
         },
         'colors': {
@@ -511,7 +511,7 @@ THEMES_CATALOG = {
 }
 
 # LỊCH TRÌNH TỰ ĐỘNG ĐỔI GIAO DIỆN TRONG NĂM (Tháng, Ngày) -> (Tháng, Ngày)
-# Đổi trước ngày lễ từ 5 đến 15 ngày để cửa hàng luôn rộn ràng không khí!
+# Đổi trước ngày lễ từ 5 đến 15 ngày để Trần Bình Auto luôn rộn ràng không khí!
 THEMES_TIMELINE = [
     # Tháng 1
     {'theme': 'new_year',         'start': (12, 26), 'end': (1, 10)},
