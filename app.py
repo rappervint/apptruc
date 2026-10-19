@@ -795,7 +795,73 @@ def parse_with_rule_engine(text, today):
     if found_dates:
         found_dates = sorted(list(set(found_dates)))
 
-    # 2.5. Nếu vẫn chưa có danh sách, tìm ngày đơn lẻ (DD/MM, DD tháng MM, DD/MM/YYYY, ngày mai, thứ trong tuần)
+    # 2.5. Xử lý theo THỨ TRONG TUẦN (hỗ trợ nhiều thứ, khoảng từ thứ X đến thứ Y, cuối tuần)
+    if not found_dates:
+        is_next_week = any(k in norm_text for k in ['tuan sau', 'tuan toi', 'toi', 'sang tuan'])
+        curr_monday = today - timedelta(days=today.weekday())
+        target_monday = curr_monday + timedelta(days=7 if is_next_week else 0)
+
+        # 2.5.1. Cụm từ "cuối tuần" (Thứ 7 & Chủ Nhật)
+        if 'cuoi tuan' in norm_text:
+            sat = target_monday + timedelta(days=5)
+            sun = target_monday + timedelta(days=6)
+            if not is_next_week and sat < today:
+                sat += timedelta(days=7)
+                sun += timedelta(days=7)
+            found_dates = [sat, sun]
+
+        val_map = {
+            'thu 2': 0, 'thu2': 0, 'thu hai': 0,
+            'thu 3': 1, 'thu3': 1, 'thu ba': 1,
+            'thu 4': 2, 'thu4': 2, 'thu tu': 2,
+            'thu 5': 3, 'thu5': 3, 'thu nam': 3,
+            'thu 6': 4, 'thu6': 4, 'thu sau': 4,
+            'thu 7': 5, 'thu7': 5, 'thu bay': 5,
+            'chu nhat': 6, 'cn': 6
+        }
+        pat_w = r'(thu\s*[2-7]|thu\s*hai|thu\s*ba|thu\s*tu|thu\s*nam|thu\s*sau|thu\s*bay|chu\s*nhat|\bcn\b)'
+
+        # 2.5.2. Khoảng "từ thứ X đến/tới thứ Y" (VD: "từ thứ 5 đến thứ 7 tuần sau", "từ thứ 2 tới thứ 4")
+        if not found_dates:
+            range_w_match = re.search(r'(?:tu|từ)\s*' + pat_w + r'\s*(?:den|đến|toi|tới|-)\s*' + pat_w, norm_text)
+            if range_w_match:
+                w1_str = re.sub(r'\s+', ' ', range_w_match.group(1).strip())
+                w2_str = re.sub(r'\s+', ' ', range_w_match.group(2).strip())
+                w1 = val_map.get(w1_str)
+                w2 = val_map.get(w2_str)
+                if w1 is not None and w2 is not None:
+                    if w1 <= w2:
+                        days_range = list(range(w1, w2 + 1))
+                    else:
+                        days_range = list(range(w1, 7)) + list(range(0, w2 + 1))
+                    res = [target_monday + timedelta(days=d) for d in days_range]
+                    if not is_next_week and any(d < today for d in res):
+                        res = [d + timedelta(days=7) for d in res]
+                    found_dates = res
+
+        # 2.5.3. Liệt kê một hoặc nhiều thứ (VD: "thứ 7 chủ nhật tuần sau", "thứ 7 và chủ nhật", "thứ 2 và thứ 4 tuần sau")
+        if not found_dates:
+            matches_w = list(re.finditer(pat_w, norm_text))
+            if matches_w:
+                w_indices = []
+                for mw in matches_w:
+                    s_clean = re.sub(r'\s+', ' ', mw.group(1).strip())
+                    v = val_map.get(s_clean)
+                    if v is not None and v not in w_indices:
+                        w_indices.append(v)
+                if w_indices:
+                    res = []
+                    for w in w_indices:
+                        d = target_monday + timedelta(days=w)
+                        if not is_next_week and d < today:
+                            d += timedelta(days=7)
+                        res.append(d)
+                    # Nếu không nói tuần sau nhưng thứ đầu tiên đã qua thì cả nhóm dời sang tuần sau
+                    if not is_next_week and any(d < today for d in res):
+                        res = [d + timedelta(days=7) for d in res]
+                    found_dates = sorted(list(set(res)))
+
+    # 2.6. Nếu vẫn chưa có danh sách, tìm ngày đơn lẻ dạng DD/MM, DD tháng MM, hoặc hôm nay, ngày mai, ngày mốt
     if not found_dates:
         single_date = None
         # DD/MM hoặc DD tháng MM hoặc DD/MM/YYYY
@@ -820,26 +886,7 @@ def parse_with_rule_engine(text, today):
                 single_date = today + timedelta(days=1)
             elif re.search(r'\b(ngay mot|mot|ngay kia)\b', norm_text):
                 single_date = today + timedelta(days=2)
-                
-        # Thứ trong tuần
-        if not single_date:
-            weekdays = {
-                'thu 2': 0, 'thu hai': 0,
-                'thu 3': 1, 'thu ba': 1,
-                'thu 4': 2, 'thu tu': 2,
-                'thu 5': 3, 'thu nam': 3,
-                'thu 6': 4, 'thu sau': 4,
-                'thu 7': 5, 'thu bay': 5,
-                'chu nhat': 6, 'cn': 6
-            }
-            for w_str, w_num in weekdays.items():
-                if re.search(r'\b' + re.escape(w_str) + r'\b', norm_text):
-                    days_ahead = (w_num - today.weekday()) % 7
-                    if days_ahead == 0 or 'tuan sau' in norm_text:
-                        days_ahead += 7
-                    single_date = today + timedelta(days=days_ahead)
-                    break
-                    
+
         if single_date:
             found_dates = [single_date]
             
@@ -906,8 +953,10 @@ Yêu cầu: Hãy phân tích và trả về DUY NHẤT một đối tượng JSO
   "leave_dates": ["YYYY-MM-DD", ...],
   "reason": "Lý do xin nghỉ"
 }}
-Nếu là 1 ngày, leave_dates có 1 phần tử. Nếu là nhiều ngày liên tiếp hoặc nhiều ngày lẻ, trả về toàn bộ các ngày đó dạng mảng YYYY-MM-DD.
-Nếu không có tên hợp lệ hoặc ngày hợp lệ, trả về null.
+QUY TẮC NHẬN DIỆN NHIỀU NGÀY:
+- Nếu xin nghỉ nhiều ngày (ví dụ: "thứ 7 chủ nhật tuần sau", "từ thứ 5 đến thứ 7", "cuối tuần sau", "ngày 25 và 26/10"), mảng "leave_dates" PHẢI chứa ĐỦ TẤT CẢ các ngày đó dạng YYYY-MM-DD.
+- Ví dụ "thứ 7 chủ nhật tuần sau": phải có 2 ngày là Thứ Bảy và Chủ Nhật của tuần sau.
+- Nếu không có tên hợp lệ hoặc ngày hợp lệ, trả về null.
 """
     try:
         req_data = json.dumps({
