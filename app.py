@@ -648,6 +648,7 @@ def history():
                            stats_by_member=stats_by_member,
                            total_leaves=len(history_list),
                            is_admin=is_admin(),
+                           is_cutoff_day=(today.day == 7),
                            audit_logs=audit_logs)
 
 @app.route('/admin-login', methods=['POST'])
