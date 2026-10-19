@@ -40,7 +40,7 @@ THEMES_CATALOG = {
         'tag': '🧧 Chúc Mừng Năm Mới',
         'icons': {'main': '🌸', 'sub': '🌼', 'bot': '🧧', 'clock': '🏮', 'float': '🧧'},
         'banner': {
-            'title': 'MỪNG XUÂN GIÁP THÂN • VẠN SỰ NHƯ Ý',
+            'title': 'MỪNG XUÂN MỚI • VẠN SỰ NHƯ Ý',
             'sub': 'Kính chúc anh em cửa hàng và gia đình năm mới Bình An - Thịnh Vượng - Tài Lộc Đầy Nhà! 🧧✨',
             'badge': '🌸 Happy Lunar New Year'
         },
@@ -397,7 +397,7 @@ THEMES_CATALOG = {
         'bot_intro': 'Xin chào! 🌸 Tôi là Trợ Lý Cửa Hàng AI (Mừng Ngày Phụ Nữ VN 20/10 💐). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc tạo đơn xin nghỉ bằng tin nhắn.'
     },
 
-    # 15. HALLOWEEN 2026 (26/10 - 03/11)
+    # 15. LỄ HỘI HALLOWEEN (26/10 - 03/11)
     'halloween': {
         'key': 'halloween',
         'name': 'Lễ Hội Halloween Ma Quái',
