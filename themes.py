@@ -400,13 +400,13 @@ THEMES_CATALOG = {
     # 15. LỄ HỘI HALLOWEEN (26/10 - 03/11)
     'halloween': {
         'key': 'halloween',
-        'name': 'Lễ Hội Halloween Ma Quái',
+        'name': 'Lễ Hội Halloween',
         'tag': '🎃 Halloween Edition',
         'icons': {'main': '🎃', 'sub': '👻', 'bot': '🎃', 'clock': '🕯️', 'float': '🦇'},
         'banner': {
-            'title': 'ĐÊM HỘI HALLOWEEN • MA QUÁI & HUYỀN BÍ',
-            'sub': 'Chúc toàn thể anh em có mùa Halloween vui vẻ, rộn ràng và không bị "ma bắt" đi trực trễ nhé! 🎃👻🦇',
-            'badge': '🎃 Spooky Halloween'
+            'title': 'ĐÊM HỘI HALLOWEEN • RỰC RỠ & HUYỀN BÍ',
+            'sub': 'Chúc toàn thể anh em Trần Bình Auto mùa Halloween vui vẻ, rộn ràng và tràn đầy năng lượng làm việc! 🎃✨🦇',
+            'badge': '🎃 Happy Halloween'
         },
         'colors': {
             'bg': '#0b0914',
@@ -422,7 +422,7 @@ THEMES_CATALOG = {
             'text_muted': '#fed7aa',
             'highlight': '#fb923c'
         },
-        'bot_intro': 'Xin chào! 🎃 Tôi là Trợ Lý Ma Quái AI (Halloween Edition). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc tạo đơn xin nghỉ bằng tin nhắn.'
+        'bot_intro': 'Xin chào! 🎃 Tôi là Trợ Lý Trần Bình Auto AI (Phiên bản Halloween). Tôi có thể tra cứu lịch trực, kiểm tra ai nghỉ hoặc tạo đơn xin nghỉ bằng tin nhắn.'
     },
 
     # 16. NGÀY NHÀ GIÁO VIỆT NAM 20/11 (04/11 - 20/11)
