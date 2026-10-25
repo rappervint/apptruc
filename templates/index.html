@@ -1523,7 +1523,7 @@
       <form action="/report-leave" method="POST" id="leave-form" onsubmit="return validateLeaveForm(event)">
         <div class="form-group">
           <label>👤 Chọn người xin nghỉ:</label>
-          <select name="member_name" id="member_select" required onchange="checkLiveConflict()">
+          <select name="member_name" id="member_select" required onchange="updateDateInputMinForMember(); checkLiveConflict();">
             <optgroup label="Anh em trực nhật 7h30 (8 người)">
               {% for m in duty_members %}
                 <option value="{{ m }}">{{ m }}</option>
@@ -2014,9 +2014,34 @@
       }
     }
 
+    function updateDateInputMinForMember() {
+      const memberSelect = document.getElementById('member_select');
+      const dateInput = document.getElementById('leave_date_input');
+      const endDateInput = document.getElementById('leave_end_date_input');
+      const isAdmin = {{ 'true' if is_admin else 'false' }};
+      if (!dateInput || !endDateInput) return;
+
+      const isNguyen = memberSelect && memberSelect.value === 'Nguyên';
+      if (isAdmin || isNguyen) {
+        dateInput.min = '{{ today_date_str }}';
+        endDateInput.min = dateInput.value || '{{ today_date_str }}';
+      } else {
+        dateInput.min = '{{ min_leave_date_str }}';
+        if (dateInput.value && dateInput.value < '{{ min_leave_date_str }}') {
+          dateInput.value = '{{ min_leave_date_str }}';
+        }
+        endDateInput.min = dateInput.value || '{{ min_leave_date_str }}';
+        if (endDateInput.value && endDateInput.value < dateInput.value) {
+          endDateInput.value = dateInput.value;
+        }
+      }
+    }
+
     function setQuickLeaveOffset(offset, daysCount = 1) {
       const isAdmin = {{ 'true' if is_admin else 'false' }};
-      if (!isAdmin && offset < 3) offset = 3;
+      const memberSelect = document.getElementById('member_select');
+      const isNguyen = memberSelect && memberSelect.value === 'Nguyên';
+      if (!isAdmin && !isNguyen && offset < 3) offset = 3;
       const now = new Date();
       now.setDate(now.getDate() + offset);
       const yyyy = now.getFullYear();
@@ -2039,9 +2064,11 @@
 
     function validateLeaveForm(e) {
       const dateInput = document.getElementById('leave_date_input');
+      const memberSelect = document.getElementById('member_select');
       const isAdmin = {{ 'true' if is_admin else 'false' }};
+      const isNguyen = memberSelect && memberSelect.value === 'Nguyên';
       const minAllowed = '{{ min_leave_date_str }}';
-      if (!isAdmin && dateInput && dateInput.value < minAllowed) {
+      if (!isAdmin && !isNguyen && dateInput && dateInput.value < minAllowed) {
         if (e) e.preventDefault();
         alert('⛔ QUY ĐỊNH TRẦN BÌNH AUTO:\nKhông được phép tự đăng ký xin nghỉ cận ngày (Hôm nay, Ngày mai và Ngày mốt) để anh em kịp sắp xếp công việc.\n\nTrường hợp đột xuất hoặc khẩn cấp, vui lòng liên hệ trực tiếp với Quản lý / Admin!');
         return false;
@@ -2170,9 +2197,11 @@
 
       const minAllowedStr = '{{ min_leave_date_str }}';
       const isAdmin = {{ 'true' if is_admin else 'false' }};
+      const memberSelect = document.getElementById('member_select');
+      const isNguyen = memberSelect && memberSelect.value === 'Nguyên';
       const nearDates = dateList.filter(dStr => dStr < minAllowedStr);
       let nearWarningHtml = '';
-      if (!isAdmin && nearDates.length > 0) {
+      if (!isAdmin && !isNguyen && nearDates.length > 0) {
         const nearFmt = nearDates.map(d => d.split('-').reverse().slice(0, 2).join('/')).join(', ');
         nearWarningHtml = `
           <div class="alert-box alert-danger" style="border-left: 5px solid #dc2626; margin-bottom: 12px; background: #fef2f2; color: #991b1b;">
@@ -2258,7 +2287,7 @@
 
       const submitBtn = document.querySelector('#leave-form button[type="submit"]');
       if (submitBtn) {
-        if (!isAdmin && nearDates.length > 0) {
+        if (!isAdmin && !isNguyen && nearDates.length > 0) {
           submitBtn.disabled = true;
           submitBtn.style.opacity = '0.5';
           submitBtn.style.cursor = 'not-allowed';
@@ -2315,6 +2344,7 @@
         switchTab('schedule');
       }
 
+      updateDateInputMinForMember();
       checkLiveConflict();
     });
   </script>

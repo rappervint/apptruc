@@ -1865,8 +1865,9 @@ def api_ai_chat_schedule():
 
         if found_dates:
             past_dates = sorted([d for d in found_dates if d < today])
-            if admin_mode:
-                # ĐẶC QUYỀN ADMIN: Cho phép duyệt bất kỳ ngày nào từ hôm nay trở đi (cận ngày, liên tiếp)
+            is_allow_near = admin_mode or (m_name == 'Nguyên')
+            if is_allow_near:
+                # ĐẶC QUYỀN ADMIN hoặc NGOẠI LỆ CHO NGUYÊN: Cho phép duyệt bất kỳ ngày nào từ hôm nay trở đi (cận ngày, liên tiếp)
                 near_dates = []
                 valid_dates = sorted([d for d in found_dates if d >= today])
             else:
@@ -1874,8 +1875,8 @@ def api_ai_chat_schedule():
                 future_valid_dates = sorted([d for d in found_dates if d >= min_allowed_date])
                 valid_dates = future_valid_dates
 
-            # TRƯỜNG HỢP 1 (Chỉ với Nhân viên thường): Chọn ngày cận -> Từ chối & hướng dẫn liên hệ Admin
-            if not admin_mode and near_dates and not valid_dates:
+            # TRƯỜNG HỢP 1 (Chỉ với Nhân viên thường không phải Nguyên): Chọn ngày cận -> Từ chối & hướng dẫn liên hệ Admin
+            if not is_allow_near and near_dates and not valid_dates:
                 near_disp = ', '.join([d.strftime('%d/%m/%Y') for d in near_dates])
                 chips = make_ai_chips([
                     (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_prefix}xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
@@ -1915,7 +1916,7 @@ def api_ai_chat_schedule():
             display_dates = [f"{d.strftime('%d/%m/%Y')} ({weekday_vn.get(d.strftime('%A'), '')})" for d in valid_dates]
 
             near_warning_note = ""
-            if not admin_mode and near_dates:
+            if not is_allow_near and near_dates:
                 near_disp = ', '.join([d.strftime('%d/%m') for d in near_dates])
                 near_warning_note = f"• ⚠️ <strong>Các ngày cận ({near_disp})</strong>: Đã bị loại bỏ do quy định không nhận đơn Hôm nay, Ngày mai, Ngày mốt (vui lòng liên hệ Admin nếu cần nghỉ gấp)."
 
@@ -1923,7 +1924,7 @@ def api_ai_chat_schedule():
                 conflict_notes = []
                 if admin_mode:
                     conflict_notes.append("• 👑 <strong>ĐẶC QUYỀN ADMIN:</strong> Cho phép duyệt nghỉ cận ngày & liên tiếp theo thẩm quyền quản lý.")
-                if near_warning_note:
+                if not is_allow_near and near_warning_note:
                     conflict_notes.append(near_warning_note)
                 has_any_conflict = False
 
@@ -2052,6 +2053,23 @@ def api_ai_chat_schedule():
                     })
             else:
                 if m_name:
+                    if m_name == 'Nguyên':
+                        chips = make_ai_chips([
+                            (f"📅 Nghỉ hôm nay", f"{m_name} xin nghỉ hôm nay"),
+                            (f"📅 Nghỉ ngày mai", f"{m_name} xin nghỉ ngày mai"),
+                            (f"📅 Nghỉ ngày mốt", f"{m_name} xin nghỉ ngày mốt"),
+                            ("🗓️ Nghỉ tuần sau", f"{m_name} xin nghỉ tuần sau"),
+                        ])
+                        return jsonify({
+                            'success': True,
+                            'is_leave_intent': False,
+                            'is_admin_mode': False,
+                            'answer': (
+                                f"❓ Bạn muốn đăng ký cho <strong>{m_name}</strong> xin nghỉ vào ngày nào vậy bạn?<br>"
+                                f"👉 Bạn có thể nhắn ngày hoặc bấm chọn nhanh bên dưới:{chips}"
+                            ),
+                            'engine': engine
+                        })
                     chips = make_ai_chips([
                         (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
                         (f"📅 Nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}"),
@@ -2125,8 +2143,8 @@ def api_ai_confirm_leave():
     min_allowed_date = today + timedelta(days=3)
     min_allowed_str = min_allowed_date.strftime('%Y-%m-%d')
 
-    # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt) nếu không phải Admin
-    if not is_admin():
+    # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt) nếu không phải Admin và không phải Nguyên
+    if not is_admin() and member_name != 'Nguyên':
         invalid_near_dates = [d for d in leave_dates if d and today_str <= d < min_allowed_str]
         if invalid_near_dates:
             near_fmt = ', '.join([datetime.strptime(d, '%Y-%m-%d').strftime('%d/%m/%Y') for d in invalid_near_dates])
@@ -2136,7 +2154,7 @@ def api_ai_confirm_leave():
             })
 
     valid_dates = [d for d in leave_dates if d and d >= today_str]
-    if not is_admin():
+    if not is_admin() and member_name != 'Nguyên':
         valid_dates = [d for d in valid_dates if d >= min_allowed_str]
 
     if not valid_dates:
@@ -2186,8 +2204,8 @@ def report_leave():
             if d_end < d_start:
                 d_start, d_end = d_end, d_start
 
-            # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt) cho form thông thường
-            if not is_admin() and d_start < min_allowed_date:
+            # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt) cho form thông thường (Ngoại lệ cho Nguyên)
+            if not is_admin() and member_name != 'Nguyên' and d_start < min_allowed_date:
                 log_action('TỪ CHỐI XIN NGHỈ CẬN', f"{member_name} bị từ chối xin nghỉ cận ngày ({d_start.strftime('%d/%m/%Y')})", actor=member_name)
                 return redirect(url_for('index', tab='leaves'))
                 
