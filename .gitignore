@@ -8,6 +8,7 @@ __pycache__/
 venv/
 env/
 .venv/
+.env
 
 # Database (không đẩy lên github để tránh ghi đè dữ liệu thực tế trên PythonAnywhere)
 duty_schedule.db

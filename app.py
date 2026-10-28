@@ -805,10 +805,121 @@ def delete_history():
     return redirect(request.referrer or url_for('history'))
 
 # ═══════════════════════════════════════════════════════════════════
-# TRỢ LÝ ẢO AI (OLLAMA & NLP TIẾNG VIỆT TÍCH HỢP)
+# TRỢ LÝ ẢO AI (GOOGLE GEMINI, OLLAMA & NLP TIẾNG VIỆT TÍCH HỢP)
 # ═══════════════════════════════════════════════════════════════════
+
+def load_dotenv():
+    """Tự động đọc file .env nếu có để tải các biến môi trường (như GEMINI_API_KEY)"""
+    env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+    if os.path.exists(env_file):
+        try:
+            with open(env_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        k, v = line.split('=', 1)
+                        k = k.strip()
+                        v = v.strip().strip('"').strip("'")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
+
+load_dotenv()
+
+def get_gemini_api_key():
+    return os.environ.get('GEMINI_API_KEY', '').strip()
+
+def get_gemini_model():
+    return os.environ.get('GEMINI_MODEL', 'gemini-1.5-flash').strip() or 'gemini-1.5-flash'
+
 OLLAMA_HOST = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3')
+
+def call_gemini_api(prompt, system_instruction=None, json_mode=False, timeout=5.0):
+    """Gọi trực tiếp Google Gemini API qua HTTP REST (không cần thư viện nặng, chạy mượt trên mọi môi trường)"""
+    api_key = get_gemini_api_key()
+    if not api_key:
+        return None
+    model = get_gemini_model()
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+
+    payload = {
+        "contents": [
+            {
+                "parts": [{"text": prompt}]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1 if json_mode else 0.7,
+            "maxOutputTokens": 1000
+        }
+    }
+    if json_mode:
+        payload["generationConfig"]["responseMimeType"] = "application/json"
+    if system_instruction:
+        payload["systemInstruction"] = {
+            "parts": [{"text": system_instruction}]
+        }
+
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'}
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            res_data = json.loads(resp.read().decode('utf-8'))
+            candidates = res_data.get('candidates') or []
+            if candidates:
+                parts = candidates[0].get('content', {}).get('parts', [])
+                if parts:
+                    return parts[0].get('text', '').strip()
+    except Exception:
+        pass
+    return None
+
+def parse_with_gemini(text, today):
+    """Trích xuất người xin nghỉ và ngày nghỉ bằng Google Gemini AI (chính xác tuyệt đối)"""
+    if not get_gemini_api_key():
+        return None, None, [], None
+
+    prompt = f"""
+Bạn là trợ lý AI trích xuất thông tin xin nghỉ việc cho Trần Bình Auto.
+Hôm nay là: {today.strftime('%Y-%m-%d')} ({today.strftime('%A')}).
+Danh sách 10 nhân sự hợp lệ: {', '.join(ALL_STAFF)}.
+Tin nhắn của nhân viên: "{text}"
+
+Yêu cầu: Hãy phân tích và trả về DUY NHẤT một đối tượng JSON:
+{{
+  "member_name": "Tên chính xác trong danh sách 10 nhân sự hoặc null",
+  "leave_dates": ["YYYY-MM-DD", ...],
+  "reason": "Lý do xin nghỉ"
+}}
+QUY TẮC NHẬN DIỆN:
+- Nếu xin nghỉ nhiều ngày (ví dụ "ngày mốt", "thứ 7 và chủ nhật tuần sau", "từ 28 đến 30/10"), mảng "leave_dates" PHẢI chứa ĐỦ TẤT CẢ các ngày đó dạng YYYY-MM-DD.
+- Nếu không có tên hợp lệ hoặc ngày hợp lệ, trả về null.
+"""
+    try:
+        res = call_gemini_api(prompt, json_mode=True, timeout=4.0)
+        if res:
+            res_json = json.loads(res)
+            m_name = res_json.get('member_name')
+            l_dates_raw = res_json.get('leave_dates') or ([res_json.get('leave_date')] if res_json.get('leave_date') else [])
+            reason = res_json.get('reason') or 'Việc cá nhân'
+
+            parsed_dates = []
+            for ld in l_dates_raw:
+                try:
+                    parsed_dates.append(datetime.strptime(ld, '%Y-%m-%d').date())
+                except Exception:
+                    pass
+
+            if m_name in ALL_STAFF and parsed_dates:
+                return m_name, parsed_dates[0], parsed_dates, reason
+    except Exception:
+        pass
+    return None, None, [], None
 
 def remove_accents(input_str):
     if not input_str:
@@ -1131,20 +1242,27 @@ QUY TẮC NHẬN DIỆN NHIỀU NGÀY:
 
 def ai_parse_message(text):
     """
-    Hệ thống kết hợp (Hybrid):
-    1. Thử gọi Ollama nếu có server LLM đang chạy.
-    2. Nếu Ollama không khả dụng (ví dụ trên PythonAnywhere), tự động dùng bộ NLP Tiếng Việt tích hợp sẵn.
+    Hệ thống kết hợp thông minh 3 tầng (3-Tier Hybrid):
+    1. Google Gemini Cloud API (nếu có GEMINI_API_KEY): Siêu tốc, thông minh, hiểu sắc thái tiếng Việt tốt nhất.
+    2. Ollama Local LLM: Cho môi trường có GPU / LLM offline.
+    3. NLP Tiếng Việt tích hợp sẵn: 0ms, luôn hoạt động offline 100%, không phụ thuộc bất kỳ API nào.
     """
     today = get_vn_today()
-    # 1. Thử Ollama trước
+
+    # Tầng 1: Google Gemini Cloud AI
+    m_name, first_d, found_dates, reason = parse_with_gemini(text, today)
+    if m_name and found_dates:
+        return m_name, first_d, found_dates, reason, f"Google Gemini ({get_gemini_model()})"
+
+    # Tầng 2: Ollama Local LLM
     m_name, first_d, found_dates, reason = parse_with_ollama(text, today)
-    engine = f"Ollama ({OLLAMA_MODEL})"
-    
-    # 2. Fallback sang Rule-based NLP nếu Ollama không phản hồi
-    if not m_name or not found_dates:
-        m_name, first_d, found_dates, reason = parse_with_rule_engine(text, today)
-        engine = "Trợ lý AI Tiếng Việt"
-        
+    if m_name and found_dates:
+        return m_name, first_d, found_dates, reason, f"Ollama ({OLLAMA_MODEL})"
+
+    # Tầng 3: Rule-based NLP Engine (Fallback an toàn)
+    m_name, first_d, found_dates, reason = parse_with_rule_engine(text, today)
+    engine = "Trợ lý AI Tiếng Việt"
+
     return m_name, first_d, found_dates, reason, engine
 
 @app.route('/api/ai-parse-leave', methods=['POST'])
@@ -1419,37 +1537,61 @@ def answer_schedule_query(query):
     with get_db() as conn:
         shop_holidays_rows = conn.execute('SELECT holiday_date, reason FROM shop_holidays WHERE holiday_date >= ? ORDER BY holiday_date ASC LIMIT 10', (today_str,)).fetchall()
 
-    if is_ollama_online():
-        summary_lines = []
-        for s in schedule[:14]:
-            if s.get('is_holiday'):
-                summary_lines.append(f"- {s['display_date']} ({s['weekday_vn']}): Tiệm đóng cửa ({s.get('holiday_reason')})")
-            elif s.get('assigned'):
-                summary_lines.append(f"- {s['display_date']} ({s['weekday_vn']}): {s['assigned']} trực")
-        ctx = "\n".join(summary_lines)
+    # TỔNG HỢP DỮ LIỆU ĐỂ CUNG CẤP CHO LLM (GEMINI / OLLAMA)
+    summary_lines = []
+    for s in schedule[:14]:
+        if s.get('is_holiday'):
+            summary_lines.append(f"- {s['display_date']} ({s['weekday_vn']}): Tiệm đóng cửa ({s.get('holiday_reason')})")
+        elif s.get('assigned'):
+            summary_lines.append(f"- {s['display_date']} ({s['weekday_vn']}): {s['assigned']} trực vệ sinh 7h30")
+    ctx = "\n".join(summary_lines)
 
-        leaves_lines = [f"- {l['member_name']} nghỉ ngày {l['display_date']} ({l['weekday_vn']}), lý do: {l['reason']}" for l in leaves_summary[:10]]
-        leaves_ctx = "\n".join(leaves_lines) if leaves_lines else "Hiện không có ai xin nghỉ."
+    leaves_lines = [f"- {l['member_name']} nghỉ ngày {l['display_date']} ({l['weekday_vn']}), lý do: {l['reason']}" for l in leaves_summary[:10]]
+    leaves_ctx = "\n".join(leaves_lines) if leaves_lines else "Hiện không có ai xin nghỉ."
 
-        prompt = f"""
-Bạn là trợ lý AI quản lý lịch trực nhật vệ sinh 7h30 sáng và theo dõi ngày nghỉ tại Trần Bình Auto.
+    holidays_lines = [f"- Ngày {h['holiday_date']}: Tiệm đóng cửa ({h['reason']})" for h in shop_holidays_rows]
+    holidays_ctx = "\n".join(holidays_lines) if holidays_lines else "Không có ngày nghỉ tiệm nào sắp tới."
+
+    llm_prompt = f"""
+Bạn là trợ lý AI quản lý lịch trực nhật vệ sinh 7h30 sáng và theo dõi ngày nghỉ tại "Trần Bình Auto".
 Hôm nay là: {today.strftime('%d/%m/%Y')} ({weekday_vn_map.get(today.strftime('%A'))}).
-Danh sách 8 người trực nhật: {', '.join(DUTY_MEMBERS)}.
+Danh sách 8 người trực nhật vệ sinh: {', '.join(DUTY_MEMBERS)}.
 Nhân sự không trực nhật: {', '.join(NON_DUTY_STAFF)}.
-Lịch phân công trực 14 ngày tới:
+Toàn bộ 10 nhân sự: {', '.join(ALL_STAFF)}.
+
+Lịch phân công trực nhật 14 ngày tới:
 {ctx}
 
 Danh sách các ca xin nghỉ hiện tại:
 {leaves_ctx}
 
-Câu hỏi của nhân viên: "{query_clean}"
+Lịch đóng cửa nghỉ lễ của tiệm:
+{holidays_ctx}
 
-Yêu cầu: Hãy trả lời ngắn gọn, thân thiện, chính xác dựa trên dữ liệu lịch trực và ngày nghỉ ở trên. Sử dụng Tiếng Việt tự nhiên, in đậm tên người và ngày tháng.
+Câu hỏi của người dùng: "{query_clean}"
+
+Yêu cầu trả lời:
+- Trả lời ngắn gọn, thân thiện, chính xác theo dữ liệu ở trên.
+- Sử dụng Tiếng Việt tự nhiên, kèm emoji thích hợp.
+- Format HTML đơn giản: in đậm tên người và ngày tháng bằng thẻ <strong>...</strong>, xuống dòng bằng <br>. Tuyệt đối không dùng dấu backtick ```.
 """
+
+    # 1. Thử gọi Google Gemini Cloud AI trước nếu có API Key
+    if get_gemini_api_key():
+        try:
+            gemini_ans = call_gemini_api(llm_prompt, timeout=4.5)
+            if gemini_ans:
+                clean_ans = gemini_ans.replace('```html', '').replace('```', '').strip().replace('\n', '<br>')
+                return clean_ans, f"Google Gemini ({get_gemini_model()})"
+        except Exception:
+            pass
+
+    # 2. Thử gọi Ollama Local nếu server đang hoạt động
+    if is_ollama_online():
         try:
             req_data = json.dumps({
                 "model": OLLAMA_MODEL,
-                "prompt": prompt,
+                "prompt": llm_prompt,
                 "stream": False
             }).encode('utf-8')
             req = urllib.request.Request(

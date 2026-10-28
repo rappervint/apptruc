@@ -102,3 +102,32 @@ Từ nay về sau, mỗi lần sửa code xong trên máy tính và `git push`, 
 ./capnhat.sh
 ```
 Hệ thống sẽ tự kéo code mới về và tự khởi động lại web app trong vòng 2 giây!
+
+---
+
+## BƯỚC 5: CẤU HÌNH TRỢ LÝ AI GOOGLE GEMINI (TÙY CHỌN - TĂNG TRÍ THÔNG MINH)
+
+Hệ thống đã tích hợp sẵn **Google Gemini Cloud AI**:
+- Nếu chưa có API Key: Hệ thống tự động dùng bộ não AI Tiếng Việt tích hợp sẵn (0ms, miễn phí 100%).
+- Khi có API Key: AI sẽ cực kỳ thông minh, trả lời sắc bén, linh hoạt và thấu hiểu mọi cách diễn đạt tiếng Việt.
+
+### 5.1. Lấy API Key miễn phí từ Google:
+1. Truy cập: [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+2. Đăng nhập tài khoản Google của bạn và bấm **Create API key**.
+3. Sao chép chuỗi mã Key vừa tạo.
+
+### 5.2. Cấu hình trên máy tính (Local):
+Tạo file `.env` tại thư mục gốc `E:\apptruc` với nội dung:
+```env
+GEMINI_API_KEY=dán_mã_key_của_bạn_vào_đây
+GEMINI_MODEL=gemini-1.5-flash
+```
+
+### 5.3. Cấu hình trên PythonAnywhere:
+Trong cửa sổ **Bash** trên PythonAnywhere, tạo file `.env`:
+```bash
+echo "GEMINI_API_KEY=dán_mã_key_của_bạn_vào_đây" > ~/apptruc/.env
+touch /var/www/tranbinhauto_pythonanywhere_com_wsgi.py
+```
+*(Hoặc vào tab Web -> cuộn xuống mục **Environment variables** và thêm `GEMINI_API_KEY`)*
+
