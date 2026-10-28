@@ -457,8 +457,8 @@ def index():
     today_str = today_dt.strftime('%Y-%m-%d')
     today_leaves = [item for item in leaves_summary if item['leave_date'] == today_str]
 
-    # Quy định: Không cho xin nghỉ Hôm nay, Ngày mai và Ngày mốt (Tối thiểu từ ngày thứ 3 trở đi)
-    min_leave_date = today_dt + timedelta(days=3)
+    # Quy định: Không cho xin nghỉ Hôm nay và Ngày mai (Được phép từ Ngày mốt - cách 2 ngày trở đi)
+    min_leave_date = today_dt + timedelta(days=2)
     min_leave_date_str = min_leave_date.strftime('%Y-%m-%d')
     min_leave_date_display = min_leave_date.strftime('%d/%m/%Y')
 
@@ -1344,7 +1344,7 @@ def get_admin_capabilities_response():
     return (
         "👑 <strong>QUYỀN HẠN & ĐẶC QUYỀN CỦA QUẢN TRỊ VIÊN ADMIN TẠI TRẦN BÌNH AUTO:</strong><br><br>"
         "<strong>1. 🚀 Duyệt Nghỉ Cận Ngày & Bất Kỳ Ngày Nào:</strong><br>"
-        "• Cho phép bất kỳ ai nghỉ <strong>Hôm nay, Ngày mai, Ngày mốt</strong> hoặc liên tiếp nhiều ngày không giới hạn (nhân viên thường bị giới hạn tối thiểu cách 3 ngày).<br>"
+        "• Cho phép bất kỳ ai nghỉ <strong>Hôm nay, Ngày mai</strong> hoặc liên tiếp nhiều ngày không giới hạn (nhân viên thường chỉ được xin từ Ngày mốt trở đi).<br>"
         "• Nhắn trực tiếp với AI: <em>\"Cho Vinh nghỉ hôm nay\"</em>, <em>\"Admin duyệt cho Thái nghỉ mai và mốt\"</em>.<br><br>"
         "<strong>2. 📊 Báo Cáo & Thống Kê Ngày Nghỉ Toàn Diện:</strong><br>"
         "• Tra cứu tổng hợp ai nghỉ nhiều nhất, ai chưa nghỉ trong chu kỳ hoặc từ trước đến nay.<br>"
@@ -1852,8 +1852,8 @@ def api_ai_chat_schedule():
     if is_leave_statement:
         m_name, first_d, found_dates, reason, engine = ai_parse_message(question)
         today = get_vn_today()
-        # Quy định nhân viên: Tối thiểu cách 3 ngày (Không nhận Hôm nay, Ngày mai và Ngày mốt)
-        min_allowed_date = today + timedelta(days=3)
+        # Quy định nhân viên: Cho phép từ Ngày mốt (Không nhận Hôm nay và Ngày mai)
+        min_allowed_date = today + timedelta(days=2)
         min_allowed_str = min_allowed_date.strftime('%Y-%m-%d')
         min_allowed_disp = min_allowed_date.strftime('%d/%m/%Y')
         weekday_vn = {
@@ -1890,9 +1890,9 @@ def api_ai_chat_schedule():
                     'is_admin_mode': False,
                     'answer': (
                         f"⛔ <strong>KHÔNG ĐƯỢC PHÉP XIN NGHỈ CẬN NGÀY!</strong><br>"
-                        f"Theo quy định của Trần Bình Auto, bạn <strong>không được tự đăng ký xin nghỉ vào Hôm nay, Ngày mai và Ngày mốt</strong> "
+                        f"Theo quy định của Trần Bình Auto, bạn <strong>không được tự đăng ký xin nghỉ vào Hôm nay và Ngày mai</strong> "
                         f"(ngày bạn chọn: <strong>{near_disp}</strong>) để tránh thiếu hụt nhân sự và kịp sắp xếp trực nhật.<br>"
-                        f"👉 Ngày đăng ký sớm nhất có thể nhận là từ <strong>{min_allowed_disp}</strong> ({min_allowed_w}).<br>"
+                        f"👉 Ngày đăng ký sớm nhất có thể nhận là từ <strong>{min_allowed_disp}</strong> ({min_allowed_w} - Ngày mốt).<br>"
                         f"📞 <em>Trường hợp có việc khẩn cấp hoặc đột xuất, bạn vui lòng <strong>liên hệ trực tiếp với Quản lý / Admin</strong> để được xử lý nhé!</em>{chips}"
                     ),
                     'engine': engine
@@ -1918,7 +1918,7 @@ def api_ai_chat_schedule():
             near_warning_note = ""
             if not is_allow_near and near_dates:
                 near_disp = ', '.join([d.strftime('%d/%m') for d in near_dates])
-                near_warning_note = f"• ⚠️ <strong>Các ngày cận ({near_disp})</strong>: Đã bị loại bỏ do quy định không nhận đơn Hôm nay, Ngày mai, Ngày mốt (vui lòng liên hệ Admin nếu cần nghỉ gấp)."
+                near_warning_note = f"• ⚠️ <strong>Các ngày cận ({near_disp})</strong>: Đã bị loại bỏ do quy định không nhận đơn Hôm nay và Ngày mai (vui lòng liên hệ Admin nếu cần nghỉ gấp)."
 
             if m_name:
                 conflict_notes = []
@@ -2071,7 +2071,7 @@ def api_ai_chat_schedule():
                             'engine': engine
                         })
                     chips = make_ai_chips([
-                        (f"📅 Nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ ngày {min_allowed_date.strftime('%d/%m')}"),
+                        (f"⚡ Nghỉ ngày mốt ({min_allowed_date.strftime('%d/%m')})", f"{m_name} xin nghỉ ngày mốt"),
                         (f"📅 Nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')}"),
                         (f"📅 Nghỉ 3 ngày từ {min_allowed_date.strftime('%d/%m')}", f"{m_name} xin nghỉ 3 ngày từ {min_allowed_date.strftime('%d/%m')}"),
                         ("🗓️ Nghỉ tuần sau", f"{m_name} xin nghỉ tuần sau"),
@@ -2083,13 +2083,13 @@ def api_ai_chat_schedule():
                         'answer': (
                             f"❓ Bạn muốn đăng ký cho <strong>{m_name}</strong> xin nghỉ vào ngày nào vậy bạn?<br>"
                             f"👉 Bạn có thể nhắn ngày hoặc bấm chọn nhanh bên dưới:<br>"
-                            f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay, Ngày mai và Ngày mốt. Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
+                            f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay và Ngày mai (được phép xin từ Ngày mốt). Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
                         ),
                         'engine': engine
                     })
                 else:
                     chips = make_ai_chips([
-                        (f"👤 Vinh nghỉ từ {min_allowed_date.strftime('%d/%m')}", f"Vinh xin nghỉ ngày {min_allowed_date.strftime('%d/%m')} việc bận"),
+                        ("⚡ Vinh nghỉ ngày mốt", "Vinh xin nghỉ ngày mốt việc bận"),
                         (f"👤 Bảo Mập nghỉ 2 ngày", f"Bảo Mập xin nghỉ 2 ngày từ {min_allowed_date.strftime('%d/%m')} khám bệnh"),
                         (f"👤 Thái nghỉ tuần sau", "Thái xin nghỉ tuần sau việc riêng"),
                     ])
@@ -2100,7 +2100,7 @@ def api_ai_chat_schedule():
                         'answer': (
                             "❓ Bạn muốn đăng ký xin nghỉ cho ai và vào ngày nào vậy bạn?<br>"
                             "👉 Bạn có thể nhắn theo mẫu đầy đủ hoặc bấm chọn gợi ý bên dưới:<br>"
-                            f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay, Ngày mai và Ngày mốt. Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
+                            f"<small style='color:#64748b;'>📌 Lưu ý: Không nhận đơn xin nghỉ Hôm nay và Ngày mai (được phép xin từ Ngày mốt). Nếu cần nghỉ gấp vui lòng liên hệ Admin.</small>{chips}"
                         ),
                         'engine': engine
                     })
@@ -2140,17 +2140,17 @@ def api_ai_confirm_leave():
 
     today = get_vn_today()
     today_str = today.strftime('%Y-%m-%d')
-    min_allowed_date = today + timedelta(days=3)
+    min_allowed_date = today + timedelta(days=2)
     min_allowed_str = min_allowed_date.strftime('%Y-%m-%d')
 
-    # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt) nếu không phải Admin và không phải Nguyên
+    # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai) nếu không phải Admin và không phải Nguyên
     if not is_admin() and member_name != 'Nguyên':
         invalid_near_dates = [d for d in leave_dates if d and today_str <= d < min_allowed_str]
         if invalid_near_dates:
             near_fmt = ', '.join([datetime.strptime(d, '%Y-%m-%d').strftime('%d/%m/%Y') for d in invalid_near_dates])
             return jsonify({
                 'success': False,
-                'error': f'⛔ Không được phép xin nghỉ cận ngày ({near_fmt}). Trần Bình Auto không nhận đơn nghỉ Hôm nay, Ngày mai và Ngày mốt. Vui lòng liên hệ trực tiếp với Admin nếu có việc khẩn cấp!'
+                'error': f'⛔ Không được phép xin nghỉ cận ngày ({near_fmt}). Trần Bình Auto không nhận đơn nghỉ Hôm nay và Ngày mai. Vui lòng liên hệ trực tiếp với Admin nếu có việc khẩn cấp!'
             })
 
     valid_dates = [d for d in leave_dates if d and d >= today_str]
@@ -2195,7 +2195,7 @@ def report_leave():
     
     today_dt = get_vn_today()
     today_str = today_dt.strftime('%Y-%m-%d')
-    min_allowed_date = today_dt + timedelta(days=3)
+    min_allowed_date = today_dt + timedelta(days=2)
 
     if start_date_str and member_name in ALL_STAFF:
         try:
@@ -2204,7 +2204,7 @@ def report_leave():
             if d_end < d_start:
                 d_start, d_end = d_end, d_start
 
-            # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt) cho form thông thường (Ngoại lệ cho Nguyên)
+            # Chặn xin nghỉ cận ngày (Hôm nay, Ngày mai) cho form thông thường (Ngoại lệ cho Nguyên)
             if not is_admin() and member_name != 'Nguyên' and d_start < min_allowed_date:
                 log_action('TỪ CHỐI XIN NGHỈ CẬN', f"{member_name} bị từ chối xin nghỉ cận ngày ({d_start.strftime('%d/%m/%Y')})", actor=member_name)
                 return redirect(url_for('index', tab='leaves'))

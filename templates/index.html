@@ -1516,7 +1516,7 @@
           <span>{{ theme.icons.main }}</span> ĐĂNG KÝ XIN NGHỈ
         </h2>
         <div style="font-size: 0.78rem; font-weight: 700; color: {{ theme.colors.text }}; background: {{ theme.colors.primary_glow }}; border: 1px solid {{ theme.colors.border_focus }}; padding: 4px 10px; border-radius: 20px;">
-          ⚠️ Không nhận xin nghỉ Hôm nay, Ngày mai & Ngày mốt
+          ⚠️ Không nhận xin nghỉ Hôm nay & Ngày mai (Được phép từ Ngày mốt)
         </div>
       </div>
 
@@ -1540,7 +1540,7 @@
         <div class="date-picker-card">
           <div style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
             <span>ℹ️</span>
-            <span>Ngày đăng ký sớm nhất có thể nhận: <strong style="color: {{ theme.colors.primary }};">{% if is_admin %}Hôm nay (Đặc quyền Admin: Tự do chọn mọi ngày){% else %}{{ min_leave_date_display }} (cách 3 ngày để xếp trực nhật){% endif %}</strong>.</span>
+            <span>Ngày đăng ký sớm nhất có thể nhận: <strong style="color: {{ theme.colors.primary }};">{% if is_admin %}Hôm nay (Đặc quyền Admin: Tự do chọn mọi ngày){% else %}{{ min_leave_date_display }} (từ Ngày mốt trở đi){% endif %}</strong>.</span>
           </div>
           <div class="date-range-grid">
             <div class="form-group">
@@ -1558,6 +1558,8 @@
             <span class="chip" onclick="setQuickLeaveOffset(1, 1)" style="border-color: #f59e0b; color: #fbbf24; font-weight: 700;">👑 Ngày mai</span>
             <span class="chip" onclick="setQuickLeaveOffset(2, 1)" style="border-color: #f59e0b; color: #fbbf24; font-weight: 700;">👑 Ngày mốt</span>
             <span class="chip" onclick="setQuickLeaveOffset(0, 2)" style="border-color: #f59e0b; color: #fbbf24;">👑 Nay & Mai</span>
+            {% else %}
+            <span class="chip" onclick="setQuickLeaveOffset(2, 1)" style="border-color: #38bdf8; color: #38bdf8; font-weight: 700;">⚡ Ngày mốt</span>
             {% endif %}
             <span class="chip" onclick="setQuickLeaveDays(1)">⚡ 1 ngày</span>
             <span class="chip" onclick="setQuickLeaveDays(2)">✨ 2 ngày liên tiếp</span>
@@ -2041,7 +2043,7 @@
       const isAdmin = {{ 'true' if is_admin else 'false' }};
       const memberSelect = document.getElementById('member_select');
       const isNguyen = memberSelect && memberSelect.value === 'Nguyên';
-      if (!isAdmin && !isNguyen && offset < 3) offset = 3;
+      if (!isAdmin && !isNguyen && offset < 2) offset = 2;
       const now = new Date();
       now.setDate(now.getDate() + offset);
       const yyyy = now.getFullYear();
@@ -2058,7 +2060,7 @@
       const now = new Date();
       const day = now.getDay(); // 0 is Sunday, 1 is Monday...
       let daysToAdd = (1 - day + 7) % 7;
-      if (daysToAdd < 3) daysToAdd += 7; // Phải cách ít nhất 3 ngày
+      if (daysToAdd < 2) daysToAdd += 7; // Phải cách ít nhất 2 ngày (từ Ngày mốt trở đi)
       setQuickLeaveOffset(daysToAdd, 1);
     }
 
@@ -2070,7 +2072,7 @@
       const minAllowed = '{{ min_leave_date_str }}';
       if (!isAdmin && !isNguyen && dateInput && dateInput.value < minAllowed) {
         if (e) e.preventDefault();
-        alert('⛔ QUY ĐỊNH TRẦN BÌNH AUTO:\nKhông được phép tự đăng ký xin nghỉ cận ngày (Hôm nay, Ngày mai và Ngày mốt) để anh em kịp sắp xếp công việc.\n\nTrường hợp đột xuất hoặc khẩn cấp, vui lòng liên hệ trực tiếp với Quản lý / Admin!');
+        alert('⛔ QUY ĐỊNH TRẦN BÌNH AUTO:\nKhông được phép tự đăng ký xin nghỉ cận ngày (Hôm nay và Ngày mai) để anh em kịp sắp xếp công việc.\n\nTrường hợp đột xuất hoặc khẩn cấp, vui lòng liên hệ trực tiếp với Quản lý / Admin!');
         return false;
       }
       return true;
@@ -2205,7 +2207,7 @@
         nearWarningHtml = `
           <div class="alert-box alert-danger" style="border-left: 5px solid #dc2626; margin-bottom: 12px; background: #fef2f2; color: #991b1b;">
             ⛔ <strong>KHÔNG ĐƯỢC PHÉP XIN NGHỈ CẬN NGÀY:</strong><br>
-            Bạn đang chọn ngày nghỉ cận: <strong>${nearFmt}</strong> (thuộc Hôm nay, Ngày mai hoặc Ngày mốt).<br>
+            Bạn đang chọn ngày nghỉ cận: <strong>${nearFmt}</strong> (thuộc Hôm nay hoặc Ngày mai).<br>
             Theo quy định, nhân viên không được tự đăng ký nghỉ cận ngày để anh em kịp sắp xếp công việc.<br>
             👉 <em>Trường hợp khẩn cấp hoặc đột xuất, vui lòng <strong>liên hệ trực tiếp với Quản lý / Admin</strong>!</em>
           </div>
@@ -2290,7 +2292,7 @@
           submitBtn.disabled = true;
           submitBtn.style.opacity = '0.5';
           submitBtn.style.cursor = 'not-allowed';
-          submitBtn.title = 'Không được phép xin nghỉ cận ngày (Hôm nay, Ngày mai, Ngày mốt)';
+          submitBtn.title = 'Không được phép xin nghỉ cận ngày (Hôm nay và Ngày mai)';
         } else {
           submitBtn.disabled = false;
           submitBtn.style.opacity = '1';
@@ -2389,7 +2391,7 @@
           </div>
           <div>Xin chào Sếp! AI đã nhận diện <strong>Quyền Quản Trị Tối Cao</strong> của bạn:</div>
           <small style="color: #cbd5e1; margin-top: 5px; display: block; line-height: 1.45;">
-            • 🚀 <strong>Duyệt nghỉ cận ngày:</strong> Cho bất kỳ ai nghỉ hôm nay, ngày mai, ngày mốt hoặc liên tiếp mà không bị chặn 3 ngày.<br>
+            • 🚀 <strong>Duyệt nghỉ cận ngày:</strong> Cho bất kỳ ai nghỉ hôm nay, ngày mai hoặc liên tiếp mà không bị giới hạn.<br>
             • 📊 <strong>Báo cáo & Thống kê:</strong> Ai nghỉ nhiều nhất, ai chưa nghỉ, lịch sử nghỉ.<br>
             • 🎨 <strong>Đổi thử giao diện:</strong> Tết, Halloween, Noel...<br>
             • 💡 Nhắn mẫu: <em>"Cho Vinh nghỉ hôm nay"</em> hoặc bấm gợi ý:
