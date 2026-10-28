@@ -831,18 +831,23 @@ def get_gemini_api_key():
     return os.environ.get('GEMINI_API_KEY', '').strip()
 
 def get_gemini_model():
-    return os.environ.get('GEMINI_MODEL', 'gemini-1.5-flash').strip() or 'gemini-1.5-flash'
+    return os.environ.get('GEMINI_MODEL', 'gemini-3.8-flash').strip() or 'gemini-3.8-flash'
 
 OLLAMA_HOST = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3')
 
-def call_gemini_api(prompt, system_instruction=None, json_mode=False, timeout=5.0):
-    """Gọi trực tiếp Google Gemini API qua HTTP REST (không cần thư viện nặng, chạy mượt trên mọi môi trường)"""
+def call_gemini_api(prompt, system_instruction=None, json_mode=False, timeout=6.0):
+    """Gọi trực tiếp Google Gemini API qua HTTP REST (tự động thử model dự phòng nếu model chính gặp 503 hoặc timeout)"""
     api_key = get_gemini_api_key()
     if not api_key:
-        return None
-    model = get_gemini_model()
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        return None, None
+    primary_model = get_gemini_model()
+    
+    # Danh sách model thử lần lượt: Ưu tiên model chỉ định (gemini-3.8-flash), sau đó gemini-3.5-flash và gemini-3.1-flash-lite
+    models_to_try = [primary_model]
+    for fb in ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite']:
+        if fb not in models_to_try:
+            models_to_try.append(fb)
 
     payload = {
         "contents": [
@@ -862,27 +867,33 @@ def call_gemini_api(prompt, system_instruction=None, json_mode=False, timeout=5.
             "parts": [{"text": system_instruction}]
         }
 
-    try:
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json'}
-        )
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            res_data = json.loads(resp.read().decode('utf-8'))
-            candidates = res_data.get('candidates') or []
-            if candidates:
-                parts = candidates[0].get('content', {}).get('parts', [])
-                if parts:
-                    return parts[0].get('text', '').strip()
-    except Exception:
-        pass
-    return None
+    encoded_payload = json.dumps(payload).encode('utf-8')
+
+    for m in models_to_try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={api_key}"
+        try:
+            req = urllib.request.Request(
+                url,
+                data=encoded_payload,
+                headers={'Content-Type': 'application/json'}
+            )
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                res_data = json.loads(resp.read().decode('utf-8'))
+                candidates = res_data.get('candidates') or []
+                if candidates:
+                    parts = candidates[0].get('content', {}).get('parts', [])
+                    if parts:
+                        text_res = parts[0].get('text', '').strip()
+                        if text_res:
+                            return text_res, m
+        except Exception:
+            continue
+    return None, None
 
 def parse_with_gemini(text, today):
     """Trích xuất người xin nghỉ và ngày nghỉ bằng Google Gemini AI (chính xác tuyệt đối)"""
     if not get_gemini_api_key():
-        return None, None, [], None
+        return None, None, [], None, None
 
     prompt = f"""
 Bạn là trợ lý AI trích xuất thông tin xin nghỉ việc cho Trần Bình Auto.
@@ -901,7 +912,7 @@ QUY TẮC NHẬN DIỆN:
 - Nếu không có tên hợp lệ hoặc ngày hợp lệ, trả về null.
 """
     try:
-        res = call_gemini_api(prompt, json_mode=True, timeout=4.0)
+        res, used_model = call_gemini_api(prompt, json_mode=True, timeout=5.0)
         if res:
             res_json = json.loads(res)
             m_name = res_json.get('member_name')
@@ -916,10 +927,10 @@ QUY TẮC NHẬN DIỆN:
                     pass
 
             if m_name in ALL_STAFF and parsed_dates:
-                return m_name, parsed_dates[0], parsed_dates, reason
+                return m_name, parsed_dates[0], parsed_dates, reason, used_model
     except Exception:
         pass
-    return None, None, [], None
+    return None, None, [], None, None
 
 def remove_accents(input_str):
     if not input_str:
@@ -1250,9 +1261,9 @@ def ai_parse_message(text):
     today = get_vn_today()
 
     # Tầng 1: Google Gemini Cloud AI
-    m_name, first_d, found_dates, reason = parse_with_gemini(text, today)
+    m_name, first_d, found_dates, reason, used_model = parse_with_gemini(text, today)
     if m_name and found_dates:
-        return m_name, first_d, found_dates, reason, f"Google Gemini ({get_gemini_model()})"
+        return m_name, first_d, found_dates, reason, f"Google Gemini ({used_model})"
 
     # Tầng 2: Ollama Local LLM
     m_name, first_d, found_dates, reason = parse_with_ollama(text, today)
@@ -1579,10 +1590,10 @@ Yêu cầu trả lời:
     # 1. Thử gọi Google Gemini Cloud AI trước nếu có API Key
     if get_gemini_api_key():
         try:
-            gemini_ans = call_gemini_api(llm_prompt, timeout=4.5)
+            gemini_ans, used_model = call_gemini_api(llm_prompt, timeout=6.0)
             if gemini_ans:
                 clean_ans = gemini_ans.replace('```html', '').replace('```', '').strip().replace('\n', '<br>')
-                return clean_ans, f"Google Gemini ({get_gemini_model()})"
+                return clean_ans, f"Google Gemini ({used_model})"
         except Exception:
             pass
 
