@@ -831,21 +831,21 @@ def get_gemini_api_key():
     return os.environ.get('GEMINI_API_KEY', '').strip()
 
 def get_gemini_model():
-    return os.environ.get('GEMINI_MODEL', 'gemini-3.8-flash').strip() or 'gemini-3.8-flash'
+    return os.environ.get('GEMINI_MODEL', 'gemini-3.5-flash-lite').strip() or 'gemini-3.5-flash-lite'
 
 OLLAMA_HOST = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3')
 
-def call_gemini_api(prompt, system_instruction=None, json_mode=False, timeout=6.0):
-    """Gọi trực tiếp Google Gemini API qua HTTP REST (tự động thử model dự phòng nếu model chính gặp 503 hoặc timeout)"""
+def call_gemini_api(prompt, system_instruction=None, json_mode=False, timeout=3.5):
+    """Gọi trực tiếp Google Gemini API siêu tốc (tự động thử các model flash-lite cực nhanh <2s, không giật lag)"""
     api_key = get_gemini_api_key()
     if not api_key:
         return None, None
     primary_model = get_gemini_model()
     
-    # Danh sách model thử lần lượt: Ưu tiên model chỉ định (gemini-3.8-flash), sau đó gemini-3.5-flash và gemini-3.1-flash-lite
+    # Ưu tiên các model siêu tốc (< 1.5s), thông minh và không bị lỗi 503
     models_to_try = [primary_model]
-    for fb in ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite']:
+    for fb in ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.6-flash', 'gemini-3.8-flash']:
         if fb not in models_to_try:
             models_to_try.append(fb)
 
@@ -856,8 +856,8 @@ def call_gemini_api(prompt, system_instruction=None, json_mode=False, timeout=6.
             }
         ],
         "generationConfig": {
-            "temperature": 0.1 if json_mode else 0.7,
-            "maxOutputTokens": 1000
+            "temperature": 0.1 if json_mode else 0.75,
+            "maxOutputTokens": 1200
         }
     }
     if json_mode:
@@ -1587,10 +1587,37 @@ Yêu cầu trả lời:
 - Format HTML đơn giản: in đậm tên người và ngày tháng bằng thẻ <strong>...</strong>, xuống dòng bằng <br>. Tuyệt đối không dùng dấu backtick ```.
 """
 
-    # 1. Thử gọi Google Gemini Cloud AI trước nếu có API Key
+    # 1. GỌI GOOGLE GEMINI VỚI ĐẦY ĐỦ KHẢ NĂNG TRÒ CHUYỆN & TÁN GẪU TỰ NHIÊN
     if get_gemini_api_key():
+        gemini_persona = f"""
+Bạn là Trợ lý AI thông minh, thân thiện, vui tính và thấu hiểu của garage "Trần Bình Auto", sử dụng trí tuệ Google Gemini.
+
+Khả năng & Tính cách của bạn:
+1. Bạn là Google Gemini thực thụ: Có đầy đủ khả năng tán gẫu, trò chuyện phiếm, chém gió, tâm sự, hỏi thăm, kể chuyện, đùa vui, tư vấn xe cộ, kiến thức đời sống... hoàn toàn tự nhiên và sinh động như Gemini thông thường.
+2. Dữ liệu thực tế tiệm Trần Bình Auto:
+   - Hôm nay là ngày {today.strftime('%d/%m/%Y')} ({weekday_vn_map.get(today.strftime('%A'))}).
+   - 8 anh em trực nhật 7h30 sáng: {', '.join(DUTY_MEMBERS)}.
+   - 2 nhân sự không trực nhật: {', '.join(NON_DUTY_STAFF)}.
+   - Toàn bộ 10 thành viên: {', '.join(ALL_STAFF)}.
+3. Khi người dùng hỏi về tiệm, lịch trực, ai nghỉ, xin nghỉ: Hãy tra cứu các dữ liệu nội bộ được cung cấp để trả lời chính xác, chu đáo.
+4. Khi người dùng trò chuyện phiếm, than thở, chào hỏi, đùa vui hoặc hỏi bất kỳ chủ đề gì khác: Hãy nhiệt tình trò chuyện, chia sẻ, động viên, hài hước và ấm áp như một người bạn thân thiết!
+5. Xưng hô thân mật: "mình" - "bạn", hoặc "em" - "anh", gọi Admin là "Sếp". Dùng nhiều emoji vui nhộn 🚗 ✨ 😊.
+6. Trình bày bằng HTML đơn giản: in đậm tên người và từ khóa bằng <strong>...</strong>, xuống dòng bằng <br>. Tuyệt đối không dùng dấu backtick ```.
+"""
+
+        gemini_user_prompt = f"""
+[DỮ LIỆU NỘI BỘ TRẦN BÌNH AUTO ĐỂ TRA CỨU KHI CẦN]:
+- Lịch phân công trực nhật 14 ngày tới:
+{ctx}
+- Danh sách các ca xin nghỉ hiện tại:
+{leaves_ctx}
+- Lịch đóng cửa nghỉ tiệm:
+{holidays_ctx}
+
+Tin nhắn của người dùng: "{query_clean}"
+"""
         try:
-            gemini_ans, used_model = call_gemini_api(llm_prompt, timeout=6.0)
+            gemini_ans, used_model = call_gemini_api(gemini_user_prompt, system_instruction=gemini_persona, timeout=4.0)
             if gemini_ans:
                 clean_ans = gemini_ans.replace('```html', '').replace('```', '').strip().replace('\n', '<br>')
                 return clean_ans, f"Google Gemini ({used_model})"
